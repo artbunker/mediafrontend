@@ -1,0 +1,107 @@
+{% extends 'layout.html' %}
+{% block title %}Upload{% endblock %}
+{% block style %}
+	{{ super() }}
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/forms.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/upload.css') }}">
+{% endblock %}
+{% set error_descriptions = {
+	'': '',
+} %}
+{% block content %}
+	<div id="upload">
+		{% for error in errors %}
+			{% set error_description = error %}
+			{% if error in error_descriptions %}
+				{% set error_description = error_descriptions[error] %}
+			{% endif %}
+			<div class="form_error">{{ error_description }}</div>
+		{% endfor %}
+		<form method="post" enctype="multipart/form-data" novalidate>
+			{% if 0 < groups|length %}
+				{% from 'permissions.jinja' import group_display %}
+				<div id="groups">
+					<legend>Required Groups</legend>
+					{% for group in groups %}
+						{% set checked = '' %}
+						{% if fields['groups'][group] %}
+							{% set checked = ' checked' %}
+						{% endif %}
+						<input id="groups[{{ group }}]" name="groups[{{ group }}]" type="checkbox"{{ checked }}>
+						<label for="groups[{{ group }}]">{{ group_display(group) }}</label>
+					{% endfor %}
+				</div>
+			{% endif %}
+			<div id="properties">
+				<legend>Properties</legend>
+				{% if manager %}
+					<input id="generate_summaries" name="generate_summaries" type="checkbox"{% if fields['generate_summaries'] %} checked{% endif %}>
+					<label for="generate_summaries">Summaries</label>
+					<label for="owner_id">Owner</label>
+					<select id="owner_id" name="owner_id">
+						{% from 'users.jinja' import user_display %}
+						{% for user in contributors %}
+							{% set selected = '' %}
+							{% if user.id == fields['owner_id'] %}
+								{% set selected = ' selected' %}
+							{% endif %}
+							<option value="{{ user.id }}"{{ selected }}>{{ user_display(user) }}</option>
+						{% endfor %}
+					</select>
+				{% endif %}
+				<label for="searchability">Searchability</label>
+				<select id="searchability" name="searchability">
+					{% from 'media.jinja' import searchabilities, searchability_display %}
+					{% for searchability in searchabilities %}
+						{% set selected = '' %}
+						{% if searchability == fields['searchability'] %}
+							{% set selected = ' selected' %}
+						{% endif %}
+						<option value="{{ searchability }}"{{ selected }}>
+							{{ searchability_display(searchability) }}
+						</option>
+					{% endfor %}
+				</select>
+				<br>
+				<label for="protection">Protection</label>
+				<select id="protection" name="protection">
+					{% from 'media.jinja' import protections, protection_display %}
+					{% for protection in protections %}
+						{% set selected = '' %}
+						{% if protection == fields['protection'] %}
+							{% set selected = ' selected' %}
+						{% endif %}
+						<option value="{{ protection }}"{{ selected }}>
+							{{ protection_display(protection) }}
+						</option>
+					{% endfor %}
+				</select>
+				<br>
+				<label for="creation_date">Creation Date</label>
+				<input id="creation_date" name="creation_date" type="text" value="{{ fields['creation_date'] }}" placeholder="Leave blank for current date">
+			</div>
+			<div id="tagging">
+				<legend>Tagging</legend>
+				<input id="author_tag" name="author_tag" type="checkbox"{% if fields['author_tag'] %} checked{% endif %}>
+				<label for="author_tag">Author Tag</label>
+				<br>
+				<input id="filename_tag" name="filename_tag" type="checkbox"{% if fields['filename_tag'] %} checked{% endif %}>
+				<label for="filename_tag">Filename Tag</label>
+				<br>
+				<label for="tags">Additional Tags</label>
+				<input id="tags" name="tags" type="text" value="{{ fields['tags'] }}">
+			</div>
+			<div id="creation">
+				<span class="form_file">
+					<label for="upload_file">Upload File</label>
+					<input id="upload_file" name="upload_file" type="file" required>
+					<span class="file_selection" data-file-selected="File selected" data-file-not-selected="No file selected"></span>
+				</span>
+				<br>
+				<label for="upload_uri">Upload URI</label>
+				<input id="upload_uri" name="upload_uri" type="text" value="{{ fields['upload_uri'] }}" placeholder="Enter URI of remote file">
+			</div>
+			<input type="submit" value="Upload">
+		</form>
+	</div>
+{% endblock %}

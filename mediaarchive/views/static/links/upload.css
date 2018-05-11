@@ -1,0 +1,41 @@
+#upload {
+	width: 400px;
+}
+#groups, #properties, #tagging, #creation {
+	margin-top: 1em;
+	border-bottom-left-radius: 0.25em;
+	border-bottom-right-radius: 0.25em;
+	overflow: hidden;
+}
+#upload_file, .form_file .file_selection {
+	display: none;
+}
+.form_file {
+	margin: 0px;
+}
+label[for=upload_file] {
+	position: relative;
+	width: 100%;
+	border: none;
+	border-top-left-radius: 0.5em;
+	border-top-right-radius: 0.5em;
+	font-size: 2em;
+	line-height: 128px;
+	text-align: center;
+	padding: 0;
+}
+label[for=upload_file]::after {
+	position: absolute;
+	top: 0.25em;
+	left: 0.25em;
+	content: "";
+	display: block;
+	width: calc(100% - 0.66em - 0.5em);
+	height: calc(128px - 0.66em - 0.5em);
+	border: 0.33em dashed var(--f_l);
+	border-radius: 0.5em;
+}
+input[type=submit] {
+	margin-top: 1em;
+	border-radius: 0.25em;
+}

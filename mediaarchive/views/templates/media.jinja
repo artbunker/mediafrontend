@@ -1,0 +1,27 @@
+{% set searchabilities = {
+	'hidden': 'Hidden',
+	'groups': 'Groups',
+	'public': 'Public',
+} %}
+
+{% macro searchability_display(searchability) %}
+	{% if searchability in searchabilities %}
+		{{ searchabilities[searchability] }}
+	{% else %}
+		{{ searchability }}
+	{% endif %}
+{% endmacro %}
+
+{% set protections = {
+	'none': 'None',
+	'groups': 'Groups',
+	'private': 'Private',
+} %}
+
+{% macro protection_display(protection) %}
+	{% if protection in protections %}
+		{{ protections[protection] }}
+	{% else %}
+		{{ protection }}
+	{% endif %}
+{% endmacro %}

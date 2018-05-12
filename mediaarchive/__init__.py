@@ -270,7 +270,7 @@ class MediaArchive:
 			populate_category(medium)
 		return medium
 
-	def search_media(self, filter={}, **kwargs):
+	def search_media(self, **kwargs):
 		media = self.media.search_media(**kwargs)
 		for medium in media:
 			populate_id(medium)

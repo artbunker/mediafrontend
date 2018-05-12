@@ -1,5 +1,5 @@
 
-from flask import abort
+from flask import request, abort
 
 def md5_to_id(md5):
 	import base64
@@ -223,10 +223,34 @@ def populate_categories(media):
 	for medium in media:
 		medium.category = mime_to_category(medium.mime)
 
+def create_temp_medium_file(file_contents):
+	import os
+	import uuid
+	file_path = os.path.join(__name__, 'tmp', 'temp_medium_' + str(uuid.uuid4()))
+	f = open(file_path, 'w+b')
+	f.write(file_contents)
+	f.close()
+	return file_path
+
+def get_file_size(file_path):
+	import os
+	return os.path.getsize(file_path)
+
 def get_file_mime(file_path):
 	import magic
 	mime = magic.Magic(mime=True)
 	return mime.from_file(file_path)
+
+def get_file_md5(self, file_path):
+	chunk_size = 4096
+
+	import hashlib
+	hash_algo = hashlib.md5()
+
+	with open(file_path, 'rb') as f:
+		for chunk in iter(lambda: f.read(chunk_size), b''):
+			hash_algo.update(chunk)
+	return hash_algo.digest()
 
 class MediaArchive:
 	def __init__(self, config, media, accounts, access_log=None):
@@ -282,3 +306,146 @@ class MediaArchive:
 		if not medium:
 			abort(404, {'message': 'medium_not_found'})
 		return medium
+
+	def encode_tag(self, tag):
+		for needle, replacement in self.config['tag_encode_replacements']:
+			tag = tag.replace(needle, replacement)
+
+		return tag
+
+	def place_medium_file(self, medium, source_file_path=None):
+		import os
+
+		from media import MediumProtection
+
+		filename = medium.id + '.' + mime_to_extension(medium.mime)
+		protected_path = self.config['protected_path']
+		nonprotected_path = self.config['nonprotected_path']
+
+		if MediumProtection.NONE != medium.protection:
+			source = os.path.join(nonprotected_path, filename)
+			destination = os.path.join(protected_path, filename)
+		else:
+			source = os.path.join(protected_path, filename)
+			destination = os.path.join(nonprotected_path, filename)
+
+		if source_file_path:
+			source = source_file_path
+
+		#TODO eat exceptions?
+		#try:
+		os.rename(source, destination)
+		#except Exception:
+		#	pass
+		pass
+
+	def remove_medium_summaries(self, medium):
+		#TODO
+		pass
+
+	def generate_medium_summaries(self, medium):
+		#TODO
+		pass
+
+	def place_medium_summaries(self, medium):
+		#TODO
+		pass
+
+	def upload_from_request(self,):
+		params = {}
+		file_contents = None
+		if 'upload_uri' in request.form and request.form['upload_uri']:
+			import urllib
+			try:
+				response = urllib.request.urlopen(request.form['upload_uri'])
+			except urllib.error.HTTPError as e:
+				errors.append('remote_file_request_http_error')
+			except urllib.error.URLError as e:
+				errors.append('remote_file_request_url_error')
+			else:
+				if not response:
+					errors.append('remote_file_request_empty_response')
+				else:
+					file_contents = response.read()
+		elif 'upload_file' in request.files:
+			try:
+				file_contents = request.files['upload_file'].stream.read()
+			except ValueError as e:
+				errors.append('problem_uploading_file')
+		elif 'local' in request.form:
+			#TODO local file
+			#request.form['local']
+			pass
+		else:
+			errors.append('missing_file')
+
+		if 0 < len(errors):
+			return errors, None
+
+		file_path = create_temp_medium_file(file_contents)
+		size = get_file_size(file_path)
+		mime = get_file_mime(file_path)
+
+		if self.config['maximum_size'] < size:
+			errors.append('greater_than_maximum_size')
+		if mime in self.config['disallowed_mimes']:
+			errors.append('mimetype_not_allowed')
+
+		if 0 < len(errors):
+			import os
+			os.remove(file_path)
+			return errors, None
+
+		md5 = get_file_md5(file_path)
+		uploader_remote_origin = request.remote_addr
+		uploader_uuid = self.accounts.current_user.uuid
+		owner_uuid = self.accounts.current_user.uuid
+		# manager can set medium owner directly
+		if self.accounts.has_global_group(self.accounts.current_user, 'manager'):
+			if 'owner_id' in request.form:
+				owner = self.accounts.get_user(id_to_uuid(request.form['owner_id']))
+				if not owner:
+					errors.append('owner_not_found')
+					return errors, None
+				#TODO only allow contributors to be assigned as owner?
+				#self.accounts.users.populate_user_permissions(owner)
+				owner_uuid = owner.uuid
+
+		try:
+			medium = self.media.create_medium(md5, uploader_remote_origin, uploader_uuid, owner_uuid)
+		except ValueError:
+			if MediumStatus.COPYRIGHT == medium.status:
+				errors.append('medium_not_allowed_copyright')
+			elif MediumStatus.FORBIDDEN == medium.status:
+				errors.append('medium_not_allowed_forbidden')
+			else:
+				errors.append('medium_already_exists')
+			return errors, medium
+
+		updates = {}
+			
+		#TODO properties processing
+
+		if 0 < len(updates):
+			self.media.update_medium(medium, **updates)
+
+		tags = []
+		if 'author_tag' in request.form:
+			if self.accounts.current_user.display:
+				tags.append('#author:' + self.accounts.current_user.display)
+
+		if 'filename_tag' in request.form:
+			tags.append('#filename:' + filename)
+
+		if 'tags' in request.form:
+			#TODO additional tags processing
+			pass
+
+		if 0 == len(errors):
+			#TODO place medium file
+			pass
+
+		if 'generate_summaries' in request.form:
+			self.generate_medium_summaries(medium)
+
+		return errors, medium

@@ -58,13 +58,13 @@ def upload():
 			groups=g.media_archive.config['requirable_groups'],
 		)
 
-	#TODO upload processing
-
-	medium_id = 'what'
+	errors, medium = g.media_archive.upload_from_request()
 
 	if 0 == len(errors):
-		return redirect(url_for('media_archive.view_medium', medium_id=medium_id))
+		return redirect(url_for('media_archive.view_medium', medium_id=medium.id))
 
+	#TODO add form fields to fields[]
+	#TODO parse required groups
 	return render_template(
 		'upload.html',
 		errors=errors,

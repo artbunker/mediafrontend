@@ -223,6 +223,14 @@ def populate_categories(media):
 	for medium in media:
 		medium.category = mime_to_category(medium.mime)
 
+def populate_uri(medium, media_uri, media_api_uri):
+	filename = mime.id + '.' + mime_to_extension(medium.mime)
+	from media import MediumProtection
+	if MediumProtection.NONE != medium.protection:
+		medium.uri = api_uri.format('fetch/' + filename)
+		return
+	medium.uri = media_uri.format(filename)
+
 def create_temp_medium_file(file_contents):
 	import os
 	import uuid
@@ -291,6 +299,7 @@ class MediaArchive:
 		medium = self.media.get_medium(medium_md5)
 		if medium:
 			populate_id(medium)
+			populate_uri(medium, self.config['media_uri'], self.config['api_uri'])
 			populate_category(medium)
 		return medium
 
@@ -298,6 +307,7 @@ class MediaArchive:
 		media = self.media.search_media(**kwargs)
 		for medium in media:
 			populate_id(medium)
+			populate_uri(medium, self.config['media_uri'], self.config['api_uri'])
 			populate_category(medium)
 		return media
 

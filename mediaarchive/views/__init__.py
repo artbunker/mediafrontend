@@ -13,7 +13,7 @@ media_archive = Blueprint(
 	static_url_path='/media'
 )
 
-@media_archive.route('/upload')
+@media_archive.route('/upload', methods=['GET', 'POST'])
 def upload():
 	g.media_archive.accounts.require_global_group('contributor')
 

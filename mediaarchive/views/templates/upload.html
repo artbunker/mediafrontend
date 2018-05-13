@@ -24,7 +24,7 @@
 					<legend>Required Groups</legend>
 					{% for group in groups %}
 						{% set checked = '' %}
-						{% if fields['groups'][group] %}
+						{% if group in fields['groups'] %}
 							{% set checked = ' checked' %}
 						{% endif %}
 						<input id="groups[{{ group }}]" name="groups[{{ group }}]" type="checkbox"{{ checked }}>

@@ -1,6 +1,15 @@
 
 from flask import request, abort
 
+# updated list of all possible summary extensions
+summary_extensions = [
+	'png',
+	'webp',
+	'jpg',
+	'gif',
+	'webm',
+]
+
 def md5_to_id(md5):
 	import base64
 	return base64.urlsafe_b64encode(md5).decode().strip('=')

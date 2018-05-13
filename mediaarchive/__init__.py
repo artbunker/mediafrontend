@@ -347,18 +347,112 @@ class MediaArchive:
 		os.rename(source, destination)
 		#except Exception:
 		#	pass
-		pass
-
-	def remove_medium_summaries(self, medium):
-		#TODO
-		pass
-
-	def generate_medium_summaries(self, medium):
-		#TODO
-		pass
 
 	def place_medium_summaries(self, medium):
-		#TODO
+		import os
+
+		from media import MediumProtection
+
+		protected_path = os.path.join(self.config['summaries_path'], 'protected')
+		nonprotected_path = os.path.join(self.config['summaries_path'], 'nonprotected')
+
+		if MediumProtection.NONE != medium.protection:
+			source_path = nonprotected_path
+			destination_path = protected_path
+		else:
+			source_path = protected_path
+			destination_path = nonprotected_path
+
+		for extension in summary_extensions:
+			for size in self.config['summary_widths']:
+				filename = medium.id + '.' + size + '.' + extension
+
+				#TODO eat exceptions?
+				#try:
+				os.rename(os.path.join(source_path, filename), os.path.join(destination_path, filename))
+				#except Exception:
+				#	pass
+				pass
+
+	def remove_medium_file(self, medium):
+		filename = medium.id + '.' + mime_to_extension(medium.mime)
+		os.remove(os.path.join(self.config['media_path'], 'protected', filename))
+		os.remove(os.path.join(self.config['media_path'], 'nonprotected', filename))
+
+	def remove_medium_summaries(self, medium):
+		for extension in summary_extensions:
+			for size in self.config['summary_widths']:
+				filename = medium.id + '.' + size + '.' + extension
+				os.remove(os.path.join(self.config['summaries_path'], 'protected', filename))
+				os.remove(os.path.join(self.config['summaries_path'], 'nonprotected', filename))
+
+	def generate_medium_summaries(self, medium):
+		self.remove_medium_summaries(medium)
+
+		#TODO specific summary generation based on mimetypes
+		updates = {}
+		# image
+		if 'image' == medium.category:
+			#TODO get image resource
+			if 'image/png' == medium.mime:
+				pass
+			elif 'image/webp' == medium.mime:
+				pass
+			elif 'image/jpeg' == medium.mime:
+				pass
+			elif 'image/gif' == medium.mime:
+				#TODO check for multiple frames
+					#TODO save resized gif summaries of all summary widths greater than actual width
+					#TODO updates['data4'] = frames
+				pass
+			#TODO get width and height
+			#TODO create thumbnails from copy of original resource
+			#TODO calculate hsv average
+			updates['data1'] = width
+			updates['data2'] = height
+			updates['data3'] = hsv_average
+		elif 'video' == medium.category:
+			#TODO get duration
+			#TODO get self.config['video_snapshots'] at even intervals throughout the video
+			#TODO create thumbnails from copy of first snapshot resource
+			#TODO create slideshow preview from snapshot resources at self.config['video_slideshow_width']
+			#TODO calculate hsv average of first snapshot resource
+			updates['data1'] = width
+			updates['data2'] = height
+			updates['data3'] = hsv_average
+			updates['data4'] = frames
+			updates['data5'] = duration_ms
+		elif 'audio':
+			if 'audio/mpeg' == medium.mime:
+				#TODO get id3 info for mp3
+				#TODO add #title:, #tracknum:, #album:, and #author: based on id3?
+				#TODO if id3 cover image is present then generate summaries from it
+				pass
+			else:
+				#TODO nothing for other audio types yet
+				pass
+		elif 'application':
+			if 'application/x-shockwave-flash' == medium.mime:
+				width = 0
+				height = 0
+				#TODO get swf width and height
+				#TODO frames?
+				#TODO fps?
+				#TODO flash version?
+				#TODO pull frame of flash video and create summaries?
+			pass
+		elif 'archive':
+			#TODO no archive summary yet
+			pass
+		elif 'text':
+			#TODO no text summary
+			pass
+		if 0 < len(updates):
+			self.media.update_medium(medium, **updates)
+
+	def multiupload(self):
+		#TODO do groups/properties/tag processing once
+		#TODO loop through uploads and apply processed groups/properties/tags to each
 		pass
 
 	def upload_from_request(self,):

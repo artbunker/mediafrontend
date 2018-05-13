@@ -64,7 +64,12 @@ def upload():
 		return redirect(url_for('media_archive.view_medium', medium_id=medium.id))
 
 	#TODO add form fields to fields[]
-	#TODO parse required groups
+
+	for group in g.media_archive.accounts.users.available_groups:
+		field = 'groups[' + group + ']'
+		if field in request.form:
+			fields['groups'].append(group)
+
 	return render_template(
 		'upload.html',
 		errors=errors,

@@ -249,7 +249,7 @@ def get_file_mime(file_path):
 	mime = magic.Magic(mime=True)
 	return mime.from_file(file_path)
 
-def get_file_md5(self, file_path):
+def get_file_md5(file_path):
 	chunk_size = 4096
 
 	import hashlib

@@ -232,14 +232,6 @@ def populate_categories(media):
 	for medium in media:
 		medium.category = mime_to_category(medium.mime)
 
-def populate_uri(medium, media_uri, media_api_uri):
-	filename = mime.id + '.' + mime_to_extension(medium.mime)
-	from media import MediumProtection
-	if MediumProtection.NONE != medium.protection:
-		medium.uri = api_uri.format('fetch/' + filename)
-		return
-	medium.uri = media_uri.format(filename)
-
 def create_temp_medium_file(file_contents):
 	import os
 	import uuid
@@ -304,20 +296,58 @@ class MediaArchive:
 			**params
 		)
 
+	def populate_uris(self, medium):
+		medium.uris = {}
+		filename = mime.id + '.' + mime_to_extension(medium.mime)
+
+		if not self.config['api_uri']:
+			api_uri = url_for('media_archive.fetch_medium', medium_filename='{}')
+		if not self.config['media_uri']:
+			media_uri = url_for('media_archive.medium_file', medium_filename='{}')
+
+		from media import MediumProtection
+
+		if MediumProtection.NONE != medium.protection:
+			media_uri = self.config['api_uri'].format('fetch/{}')
+		else:
+			media_uri = self.config['media_uri']
+
+		medium.uris['original'] = media_uri.format(filename)
+		for width in self.config['summary_widths']:
+			filename = mime.id + '.' + width
+			if 'image' == medium.category:
+				medium.uris[width] = media_uri.format(filename + '.png')
+				if 'image/gif' == medium.mime and 1 < medium.data4:
+					medium.uris['reencoded_' + width] = media_uri.format(filename + '.gif')
+
+			medium.uris['original'] = media_uri.format(filename)
+			for width in self.config['summary_widths']:
+				filename = mime.id + '.' + width
+				if 'image' == medium.category:
+					medium.uris[width] = media_uri.format(filename + '.png')
+					if 'image/gif' == medium.mime and 1 < medium.data4:
+						medium.uris['reencoded_' + width] = media_uri.format(filename + '.gif')
+			if (
+				'video' == medium.category
+				and 'video/mpeg' != medium.mime
+				and 'video/webm' != medium.mime
+				):
+					medium.uris['reencoded'] = media_uri.format(mime.id + '.webm')
+
 	def get_medium(self, medium_md5):
 		medium = self.media.get_medium(medium_md5)
 		if medium:
 			populate_id(medium)
-			populate_uri(medium, self.config['media_uri'], self.config['api_uri'])
 			populate_category(medium)
+			self.populate_uris(medium)
 		return medium
 
 	def search_media(self, **kwargs):
 		media = self.media.search_media(**kwargs)
 		for medium in media:
 			populate_id(medium)
-			populate_uri(medium, self.config['media_uri'], self.config['api_uri'])
 			populate_category(medium)
+			populate_uris(medium)
 		return media
 
 	def require_medium(self, medium_md5):

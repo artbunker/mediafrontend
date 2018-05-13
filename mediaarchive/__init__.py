@@ -458,8 +458,8 @@ class MediaArchive:
 		#TODO loop through uploads and apply processed groups/properties/tags to each
 		pass
 
-	def upload_from_request(self,):
-		params = {}
+	def upload_from_request(self):
+		errors = []
 		file_contents = None
 		if 'upload_uri' in request.form and request.form['upload_uri']:
 			import urllib
@@ -516,22 +516,48 @@ class MediaArchive:
 					return errors, None
 				#TODO only allow contributors to be assigned as owner?
 				#self.accounts.users.populate_user_permissions(owner)
+				#if not self.accounts.users.has_global_group(owner, 'contributor'):
+					#TODO warning for owner not set
+				#else:
 				owner_uuid = owner.uuid
 
 		try:
 			medium = self.media.create_medium(md5, uploader_remote_origin, uploader_uuid, owner_uuid)
 		except ValueError:
 			if MediumStatus.COPYRIGHT == medium.status:
-				errors.append('medium_not_allowed_copyright')
+				errors.append('medium_copyright')
 			elif MediumStatus.FORBIDDEN == medium.status:
-				errors.append('medium_not_allowed_forbidden')
+				errors.append('medium_forbidden')
 			else:
 				errors.append('medium_already_exists')
 			return errors, medium
 
 		updates = {}
 			
-		#TODO properties processing
+		if 'searchability' in request.form:
+			updates['searchability'] = request.form['searchability']
+
+		if 'protection' in request.form:
+			updates['protection'] = request.form['protection']
+
+		if 'creation_date' in request.form:
+			import dateutil
+			try:
+				updates['creation_time'] = dateutil.parser.parse(request.form['creation_date']).timestamp()
+			except ValueError:
+				#TODO warning for creation time not set
+				pass
+
+		groups = []
+		for group in self.accounts.users.available_groups:
+			field = 'groups[' + group + ']'
+			if field in request.form:
+				groups.append(group)
+		if 0 < len(groups):
+			updates['group_bits'] = int.from_bytes(
+				self.accounts.users.combine_groups(names=groups),
+				'big'
+			)
 
 		if 0 < len(updates):
 			self.media.update_medium(medium, **updates)
@@ -545,14 +571,18 @@ class MediaArchive:
 			tags.append('#filename:' + filename)
 
 		if 'tags' in request.form:
-			#TODO additional tags processing
-			pass
+			tags += self.tag_string_to_list(request.form['tags'])
 
-		if 0 == len(errors):
-			#TODO place medium file
-			pass
+		if 0 < len(tags):
+			self.media.add_tags(medium, tags)
 
-		if 'generate_summaries' in request.form:
-			self.generate_medium_summaries(medium)
+		# update medium from db after alterations
+		medium = self.get_medium(medium.md5)
+
+		if 0 < len(errors):
+			self.place_medium_file(medium)
+
+			if 'generate_summaries' in request.form:
+				self.generate_medium_summaries(medium)
 
 		return errors, medium

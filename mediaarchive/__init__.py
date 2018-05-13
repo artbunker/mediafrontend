@@ -329,22 +329,25 @@ class MediaArchive:
 		from media import MediumProtection
 
 		filename = medium.id + '.' + mime_to_extension(medium.mime)
-		protected_path = self.config['protected_path']
-		nonprotected_path = self.config['nonprotected_path']
+
+		protected_path = os.path.join(self.config['media_path'], 'protected')
+		nonprotected_path = os.path.join(self.config['media_path'], 'nonprotected')
 
 		if MediumProtection.NONE != medium.protection:
-			source = os.path.join(nonprotected_path, filename)
-			destination = os.path.join(protected_path, filename)
+			source_path = nonprotected_path
+			destination_path = protected_path
 		else:
-			source = os.path.join(protected_path, filename)
-			destination = os.path.join(nonprotected_path, filename)
+			source_path = protected_path
+			destination_path = nonprotected_path
 
 		if source_file_path:
 			source = source_file_path
+		else:
+			source = os.path.join(source_path, filename)
 
 		#TODO eat exceptions?
 		#try:
-		os.rename(source, destination)
+		os.rename(source, os.path.join(destination_path, filename))
 		#except Exception:
 		#	pass
 

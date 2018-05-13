@@ -34,14 +34,14 @@ def upload():
 	fields = {
 		'groups': [],
 
-		'generate_summaries': g.media_archive.config['defaults']['generate_summaries'],
+		'generate_summaries': g.media_archive.config['upload_defaults']['generate_summaries'],
 		'owner_id': g.media_archive.accounts.current_user.id,
-		'searchability': g.media_archive.config['defaults']['searchability'],
-		'protection': g.media_archive.config['defaults']['protection'],
+		'searchability': g.media_archive.config['upload_defaults']['searchability'],
+		'protection': g.media_archive.config['upload_defaults']['protection'],
 		'creation_date': '',
 
-		'author_tag': g.media_archive.config['defaults']['author_tag'],
-		'filename_tag': g.media_archive.config['defaults']['filename_tag'],
+		'author_tag': g.media_archive.config['upload_defaults']['author_tag'],
+		'filename_tag': g.media_archive.config['upload_defaults']['filename_tag'],
 		'tags': '',
 
 		'upload_uri': '',

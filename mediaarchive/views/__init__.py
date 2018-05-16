@@ -56,6 +56,7 @@ def upload():
 			contributors=contributors,
 			fields=fields,
 			groups=g.media_archive.config['requirable_groups'],
+			medium=None,
 		)
 
 	errors, medium = g.media_archive.upload_from_request()
@@ -90,6 +91,7 @@ def upload():
 		contributors=contributors,
 		fields=fields,
 		groups=g.media_archive.config['requirable_groups'],
+		medium=medium,
 	)
 
 @media_archive.route('/search')

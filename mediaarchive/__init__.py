@@ -569,10 +569,12 @@ class MediaArchive:
 		updates = {}
 			
 		if 'searchability' in request.form:
-			updates['searchability'] = request.form['searchability']
+			#TODO add exception handling here for ValueErrors
+			updates['searchability'] = request.form['searchability'].upper()
 
 		if 'protection' in request.form:
-			updates['protection'] = request.form['protection']
+			#TODO add exception handling here for ValueErrors
+			updates['protection'] = request.form['protection'].upper()
 
 		if 'creation_date' in request.form:
 			import dateutil.parser

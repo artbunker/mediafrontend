@@ -581,7 +581,7 @@ class MediaArchive:
 			updates['protection'] = request.form['protection']
 
 		if 'creation_date' in request.form:
-			import dateutil
+			import dateutil.parser
 			try:
 				updates['creation_time'] = dateutil.parser.parse(request.form['creation_date']).timestamp()
 			except ValueError:

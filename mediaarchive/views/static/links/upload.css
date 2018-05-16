@@ -7,7 +7,7 @@
 	border-bottom-right-radius: 0.25em;
 	overflow: hidden;
 }
-#upload_file, .form_file .file_selection {
+.form_file .file_selection {
 	display: none;
 }
 .form_file {
@@ -23,6 +23,11 @@ label[for=upload_file] {
 	line-height: 128px;
 	text-align: center;
 	padding: 0;
+}
+#upload_file {
+	width: 100%;
+	height: 0px;
+	padding: 0px 0px 128px 0px;
 }
 label[for=upload_file]::after {
 	position: absolute;

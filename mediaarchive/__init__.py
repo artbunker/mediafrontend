@@ -562,8 +562,8 @@ class MediaArchive:
 				owner_uuid = owner.uuid
 
 		try:
-			medium = self.media.create_medium(md5, uploader_remote_origin, uploader_uuid, owner_uuid)
 		except ValueError:
+			medium = self.media.create_medium(md5, uploader_remote_origin, uploader_uuid, owner_uuid, mime)
 			if MediumStatus.COPYRIGHT == medium.status:
 				errors.append('medium_copyright')
 			elif MediumStatus.FORBIDDEN == medium.status:

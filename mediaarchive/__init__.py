@@ -502,6 +502,44 @@ class MediaArchive:
 	def tag_string_to_list(self, tag_string):
 		return tag_string.split('#')
 
+	def require_access(self, medium):
+		signed_in = False
+		owner = False
+		manager = False
+
+		if self.accounts.current_user:
+			signed_in = True
+			if medium.owner_uuid == self.accounts.current_user.uuid:
+				owner = True
+			if self.accounts.current_user_has_global_group('manager'):
+				manager = True
+
+		if not manager:
+			if MediumStatus.ALLOWED != medium.status:
+				abort(451, {'message': 'unavailable'})
+			if not owner:
+				if MediumProtection.PRIVATE == medium.protection:
+					abort(404, {'message': 'medium_not_found'})
+				if not signed_in:
+					abort(401, {'message': 'medium_protected'})
+				if MediumProtection.GROUPS == medium.protection:
+					if not self.accounts.current_user_has_permissions(
+							'global',
+							medium.group_bits
+						):
+						for premium_group in self.config['premium_groups']:
+							premium_group_bit = self.accounts.users.group_name_to_bit(premium_group)
+							if self.accounts.users.contains_all_group_bits(
+									medium.group_bits,
+									premium_group_bit
+								):
+								if not self.accounts.has_global_group(
+										self.accounts.current_user,
+										premium_group
+									):
+									abort(402, {'message': 'premium_medium', 'group': premium_group})
+						abort(403, {'message': 'protected_medium'})
+
 	def upload_from_request(self):
 		errors = []
 		file_contents = None

@@ -185,7 +185,7 @@ def protected_medium_file(medium_filename):
 	return send_from_directory(media_path, medium_filename)
 
 @media_archive.route('/file/<medium_filename>')
-def nonprotected_medium_file(medium_filename):
+def medium_file(medium_filename):
 	import os
 
 	media_path = os.path.join(g.media_archive.config['media_path'], 'nonprotected')

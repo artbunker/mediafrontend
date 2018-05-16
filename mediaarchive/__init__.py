@@ -404,12 +404,11 @@ class MediaArchive:
 			for size in self.config['summary_widths']:
 				filename = medium.id + '.' + size + '.' + extension
 
-				#TODO eat exceptions?
-				#try:
-				os.rename(os.path.join(source_path, filename), os.path.join(destination_path, filename))
-				#except Exception:
-				#	pass
-				pass
+				# eat exceptions to ignore not found
+				try:
+					os.rename(os.path.join(source_path, filename), os.path.join(destination_path, filename))
+				except FileNotFoundError:
+					pass
 
 	def remove_medium_file(self, medium):
 		filename = medium.id + '.' + mime_to_extension(medium.mime)

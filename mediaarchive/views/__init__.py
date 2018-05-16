@@ -139,8 +139,6 @@ def manage():
 
 @media_archive.route('/fetch/<medium_filename>')
 def protected_medium_file(medium_filename):
-	g.media_archive.accounts.require_sign_in()
-
 	import os
 
 	media_path = os.path.join(g.media_archive.config['media_path'], 'protected')
@@ -148,32 +146,15 @@ def protected_medium_file(medium_filename):
 	pieces = medium_filename.split('.')
 	if 2 > len(pieces):
 		abort(404, {'message': 'medium_not_found'})
+
 	medium_id = pieces[0]
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
-	if medium.group_bits:
-		if not (
-				g.media_archive.accounts.users.has_permissions(
-					g.media_archive.accounts.current_user,
-					'global',
-					medium.group_bits
-				)
-			):
-			for premium_group in g.media_archive.config['premium_groups']:
-				premium_group_bit = g.media_archive.accounts.users.group_name_to_bit(premium_group)
-				if (
-						g.media_archive.accounts.users.contains_all_group_bits(
-							medium.group_bits,
-							premium_group_bit
-						)
-					):
-					if (
-							not g.media_archive.accounts.has_global_group(
-								g.media_archive.accounts.current_user,
-								premium_group
-							)
-						):
-						abort(402, {'message': 'premium_media', 'group': premium_group})
-			abort(403, {'message': 'medium_protected'})
+
+	# trying to access nonprotected medium through protected medium path
+	if MediumProtection.NONE == medium.protection:
+		abort(400)
+
+	g.media_archive.require_access(medium)
 
 	media_path = os.path.join(g.media_archive.config['media_path'], 'protected')
 

@@ -297,13 +297,10 @@ class MediaArchive:
 		)
 
 	def populate_uris(self, medium):
-		medium.uris = {}
-		filename = mime.id + '.' + mime_to_extension(medium.mime)
-
 		if not self.config['api_uri']:
-			api_uri = url_for('media_archive.fetch_medium', medium_filename='{}')
+			self.config['api_uri'] = url_for('media_archive.protected_medium_file', medium_filename='MEDIUM_FILENAME').replace('MEDIUM_FILENAME', '{}')
 		if not self.config['media_uri']:
-			media_uri = url_for('media_archive.medium_file', medium_filename='{}')
+			self.config['media_uri'] = url_for('media_archive.medium_file', medium_filename='MEDIUM_FILENAME').replace('MEDIUM_FILENAME', '{}')
 
 		from media import MediumProtection
 
@@ -312,17 +309,18 @@ class MediaArchive:
 		else:
 			media_uri = self.config['media_uri']
 
-		medium.uris['original'] = media_uri.format(filename)
+		medium.uris = {
+			'original': media_uri.format(medium.id + '.' + mime_to_extension(medium.mime)),
+		}
 		for width in self.config['summary_widths']:
-			filename = mime.id + '.' + width
+			filename = medium.id + '.' + str(width)
 			if 'image' == medium.category:
 				medium.uris[width] = media_uri.format(filename + '.png')
 				if 'image/gif' == medium.mime and 1 < medium.data4:
 					medium.uris['reencoded_' + width] = media_uri.format(filename + '.gif')
 
-			medium.uris['original'] = media_uri.format(filename)
 			for width in self.config['summary_widths']:
-				filename = mime.id + '.' + width
+				filename = medium.id + '.' + str(width)
 				if 'image' == medium.category:
 					medium.uris[width] = media_uri.format(filename + '.png')
 					if 'image/gif' == medium.mime and 1 < medium.data4:
@@ -347,7 +345,7 @@ class MediaArchive:
 		for medium in media:
 			populate_id(medium)
 			populate_category(medium)
-			populate_uris(medium)
+			self.populate_uris(medium)
 		return media
 
 	def require_medium(self, medium_md5):

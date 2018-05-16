@@ -533,8 +533,8 @@ class MediaArchive:
 		size = get_file_size(file_path)
 		mime = get_file_mime(file_path)
 
-		if self.config['maximum_size'] < size:
-			errors.append('greater_than_maximum_size')
+		if self.config['maximum_upload_filesize'] < size:
+			errors.append('greater_than_maximum_upload_filesize')
 		if mime in self.config['disallowed_mimes']:
 			errors.append('mimetype_not_allowed')
 

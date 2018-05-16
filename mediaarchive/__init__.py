@@ -1,3 +1,4 @@
+import os
 
 from flask import request, abort
 
@@ -539,7 +540,6 @@ class MediaArchive:
 			errors.append('mimetype_not_allowed')
 
 		if 0 < len(errors):
-			import os
 			os.remove(file_path)
 			return errors, None
 

@@ -6,19 +6,33 @@
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/view.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/tags.css') }}">
 {% endblock %}
+{% if 'image' == medium.category %}
+	{% set medium_template = 'image_medium.html' %}
+	{% set info_template = 'image_info.html' %}
+{% elif 'audio' == medium.category %}
+	{% set medium_template = 'audio_medium.html' %}
+	{% set info_template = 'audio_info.html' %}
+{% elif 'video' == medium.category %}
+	{% set medium_template = 'video_medium.html' %}
+	{% set info_template = 'video_info.html' %}
+{% elif 'application/swf' == medium.mime %}
+	{% set medium_template = 'flash_medium.html' %}
+	{% set info_template = 'flash_info.html' %}
+{% else %}
+	{% set medium_template = 'generic_medium.html' %}
+	{% set info_template = 'generic_info.html' %}
+{% endif %}
+
 {% block content %}
 	<div id="view_medium">
 		<div class="medium" data-id="{{ medium.id }}" data-upload-time="{{ (medium.upload_time.timestamp() * 1000)|int }}" data-creation-time="{{ (medium.creation_time.timestamp() * 1000)|int }}" data-category="{{ medium.category }}" data-mime="{{ medium.mime }}" data-size="{{ medium.size }}" data-data1="{{ medium.data1 }}" data-data2="{{ medium.data2 }}" data-data3="{{ medium.data3 }}" data-data4="{{ medium.data4 }}" data-data5="{{ medium.data5 }}" data-data6="{{ medium.data6 }}">
-			{% if 'image' == medium.category %}
-				{% include 'image_medium.html' %}
-			{% elif 'audio' == medium.category %}
-				{% include 'audio_medium.html' %}
-			{% elif 'video' == medium.category %}
-				{% include 'video_medium.html' %}
-			{% elif 'application/swf' == medium.mime %}
-				{% include 'flash_medium.html' %}
-			{% else %}
-				{% include 'generic_medium.html' %}
+			{% include medium_template %}
+		</div>
+		<div class="info">
+			<span class="size">{{ medium.size }} bytes</span>
+			{% include info_template %}
+			{% if edit_medium %}
+				<a href="{{ url_for('media_archive.edit_medium', medium_id=medium.id) }}">Edit Medium</a>
 			{% endif %}
 		</div>
 		{% if 0 < medium.tags|length %}

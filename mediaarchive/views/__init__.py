@@ -113,26 +113,29 @@ def search():
 		filter['without_group_bits'] = user_inverse_permissions
 
 	media = g.media_archive.media.search_media(filter=filter)
-	print(media)
 
-	return 'regular media search'
+	#TODO loop through media and any the current user doesn't have permissions for remove the media id
+
+	return render_template(
+		'search.html',
+		media=media,
+	)
 
 @media_archive.route('/manage')
 def manage():
 	filter = {}
 
-	output = 'manage media'
-
 	if not g.media_archive.accounts.has_global_group(g.media_archive.accounts.current_user, 'manager'):
-		output = 'contributor manage self'
+		# contributor manage self
 		g.media_archive.accounts.require_global_group('contributor')
 		filter['owner_uuids'] = g.accounts.current_user.uuid
 
-	media = g.media_archive.media.search_media(filter=filter)
-	print('media:')
-	print(media)
+	media = g.media_archive.search_media(filter=filter)
 
-	return output
+	return render_template(
+		'search.html',
+		media=media,
+	)
 
 @media_archive.route('/fetch/<medium_filename>')
 def protected_medium_file(medium_filename):
@@ -198,7 +201,26 @@ def nonprotected_medium_file(medium_filename):
 def view_medium(medium_id):
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
-	return 'view ' + medium.id
+	g.media_archive.require_access(medium)
+
+	edit_medium = False
+	edit_tags = False
+
+	if (
+			medium.owner_uuid == g.media_archive.accounts.current_user.uuid
+			or g.media_archive.accounts.current_user_has_global_group('manager')
+		):
+		edit_medium = True
+		edit_tags = True
+	elif g.media_archive.accounts.current_user_has_global_group('taxonomist'):
+		edit_tags = True
+
+	return render_template(
+		'view.html',
+		medium=medium,
+		edit_medium=edit_medium,
+		edit_tags=edit_tags,
+	)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/edit", methods=['GET', 'POST'])
 def edit_medium(medium_id):

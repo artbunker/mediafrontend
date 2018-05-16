@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block title %}Search{% endblock %}
+{% block style %}
+	{{ super() }}
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/forms.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/search.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/tags.css') }}">
+{% endblock %}
+{% block content %}
+	<div id="media_search">
+		{% for medium in media %}
+			<span class="thumbnail">
+				{% if not medium.id %}
+					{# protected thumbnail #}
+					<span>protected thumbnail</span>
+				{% else %}
+					<a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">
+						{{ medium.id }}
+					</a>
+				{% endif %}
+			</span>
+		{% endfor %}
+	</div>
+{% endblock %}

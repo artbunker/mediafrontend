@@ -379,11 +379,11 @@ class MediaArchive:
 		else:
 			source = os.path.join(source_path, filename)
 
-		#TODO eat exceptions?
-		#try:
-		os.rename(source, os.path.join(destination_path, filename))
-		#except Exception:
-		#	pass
+		# eat exceptions to ignore not found
+		try:
+			os.rename(source, os.path.join(destination_path, filename))
+		except FileNotFoundError:
+			pass
 
 	def place_medium_summaries(self, medium):
 		from media import MediumProtection
@@ -411,15 +411,23 @@ class MediaArchive:
 
 	def remove_medium_file(self, medium):
 		filename = medium.id + '.' + mime_to_extension(medium.mime)
-		os.remove(os.path.join(self.config['media_path'], 'protected', filename))
-		os.remove(os.path.join(self.config['media_path'], 'nonprotected', filename))
+		# eat exceptions to ignore not found
+		try:
+			os.remove(os.path.join(self.config['media_path'], 'protected', filename))
+			os.remove(os.path.join(self.config['media_path'], 'nonprotected', filename))
+		except FileNotFoundError:
+			pass
 
 	def remove_medium_summaries(self, medium):
 		for extension in summary_extensions:
-			for size in self.config['summary_widths']:
-				filename = medium.id + '.' + size + '.' + extension
-				os.remove(os.path.join(self.config['summaries_path'], 'protected', filename))
-				os.remove(os.path.join(self.config['summaries_path'], 'nonprotected', filename))
+			for width in self.config['summary_widths']:
+				filename = medium.id + '.' + str(width) + '.' + extension
+				# eat exceptions to ignore not found
+				try:
+					os.remove(os.path.join(self.config['summaries_path'], 'protected', filename))
+					os.remove(os.path.join(self.config['summaries_path'], 'nonprotected', filename))
+				except FileNotFoundError:
+					pass
 
 	def generate_medium_summaries(self, medium):
 		self.remove_medium_summaries(medium)
@@ -534,7 +542,11 @@ class MediaArchive:
 			errors.append('mimetype_not_allowed')
 
 		if 0 < len(errors):
-			os.remove(file_path)
+			# eat exceptions to ignore not found
+			try:
+				os.remove(file_path)
+			except FileNotFoundError:
+				pass
 			return errors, None
 
 		md5 = get_file_md5(file_path)
@@ -556,8 +568,16 @@ class MediaArchive:
 				owner_uuid = owner.uuid
 
 		try:
-		except ValueError:
 			medium = self.media.create_medium(md5, uploader_remote_origin, uploader_uuid, owner_uuid, mime)
+		except ValueError as e:
+			# eat exceptions to ignore not found
+			try:
+				os.remove(file_path)
+			except FileNotFoundError:
+				pass
+
+			medium = e.args[0]
+			populate_id(medium)
 			if MediumStatus.COPYRIGHT == medium.status:
 				errors.append('medium_copyright')
 			elif MediumStatus.FORBIDDEN == medium.status:
@@ -616,6 +636,11 @@ class MediaArchive:
 		medium = self.get_medium(medium.md5)
 
 		if 0 < len(errors):
+			# eat exceptions to ignore not found
+			try:
+				os.remove(file_path)
+			except FileNotFoundError:
+				pass
 			return errors, medium
 
 		self.place_medium_file(medium, file_path)

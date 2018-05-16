@@ -616,9 +616,10 @@ class MediaArchive:
 		medium = self.get_medium(medium.md5)
 
 		if 0 < len(errors):
-			self.place_medium_file(medium)
+			return errors, medium
 
-			if 'generate_summaries' in request.form:
-				self.generate_medium_summaries(medium)
+		self.place_medium_file(medium, file_path)
+		if 'generate_summaries' in request.form:
+			self.generate_medium_summaries(medium)
 
 		return errors, medium

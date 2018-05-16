@@ -502,6 +502,12 @@ class MediaArchive:
 	def tag_string_to_list(self, tag_string):
 		return tag_string.split('#')
 
+	def remove_medium(self, medium):
+		#TODO remove medium
+		#TODO remove summaries
+		#TODO remove tags
+		pass
+
 	def require_access(self, medium):
 		signed_in = False
 		owner = False

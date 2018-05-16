@@ -234,7 +234,6 @@ def populate_categories(media):
 		medium.category = mime_to_category(medium.mime)
 
 def create_temp_medium_file(file_contents):
-	import os
 	import uuid
 	file_path = os.path.join(__name__, 'tmp', 'temp_medium_' + str(uuid.uuid4()))
 	f = open(file_path, 'w+b')
@@ -243,7 +242,6 @@ def create_temp_medium_file(file_contents):
 	return file_path
 
 def get_file_size(file_path):
-	import os
 	return os.path.getsize(file_path)
 
 def get_file_mime(file_path):
@@ -362,8 +360,6 @@ class MediaArchive:
 		return tag
 
 	def place_medium_file(self, medium, source_file_path=None):
-		import os
-
 		from media import MediumProtection
 
 		filename = medium.id + '.' + mime_to_extension(medium.mime)
@@ -390,8 +386,6 @@ class MediaArchive:
 		#	pass
 
 	def place_medium_summaries(self, medium):
-		import os
-
 		from media import MediumProtection
 
 		protected_path = os.path.join(self.config['summaries_path'], 'protected')

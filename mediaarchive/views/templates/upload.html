@@ -6,6 +6,7 @@
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/upload.css') }}">
 {% endblock %}
 {% set error_descriptions = {
+	'medium_already_exists': 'Exact duplicate exists',
 	'': '',
 } %}
 {% block content %}
@@ -15,7 +16,13 @@
 			{% if error in error_descriptions %}
 				{% set error_description = error_descriptions[error] %}
 			{% endif %}
-			<div class="form_error">{{ error_description }}</div>
+			<div class="form_error">
+				{% if 'medium_already_exists' == error %}
+					<a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">{{ error_description }}</a>
+				{% else %}
+					{{ error_description }}
+				{% endif %}
+			</div>
 		{% endfor %}
 		<form method="post" enctype="multipart/form-data" novalidate>
 			{% if 0 < groups|length %}

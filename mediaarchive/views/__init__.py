@@ -63,8 +63,21 @@ def upload():
 	if 0 == len(errors):
 		return redirect(url_for('media_archive.view_medium', medium_id=medium.id))
 
-	#TODO add form fields to fields[]
+	for field in ['generate_summaries', 'author_tag', 'filename_tag']:
+		fields[field] = (field in request.form)
 
+	form_fields = [
+		'owner_id',
+		'searchability',
+		'protection',
+		'creation_date',
+		'tags',
+		'upload_uri',
+	]
+	for field in form_fields:
+		if field in request.form:
+			fields[field] = request.form[field]
+		
 	for group in g.media_archive.accounts.users.available_groups:
 		field = 'groups[' + group + ']'
 		if field in request.form:

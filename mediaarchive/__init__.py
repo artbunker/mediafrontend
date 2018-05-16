@@ -495,6 +495,9 @@ class MediaArchive:
 		#TODO loop through uploads and apply processed groups/properties/tags to each
 		pass
 
+	def tag_string_to_list(self, tag_string):
+		return tag_string.split('#')
+
 	def upload_from_request(self):
 		errors = []
 		file_contents = None

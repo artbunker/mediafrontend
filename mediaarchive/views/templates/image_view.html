@@ -1,0 +1,13 @@
+<div class="medium">
+	<a href="{{ 'test' }}">
+		{% if medium.uris['reencoded'][1024] and medium.uris['fallback'][1024] %}
+			<picture>
+				 <source srcset="{{ medium.uris['reencoded'][1024] }}">
+				 <source srcset="{{ medium.uris['fallback'][1024] }}">
+				 <img srcset="{{ medium.uris['fallback'][1024] }}">
+			</picture>
+		{% else %}
+			{{ medium.id }}
+		{% endif %}
+	</a>
+</div>

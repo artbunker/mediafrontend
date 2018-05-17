@@ -197,7 +197,7 @@ def view_medium(medium_id):
 		edit_tags = True
 
 	return render_template(
-		'view.html',
+		'view_medium.html',
 		medium=medium,
 		edit_medium=edit_medium,
 		edit_tags=edit_tags,

@@ -1,0 +1,26 @@
+.medium {
+	display: block;
+	margin-bottom: 1px;
+	background-color: #fff;
+}
+.info {
+	background-color: var(--b_h);
+	color: var(--f_h);
+	padding: 0.33em 0.75em;
+	text-align: left;
+	font-size: 0.8em;
+	border-bottom-left-radius: 0.25em;
+	border-bottom-right-radius: 0.25em;
+}
+.info>span {
+	display: inline-block;
+	margin-right: 0.75em;
+}
+.info a {
+	color: var(--f_h);
+}
+.info .manage {
+	margin-left: 2em;
+	margin-right: 0px;
+	float: right;
+}

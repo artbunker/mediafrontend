@@ -437,23 +437,25 @@ class MediaArchive:
 
 	def remove_medium_file(self, medium):
 		filename = medium.id + '.' + mime_to_extension(medium.mime)
-		# eat exceptions to ignore not found
-		try:
-			os.remove(os.path.join(self.config['media_path'], 'protected', filename))
-			os.remove(os.path.join(self.config['media_path'], 'nonprotected', filename))
-		except FileNotFoundError:
-			pass
+
+		for protection_path in ['protected', 'nonprotected']:
+			# eat exceptions to ignore not found
+			try:
+				os.remove(os.path.join(self.config['media_path'], protection_path, filename))
+			except FileNotFoundError:
+				pass
 
 	def remove_medium_summaries(self, medium):
 		for extension in summary_extensions:
-			for width in self.config['summary_widths']:
-				filename = medium.id + '.' + str(width) + '.' + extension
-				# eat exceptions to ignore not found
-				try:
-					os.remove(os.path.join(self.config['summaries_path'], 'protected', filename))
-					os.remove(os.path.join(self.config['summaries_path'], 'nonprotected', filename))
-				except FileNotFoundError:
-					pass
+			for edge in self.config['summary_edges']:
+				filename = medium.id + '.' + str(edge) + '.' + extension
+
+				for protection_path in ['protected', 'nonprotected']:
+					# eat exceptions to ignore not found
+					try:
+						os.remove(os.path.join(self.config['summaries_path'], protection_path, filename))
+					except FileNotFoundError:
+						pass
 
 	def generate_medium_summaries(self, medium):
 		self.remove_medium_summaries(medium)

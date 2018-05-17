@@ -576,10 +576,10 @@ class MediaArchive:
 		return tag_string.split('#')
 
 	def remove_medium(self, medium):
-		#TODO remove medium
-		#TODO remove summaries
-		#TODO remove tags
-		pass
+		self.remove_medium_file(medium)
+		self.remove_medium_summaries(medium)
+		self.media.remove_tags(medium)
+		self.media.remove_medium(medium)
 
 	def require_access(self, medium):
 		signed_in = False

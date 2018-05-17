@@ -360,6 +360,8 @@ class MediaArchive:
 			populate_id(medium)
 			populate_category(medium)
 			self.populate_uris(medium)
+			medium.uploader_id = uuid_to_id(medium.uploader_uuid)
+			medium.owner_id = uuid_to_id(medium.owner_uuid)
 		return medium
 
 	def search_media(self, **kwargs):
@@ -368,6 +370,8 @@ class MediaArchive:
 			populate_id(medium)
 			populate_category(medium)
 			self.populate_uris(medium)
+			medium.uploader_id = uuid_to_id(medium.uploader_uuid)
+			medium.owner_id = uuid_to_id(medium.owner_uuid)
 		return media
 
 	def require_medium(self, medium_md5):

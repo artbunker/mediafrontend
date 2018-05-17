@@ -1,0 +1,43 @@
+#edit_medium {
+	width: 400px;
+}
+.info {
+	border-radius: 0;
+}
+#groups, #properties, #creation {
+	margin-top: 1em;
+	border-bottom-left-radius: 0.25em;
+	border-bottom-right-radius: 0.25em;
+	overflow: hidden;
+}
+#groups {
+	margin-top: 0px;
+}
+input[type=submit] {
+	margin-top: 1em;
+	border-radius: 0.25em;
+}
+input#generate_summaries,
+label[for=generate_summaries],
+label[for=generate_summaries] + br {
+	display: none;
+}
+a#generate_summaries, #remove_summaries, #remove_file, #remove_medium {
+	display: inline-block;
+	width: 100%;
+	margin-top: 1em;
+	border-radius: 0.25em;
+	background-color: var(--b_l);
+	color: var(--f_l);
+	font-weight: bold;
+	cursor: pointer;
+	box-sizing: border-box;
+	line-height: 1.5em;
+	padding: 0.1em 0.5em;
+	text-decoration: none;
+}
+a#generate_summaries {
+	margin-bottom: 2em;
+	background-color: var(--b_m);
+	color: var(--f_m);
+}

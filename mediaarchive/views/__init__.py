@@ -205,14 +205,178 @@ def view_medium(medium_id):
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/edit", methods=['GET', 'POST'])
 def edit_medium(medium_id):
-	medium = g.media_archive.require_medium(id_to_md5(medium_id))
+	manager = False
+	contributors = []
+	if g.media_archive.accounts.has_global_group(g.media_archive.accounts.current_user, 'manager'):
+		manager = True
+		contributor_bit = g.media_archive.accounts.users.group_name_to_bit('contributor')
+		permissions = g.media_archive.accounts.search_permissions(filter={
+			'permissions': {
+				'global': contributor_bit,
+				'media': contributor_bit,
+			}
+		})
+		for permission in permissions:
+			contributors.append(permission.user)
 
-	if not g.media_archive.accounts.has_global_group(g.media_archive.accounts.current_user, 'manager'):
+	medium = g.media_archive.get_medium(id_to_md5(medium_id))
+
+	if not manager:
+		if not medium or MediumStatus.ALLOWED != medium.status:
+			abort(403, {'message': 'manager_required'})
+
 		g.media_archive.accounts.require_global_group('contributor')
 		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
-			abort(404, {'message': 'medium_not_found'})
+			abort(403, {'message': 'not_medium_owner'})
+	elif not medium:
+		abort(404, {'message': 'medium_not_found'})
 
-	return 'edit ' + medium_id
+	fields = {
+		'groups': [],
+
+		'owner_id': medium.owner_id,
+		'searchability': medium.searchability,
+		'protection': medium.protection,
+		'creation_time': medium.creation_time,
+		'creation_date': medium.creation_time.strftime('%Y-%m-%dT%H:%M:%S.%f%z'),
+
+		'file_uri': '',
+	}
+
+	errors = []
+	if 'POST' != request.method:
+		return render_template(
+			'edit_medium.html',
+			errors=errors,
+			manager=manager,
+			contributors=contributors,
+			fields=fields,
+			groups=g.media_archive.config['requirable_groups'],
+			medium=medium,
+		)
+
+	if 'generate_summaries' in request.form:
+		#TODO rebuild summaries
+		pass
+
+	updates = {}
+
+	# manager can set medium owner directly
+	if manager:
+		if 'owner_id' in request.form and request.form['owner_id'] != media.owner_id:
+			owner = self.accounts.get_user(id_to_uuid(request.form['owner_id']))
+			if not owner:
+				errors.append('owner_not_found')
+				return errors, None
+			#TODO only allow contributors to be assigned as owner?
+			#self.accounts.users.populate_user_permissions(owner)
+			#if not self.accounts.users.has_global_group(owner, 'contributor'):
+				#TODO warning for owner not set
+			#else:
+			updates['owner_uuid'] = owner.uuid
+
+	if 'searchability' in request.form:
+		#TODO add exception handling here for ValueErrors
+		updates['searchability'] = request.form['searchability'].upper()
+
+	if 'protection' in request.form:
+		#TODO add exception handling here for ValueErrors
+		updates['protection'] = request.form['protection'].upper()
+
+	if 'creation_date' in request.form:
+		import dateutil.parser
+		try:
+			updates['creation_time'] = dateutil.parser.parse(request.form['creation_date']).timestamp()
+		except ValueError:
+			#TODO warning for creation time not set
+			pass
+
+	groups = []
+	for group in g.media_archive.accounts.users.available_groups:
+		field = 'groups[' + group + ']'
+		if field in request.form:
+			fields['groups'].append(group)
+	if 0 < len(groups):
+		updates['group_bits'] = int.from_bytes(
+			self.accounts.users.combine_groups(names=groups),
+			'big'
+		)
+
+	if 0 < len(updates):
+		g.media_archive.media.update_medium(medium, **updates)
+
+	#TODO replace medium
+
+	if 0 == len(errors):
+		return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
+
+	for field in ['generate_summaries', 'author_tag', 'filename_tag']:
+		fields[field] = (field in request.form)
+
+	form_fields = [
+		'owner_id',
+		'searchability',
+		'protection',
+		'creation_date',
+		'upload_uri',
+	]
+	for field in form_fields:
+		if field in request.form:
+			fields[field] = request.form[field]
+
+	#TODO get creation datetime from request.form['creation_date'] string
+
+	return render_template(
+		'edit_medium.html',
+		errors=errors,
+		manager=manager,
+		contributors=contributors,
+		fields=fields,
+		groups=g.media_archive.config['requirable_groups'],
+		medium=medium,
+	)
+
+@media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/build")
+def generate_summaries(medium_id):
+	medium = g.media_archive.require_medium(id_to_md5(medium_id))
+
+	if not g.media_archive.accounts.current_user_has_global_group('manager'):
+		if MediumStatus.ALLOWED != medium.status:
+			abort(403)
+		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
+			abort(403)
+
+	g.media_archive.generate_medium_summaries(medium)
+
+	return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
+
+@media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/remove/summaries")
+def remove_summaries(medium_id):
+	medium = g.media_archive.require_medium(id_to_md5(medium_id))
+
+	if not g.media_archive.accounts.current_user_has_global_group('manager'):
+		if MediumStatus.ALLOWED != medium.status:
+			abort(403)
+		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
+			abort(403)
+
+	g.media_archive.remove_medium_summaries(medium)
+
+	return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
+
+@media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/remove/original")
+def remove_file(medium_id):
+	medium = g.media_archive.require_medium(id_to_md5(medium_id))
+
+	if not g.media_archive.accounts.current_user_has_global_group('manager'):
+		if MediumStatus.ALLOWED != medium.status:
+			abort(403)
+		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
+			abort(403)
+
+	g.media_archive.remove_medium_file(medium)
+
+	return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/remove")
 def remove_medium(medium_id):

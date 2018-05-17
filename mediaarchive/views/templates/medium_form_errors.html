@@ -1,0 +1,18 @@
+{% set error_descriptions = {
+	'medium_already_exists': 'Exact duplicate exists',
+	'': '',
+} %}
+
+{% for error in errors %}
+	{% set error_description = error %}
+	{% if error in error_descriptions %}
+		{% set error_description = error_descriptions[error] %}
+	{% endif %}
+	<div class="form_error">
+		{% if 'medium_already_exists' == error %}
+			<a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">{{ error_description }}</a>
+		{% else %}
+			{{ error_description }}
+		{% endif %}
+	</div>
+{% endfor %}

@@ -594,11 +594,15 @@ class MediaArchive:
 					errors.append('remote_file_request_empty_response')
 				else:
 					file_contents = response.read()
+					#TODO get filename
 		elif 'file_upload' in request.files:
 			try:
 				file_contents = request.files['file_upload'].stream.read()
 			except ValueError as e:
 				errors.append('problem_uploading_file')
+			else:
+				#TODO get filename
+				pass
 		elif 'local' in request.form:
 			#TODO local file
 			#request.form['local']

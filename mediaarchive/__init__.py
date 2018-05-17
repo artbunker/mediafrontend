@@ -570,10 +570,11 @@ class MediaArchive:
 	def upload_from_request(self):
 		errors = []
 		file_contents = None
-		if 'upload_uri' in request.form and request.form['upload_uri']:
+		filename = ''
+		if 'file_uri' in request.form and request.form['file_uri']:
 			import urllib
 			try:
-				response = urllib.request.urlopen(request.form['upload_uri'])
+				response = urllib.request.urlopen(request.form['file_uri'])
 			except urllib.error.HTTPError as e:
 				errors.append('remote_file_request_http_error')
 			except urllib.error.URLError as e:
@@ -583,9 +584,9 @@ class MediaArchive:
 					errors.append('remote_file_request_empty_response')
 				else:
 					file_contents = response.read()
-		elif 'upload_file' in request.files:
+		elif 'file_upload' in request.files:
 			try:
-				file_contents = request.files['upload_file'].stream.read()
+				file_contents = request.files['file_upload'].stream.read()
 			except ValueError as e:
 				errors.append('problem_uploading_file')
 		elif 'local' in request.form:

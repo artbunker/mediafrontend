@@ -24,15 +24,15 @@
 			</div>
 			<div id="creation">
 				<span class="form_file">
-					<label for="upload_file">Upload File</label>
-					<input id="upload_file" name="upload_file" type="file" required>
+					<label for="file_upload">File by Upload</label>
+					<input id="file_upload" name="file_upload" type="file" required>
 					<span class="file_selection" data-file-selected="File selected" data-file-not-selected="No file selected"></span>
 				</span>
 				<br>
-				<label for="upload_uri">Upload URI</label>
-				<input id="upload_uri" name="upload_uri" type="text" value="{{ fields['upload_uri'] }}" placeholder="Enter URI of remote file">
+				<label for="file_uri">File by URI</label>
+				<input id="file_uri" name="file_uri" type="text" value="{{ fields['file_uri'] }}" placeholder="Enter URI of remote file">
 			</div>
-			<input type="submit" value="Upload">
+			<input type="submit" value="Create Medium">
 		</form>
 	</div>
 {% endblock %}

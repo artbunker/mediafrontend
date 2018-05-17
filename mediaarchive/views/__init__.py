@@ -62,7 +62,7 @@ def upload():
 	errors, medium = g.media_archive.upload_from_request()
 
 	if 0 == len(errors):
-		return redirect(url_for('media_archive.view_medium', medium_id=medium.id))
+		return redirect(url_for('media_archive.view_medium', medium_id=medium.id), 302)
 
 	for field in ['generate_summaries', 'author_tag', 'filename_tag']:
 		fields[field] = (field in request.form)

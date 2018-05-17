@@ -406,9 +406,11 @@ class MediaArchive:
 		else:
 			source = os.path.join(source_path, filename)
 
-		# eat exceptions to ignore not found
+		# eat exceptions to ignore already exists or not found
 		try:
 			os.rename(source, os.path.join(destination_path, filename))
+		except FileExistsError:
+			pass
 		except FileNotFoundError:
 			pass
 
@@ -429,9 +431,11 @@ class MediaArchive:
 			for size in self.config['summary_widths']:
 				filename = medium.id + '.' + size + '.' + extension
 
-				# eat exceptions to ignore not found
+				# eat exceptions to ignore already exists or not found
 				try:
 					os.rename(os.path.join(source_path, filename), os.path.join(destination_path, filename))
+				except FileExistsError:
+					pass
 				except FileNotFoundError:
 					pass
 

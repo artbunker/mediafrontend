@@ -306,32 +306,53 @@ class MediaArchive:
 		from media import MediumProtection
 
 		if MediumProtection.NONE != medium.protection:
+			protection_path = 'protected'
 			media_uri = self.config['api_uri'].format('fetch/{}')
 		else:
+			protection_path = 'nonprotected'
 			media_uri = self.config['media_uri']
 
 		medium.uris = {
-			'original': media_uri.format(medium.id + '.' + mime_to_extension(medium.mime)),
+			#TODO uri to category placeholder images
+			'original': '',
+			'reencoded': {},
+			'fallback': {},
+			'slideshow': {},
+			'clip': {},
 		}
-		for width in self.config['summary_widths']:
-			filename = medium.id + '.' + str(width)
-			if 'image' == medium.category:
-				medium.uris[width] = media_uri.format(filename + '.png')
-				if 'image/gif' == medium.mime and 1 < medium.data4:
-					medium.uris['reencoded_' + width] = media_uri.format(filename + '.gif')
 
-			for width in self.config['summary_widths']:
-				filename = medium.id + '.' + str(width)
-				if 'image' == medium.category:
-					medium.uris[width] = media_uri.format(filename + '.png')
-					if 'image/gif' == medium.mime and 1 < medium.data4:
-						medium.uris['reencoded_' + width] = media_uri.format(filename + '.gif')
-			if (
+		filename = medium.id + '.' + mime_to_extension(medium.mime)
+		if os.path.exists(os.path.join(self.config['media_path'], protection_path, filename)):
+			medium.uris['original'] = media_uri.format(filename)
+		for edge in self.config['summary_edges']:
+			filename = medium.id + '.' + str(edge)
+			if 'image' == medium.category:
+				if os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.webp')):
+					medium.uris['reencoded'][edge] = media_uri.format(filename + '.webp')
+				if os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.png')):
+					medium.uris['fallback'][edge] = media_uri.format(filename + '.png')
+				if (
+						'image/gif' == medium.mime
+						and 1 < medium.data4
+						and os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.clip.gif'))
+					):
+					medium.uris['clip'][edge] = media_uri.format(filename + '.clip.gif')
+			elif 'video' == medium.category:
+				if os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.png')):
+					medium.uris[edge] = media_uri.format(filename + '.png')
+				if os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.slideshow.gif')):
+					medium.uris['slideshow'][edge] = media_uri.format(filename + '.slideshow.gif')
+				if os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.clip.gif')):
+					medium.uris['clip'][edge] = media_uri.format(filename + '.clip.gif')
+		if (
 				'video' == medium.category
 				and 'video/mpeg' != medium.mime
 				and 'video/webm' != medium.mime
-				):
-					medium.uris['reencoded'] = media_uri.format(mime.id + '.webm')
+				and os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.webm'))
+			):
+			medium.uris['reencoded']['original'] = media_uri.format(mime.id + '.webm')
+
+		print(medium.uris)
 
 	def get_medium(self, medium_md5):
 		medium = self.media.get_medium(medium_md5)

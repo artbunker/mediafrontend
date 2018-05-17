@@ -216,9 +216,17 @@ def edit_medium(medium_id):
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/remove")
 def remove_medium(medium_id):
-	g.media_archive.require_medium(id_to_md5(medium_id))
+	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
-	return 'remove ' + medium_id
+	if not g.media_archive.accounts.current_user_has_global_group('manager'):
+		if MediumStatus.ALLOWED != medium.status:
+			abort(403)
+		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
+			abort(403)
+
+	g.media_archive.remove_medium(medium)
+
+	return redirect(url_for('media_archive.manage'), 302)
 
 @media_archive.route('/mediatest')
 def mediatest():

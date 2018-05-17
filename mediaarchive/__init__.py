@@ -464,34 +464,72 @@ class MediaArchive:
 	def generate_medium_summaries(self, medium):
 		self.remove_medium_summaries(medium)
 
+		filename = medium.id + '.' + mime_to_extension(medium.mime)
+
+		protection_path = 'nonprotected'
+		if MediumProtection.NONE != medium.protection:
+			protection_path = 'protected'
+		file_path = os.path.join(self.config['media_path'], protection_path, filename)
+
+		if not os.path.exists(file_path):
+			abort(500, {'message': 'original_file_not_found'})
+
 		#TODO specific summary generation based on mimetypes
 		updates = {}
 		# image
 		if 'image' == medium.category:
-			#TODO get image resource
-			if 'image/png' == medium.mime:
-				pass
-			elif 'image/webp' == medium.mime:
-				pass
-			elif 'image/jpeg' == medium.mime:
-				pass
-			elif 'image/gif' == medium.mime:
+			from PIL import Image
+
+			if 'image/gif' == medium.mime:
 				#TODO check for multiple frames
+				if False:
 					#TODO save resized gif summaries of all summary widths greater than actual width
 					#TODO updates['data4'] = frames
-				pass
-			#TODO get width and height
-			#TODO create thumbnails from copy of original resource
+					pass
+				else:
+					img = Image.open(file_path)
+			else:
+				img = Image.open(file_path)
+
+			width = img.width
+			height = img.height
+
+			summary_path = os.path.join(self.config['summaries_path'], protection_path)
+			from copy import copy
+			for edge in self.config['summary_edges']:
+				thumbnail = copy(img)
+				thumbnail.thumbnail((edge, edge), Image.BICUBIC)
+
+				thumbnail_path = os.path.join(summary_path, medium.id + '.' + str(edge) + '.png')
+				thumbnail.save(thumbnail_path, 'PNG', optimize=True)
+
+				thumbnail_path = os.path.join(summary_path, medium.id + '.' + str(edge) + '.webp')
+				thumbnail.save(thumbnail_path, 'WebP', lossless=True)
+
 			#TODO calculate hsv average
+			hsv_average = 0
+
 			updates['data1'] = width
 			updates['data2'] = height
 			updates['data3'] = hsv_average
 		elif 'video' == medium.category:
+			#TODO get width and height
+			width = 0
+			height = 0
+
+			#TODO get frames
+			frames = 0
+
 			#TODO get duration
+			duration_ms = 0
+
 			#TODO get self.config['video_snapshots'] at even intervals throughout the video
 			#TODO create thumbnails from copy of first snapshot resource
 			#TODO create slideshow preview from snapshot resources at self.config['video_slideshow_width']
+
 			#TODO calculate hsv average of first snapshot resource
+			hsv_average = 0
+
 			updates['data1'] = width
 			updates['data2'] = height
 			updates['data3'] = hsv_average
@@ -508,13 +546,17 @@ class MediaArchive:
 				pass
 		elif 'application':
 			if 'application/x-shockwave-flash' == medium.mime:
+				#TODO get dimensions
 				width = 0
 				height = 0
-				#TODO get swf width and height
+
 				#TODO frames?
 				#TODO fps?
 				#TODO flash version?
 				#TODO pull frame of flash video and create summaries?
+
+				updates['data1'] = width
+				updates['data2'] = height
 			pass
 		elif 'archive':
 			#TODO no archive summary yet

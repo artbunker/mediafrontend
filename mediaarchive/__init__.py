@@ -428,8 +428,8 @@ class MediaArchive:
 			destination_path = nonprotected_path
 
 		for extension in summary_extensions:
-			for size in self.config['summary_widths']:
-				filename = medium.id + '.' + size + '.' + extension
+			for edge in self.config['summary_edges']:
+				filename = medium.id + '.' + edge + '.' + extension
 
 				# eat exceptions to ignore already exists or not found
 				try:

@@ -1,5 +1,5 @@
-	<a href="{{ 'test' }}">
 <div class="summary view">
+	<a href="{{ medium.uris['original'] }}">
 		{% if medium.uris['reencoded'][1024] and medium.uris['fallback'][1024] %}
 			<picture>
 				 <source srcset="{{ medium.uris['reencoded'][1024] }}">

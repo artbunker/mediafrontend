@@ -164,9 +164,11 @@ def protected_medium_file(medium_filename):
 	if not os.path.exists(os.path.join(media_path, medium_filename)):
 		abort(404, {'message': 'medium_not_found'})
 
+	g.no_store = True
+
 	from flask import send_from_directory
 
-	return send_from_directory(media_path, medium_filename)
+	return send_from_directory(media_path, medium_filename, mimetype=medium.mime, conditional=True)
 
 @media_archive.route('/file/<medium_filename>')
 def medium_file(medium_filename):
@@ -182,7 +184,7 @@ def medium_file(medium_filename):
 
 	from flask import send_from_directory
 
-	return send_from_directory(media_path, medium_filename)
+	return send_from_directory(media_path, medium_filename, conditional=True)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>")
 def view_medium(medium_id):

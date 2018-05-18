@@ -10,10 +10,12 @@
 {% block content %}
 	<div id="media_search">
 		{% from 'media.jinja' import render_thumb, render_protected %}
-		{% for medium in media %}
-			<span class="thumbnail">
-				{{ render_thumb(medium) }}
-			</span>
-		{% endfor %}
+		<div id="results">
+			{% for medium in media %}
+				<div class="thumbnail">
+					{{ render_thumb(medium) }}
+				</div>
+			{% endfor %}
+		</div>
 	</div>
 {% endblock %}

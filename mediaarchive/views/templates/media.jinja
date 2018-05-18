@@ -40,7 +40,9 @@
 {% endmacro %}
 
 {% macro render_thumb(medium) %}
-	{% if not medium.uris['original'] %}
+	{% if not medium.id %}
+		{% include 'protected_thumb.html' %}
+	{% elif not medium.uris['original'] %}
 		{% include 'generic_thumb.html' %}
 	{% elif 'application/swf' == medium.mime %}
 		{% include 'flash_thumb.html' %}

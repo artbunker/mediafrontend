@@ -1,13 +1,13 @@
-<div class="summary view">
-	<a href="{{ medium.uris['original'] }}">
-		{% if medium.uris['reencoded'][1024] and medium.uris['fallback'][1024] %}
+{% if medium.uris['reencoded'][1024] and medium.uris['fallback'][1024] %}
+	<div class="summary view">
+		<a href="{{ medium.uris['original'] }}">
 			<picture>
 				 <source srcset="{{ medium.uris['reencoded'][1024] }}">
 				 <source srcset="{{ medium.uris['fallback'][1024] }}">
 				 <img srcset="{{ medium.uris['fallback'][1024] }}">
 			</picture>
-		{% else %}
-			{{ medium.id }}
-		{% endif %}
-	</a>
-</div>
+		</a>
+	</div>
+{% else %}
+	{% include 'generic_view.html' %}
+{% endif %}

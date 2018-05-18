@@ -41,3 +41,11 @@ a#generate_summaries {
 	background-color: var(--b_m);
 	color: var(--f_m);
 }
+.medium video,
+.medium picture img,
+.medium picture {
+	width: auto;
+	height: auto;
+	max-width: 100%;
+	max-height: 128px;
+}

@@ -1,0 +1,10 @@
+.summary.nofile {
+	display: inline-block;
+	/*TODO background images for generic view/thumb */
+	background-color: #f00;
+}
+.summary.nofile a {
+	display: block;
+	width: 100%;
+	height: 100%;
+}

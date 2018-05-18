@@ -50,3 +50,23 @@
 .summary {
 	display: inline-block;
 }
+.summary.view.nofile {
+	display: inline-block;
+	width: 512px;
+	height: 512px;
+	background-color: #f00;
+	font-size: 1em;
+}
+.summary.thumb.nofile {
+	display: inline-block;
+	width: 256px;
+	height: 256px;
+	background-color: #f00;
+	font-size: 1em;
+}
+.summary.view.nofile a,
+.summary.thumb.nofile a {
+	display: block;
+	width: 100%;
+	height: 100%;
+}

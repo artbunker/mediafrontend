@@ -1,5 +1,6 @@
 #edit_medium {
 	width: 400px;
+	padding-top: 1px;
 }
 .info {
 	border-radius: 0;
@@ -48,4 +49,8 @@ a#generate_summaries {
 	height: auto;
 	max-width: 100%;
 	max-height: 128px;
+}
+.medium .summary.nofile {
+	width: 128px;
+	height: 128px;
 }

@@ -78,7 +78,7 @@ def upload():
 	for field in form_fields:
 		if field in request.form:
 			fields[field] = request.form[field]
-		
+
 	for group in g.media_archive.accounts.users.available_groups:
 		field = 'groups[' + group + ']'
 		if field in request.form:
@@ -141,7 +141,10 @@ def manage():
 def protected_medium_file(medium_filename):
 	import os
 
-	media_path = os.path.join(g.media_archive.config['media_path'], 'protected')
+	if 1 == medium_filename.count('.'):
+		media_path = os.path.join(g.media_archive.config['media_path'], 'protected')
+	else:
+		media_path = os.path.join(g.media_archive.config['summaries_path'], 'protected')
 
 	pieces = medium_filename.split('.')
 	if 2 > len(pieces):
@@ -169,7 +172,10 @@ def protected_medium_file(medium_filename):
 def medium_file(medium_filename):
 	import os
 
-	media_path = os.path.join(g.media_archive.config['media_path'], 'nonprotected')
+	if 1 == medium_filename.count('.'):
+		media_path = os.path.join(g.media_archive.config['media_path'], 'nonprotected')
+	else:
+		media_path = os.path.join(g.media_archive.config['summaries_path'], 'nonprotected')
 
 	if not os.path.exists(os.path.join(media_path, medium_filename)):
 		abort(404, {'message': 'medium_not_found'})

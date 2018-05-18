@@ -15,9 +15,6 @@
 			{{ render_thumb(medium) }}
 		</div>
 		<div class="info">
-			<span class="manage">
-				<a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">View</a>
-			</span>
 			<span class="size">{{ medium.size }} bytes</span>
 			<span class="creation_date" data-timestamp="{{ medium.creation_time.timestamp() }}">{{ medium.creation_time.strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}</span>
 			{{ render_info(medium) }}

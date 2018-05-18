@@ -1,0 +1,51 @@
+:root {
+	--per_row: 8;
+	--thumb_edge: calc((100vw / var(--per_row)) - (2em / var(--per_row)));
+}
+#content {
+	display: block;
+}
+#media_search, #results {
+	width: 100%;
+}
+#results {
+	display: grid;
+	grid-template-columns: repeat(var(--per_row), var(--thumb_edge));
+	grid-auto-rows: var(--thumb_edge);
+	grid-gap: 1px;
+}
+.thumbnail {
+	display: inline-block;
+	max-width: 100%;
+	max-height: 100%;
+}
+.summary.thumb {
+	display: inline-block;
+	width: 100%;
+	height: 100%;
+	max-width: 100%;
+	max-height: 100%;
+	overflow: hidden;
+	position: relative;
+}
+.summary.thumb video,
+.summary.thumb picture img,
+.summary.thumb picture {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	object-fit: cover;
+	object-position: center center;
+}
+@media only screen and (max-width: 1024px) {
+	:root {
+		--per_row: 4;
+	}
+}
+@media only screen and (max-width: 512px) {
+	:root {
+		--per_row: 2;
+	}
+}

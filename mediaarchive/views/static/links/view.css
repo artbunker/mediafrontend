@@ -1,10 +1,28 @@
 .medium {
 	display: block;
 	margin-bottom: 1px;
-	background-color: #fff;
 	font-size: 0;
 	border-top-left-radius: 8px;
 	border-top-right-radius: 8px;
+
+	/*checker*/
+	background-color: var(--b_h);
+	background-image:
+		-moz-linear-gradient(45deg, var(--b_m) 25%, transparent 25%), 
+		-moz-linear-gradient(-45deg, var(--b_m) 25%, transparent 25%),
+		-moz-linear-gradient(45deg, transparent 75%, var(--b_m) 75%),
+		-moz-linear-gradient(-45deg, transparent 75%, var(--b_m) 75%);
+	background-image:
+		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.25, var(--b_m)), color-stop(.25, transparent)), 
+		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, var(--b_m)), color-stop(.25, transparent)),
+		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.75, transparent), color-stop(.75, var(--b_m))),
+		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.75, transparent), color-stop(.75, var(--b_m)));
+
+	-moz-background-size: 32px 32px;
+	background-size: 32px 32px;
+	-webkit-background-size: 32px 32px;
+
+	background-position: 0 0, 16px 0, 16px -16px, 0px 16px;
 }
 .info {
 	background-color: var(--b_h);

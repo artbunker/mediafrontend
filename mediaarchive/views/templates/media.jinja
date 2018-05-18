@@ -39,6 +39,19 @@
 	{% endif %}
 {% endmacro %}
 
+{% macro render_thumb(medium) %}
+	{% if not medium.uris['original'] %}
+		{% include 'generic_thumb.html' %}
+	{% elif 'application/swf' == medium.mime %}
+		{% include 'flash_thumb.html' %}
+	{% elif medium.category in ['image', 'audio', 'video'] %}
+		{% set thumb_template = (medium.category + '_thumb.html') %}
+		{% include thumb_template %}
+	{% else %}
+		{% include 'generic_thumb.html' %}
+	{% endif %}
+{% endmacro %}
+
 {% macro render_info(medium) %}
 	{% if not medium.uris['original'] %}
 		{% include 'generic_info.html' %}

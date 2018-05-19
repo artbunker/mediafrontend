@@ -271,8 +271,8 @@ def edit_medium(medium_id):
 
 	# manager can set medium owner directly
 	if manager:
-		if 'owner_id' in request.form and request.form['owner_id'] != media.owner_id:
-			owner = self.accounts.get_user(id_to_uuid(request.form['owner_id']))
+		if 'owner_id' in request.form and request.form['owner_id'] != medium.owner_id:
+			owner = g.media_archive.accounts.get_user(id_to_uuid(request.form['owner_id']))
 			if not owner:
 				errors.append('owner_not_found')
 				return errors, None

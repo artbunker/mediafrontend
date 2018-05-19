@@ -294,10 +294,12 @@ def edit_medium(medium_id):
 	if 'creation_date' in request.form:
 		import dateutil.parser
 		try:
-			updates['creation_time'] = dateutil.parser.parse(request.form['creation_date']).timestamp()
+			creation_time = dateutil.parser.parse(request.form['creation_date'])
 		except ValueError:
 			#TODO warning for creation time not set
 			pass
+		else:
+			updates['creation_time'] = creation_time.timestamp()
 
 	groups = []
 	for group in g.media_archive.accounts.users.available_groups:

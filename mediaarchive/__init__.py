@@ -262,6 +262,10 @@ def get_file_md5(file_path):
 			hash_algo.update(chunk)
 	return hash_algo.digest()
 
+def hsv_average_from_image(image):
+	#TODO hsv average
+	pass
+
 class MediaArchive:
 	def __init__(self, config, media, accounts, access_log=None):
 		self.config = config
@@ -352,8 +356,6 @@ class MediaArchive:
 			):
 			medium.uris['reencoded']['original'] = media_uri.format(mime.id + '.webm')
 
-		print(medium.uris)
-
 	def get_medium(self, medium_md5):
 		medium = self.media.get_medium(medium_md5)
 		if medium:
@@ -443,98 +445,263 @@ class MediaArchive:
 		filename = medium.id + '.' + mime_to_extension(medium.mime)
 
 		for protection_path in ['protected', 'nonprotected']:
-			# eat exceptions to ignore not found
-			try:
-				os.remove(os.path.join(self.config['media_path'], protection_path, filename))
-			except FileNotFoundError:
-				pass
+			file_path = os.path.join(self.config['media_path'], protection_path, filename)
+			if os.path.exists(file_path):
+				os.remove(file_path)
 
 	def remove_medium_summaries(self, medium):
-		for extension in summary_extensions:
+		for protection_path in ['protected', 'nonprotected']:
 			for edge in self.config['summary_edges']:
-				filename = medium.id + '.' + str(edge) + '.' + extension
+				summary_path = os.path.join(
+					self.config['summaries_path'],
+					protection_path,
+					medium.id + '.' + str(edge) + '.{}'
+				)
+				if 'image' == medium.category:
+					for extension in ['png', 'webp', 'gif']:
+						summary_file =  summary_path.format(extension)
+						if os.path.exists(summary_file):
+							os.remove(summary_file)
+				elif 'video' == medium.category:
+					for extension in ['png', 'webp', 'webm']:
+						summary_file = summary_path.format(extension)
+						if os.path.exists(summary_file):
+							os.remove(summary_file)
+				elif 'audio' == medium.category:
+					pass
+			if (
+					'video' == medium.category
+					and 'video/mp4' != medium.mime
+					and 'video/mpeg' != medium.mime
+					and 'video/webm' != medium.mime
+					and 'application/ogg' != medium.mime
+					and 'video/ogg' != medium.mime
+					and os.path.exists(summary_path.format('webm'))
+				):
+				os.remove(summary_path.format('webm'))
 
-				for protection_path in ['protected', 'nonprotected']:
-					# eat exceptions to ignore not found
-					try:
-						os.remove(os.path.join(self.config['summaries_path'], protection_path, filename))
-					except FileNotFoundError:
-						pass
+	def summaries_from_image(self, image, path):
+		from copy import copy
+		for edge in self.config['summary_edges']:
+			thumbnail = copy(img)
+			thumbnail.thumbnail((edge, edge), Image.BICUBIC)
+
+			# summary
+			thumbnail_path = path.format(str(edge) + '.webp')
+			thumbnail.save(thumbnail_path, 'WebP', lossless=True)
+
+			# fallback
+			thumbnail_path = os.path.join(summary_path, medium.id + '.' + str(edge) + '.png')
+			thumbnail.save(thumbnail_path, 'PNG', optimize=True)
 
 	def generate_medium_summaries(self, medium):
 		self.remove_medium_summaries(medium)
 
-		filename = medium.id + '.' + mime_to_extension(medium.mime)
-
 		protection_path = 'nonprotected'
 		if MediumProtection.NONE != medium.protection:
 			protection_path = 'protected'
-		file_path = os.path.join(self.config['media_path'], protection_path, filename)
+
+		file_path = os.path.join(
+			self.config['media_path'],
+			protection_path,
+			medium.id + '.' + mime_to_extension(medium.mime)
+		)
+		summary_path = os.path.join(
+			self.config['summaries_path'],
+			protection_path,
+			medium.id + '.{}'
+		)
 
 		if not os.path.exists(file_path):
 			abort(500, {'message': 'original_file_not_found'})
 
-		#TODO specific summary generation based on mimetypes
 		updates = {}
-		# image
 		if 'image' == medium.category:
 			from PIL import Image
 
+			img = Image.open(file_path)
+			self.summaries_from_image(img, summary_path)
+
+			updates['data1'] = img.width
+			updates['data2'] = img.height
+			updates['data3'] = hsv_average_from_image(img)
+
 			if 'image/gif' == medium.mime:
 				#TODO check for multiple frames
-				if False:
-					#TODO save resized gif summaries of all summary widths greater than actual width
-					#TODO updates['data4'] = frames
-					pass
-				else:
-					img = Image.open(file_path)
-			else:
-				img = Image.open(file_path)
-
-			width = img.width
-			height = img.height
-
-			summary_path = os.path.join(self.config['summaries_path'], protection_path)
-			from copy import copy
-			for edge in self.config['summary_edges']:
-				thumbnail = copy(img)
-				thumbnail.thumbnail((edge, edge), Image.BICUBIC)
-
-				thumbnail_path = os.path.join(summary_path, medium.id + '.' + str(edge) + '.png')
-				thumbnail.save(thumbnail_path, 'PNG', optimize=True)
-
-				thumbnail_path = os.path.join(summary_path, medium.id + '.' + str(edge) + '.webp')
-				thumbnail.save(thumbnail_path, 'WebP', lossless=True)
-
-			#TODO calculate hsv average
-			hsv_average = 0
-
-			updates['data1'] = width
-			updates['data2'] = height
-			updates['data3'] = hsv_average
+				frames = 1
+				if 1 < frames:
+					updates['data4'] = frames
+					if self.config['ffmpeg_path']:
+						portrait = (img.width < img.height)
+						for edge in self.config['summary_edges']:
+							if portrait:
+								width = -1
+								height = edge
+							else:
+								width = edge
+								height = -1
+							subprocess.call([
+								self.config['ffmpeg_path'],
+								'-i',
+								'"' + file_path + '"',
+								'-vf',
+								'scale=' + str(width) + ':' + str(height),
+								summary_path.format(edge + '.gif')
+							])
 		elif 'video' == medium.category:
-			#TODO get width and height
-			width = 0
-			height = 0
+			if self.config['ffprobe_path'] and self.config['ffmpeg_path']:
+				width = 0
+				height = 0
+				duration_s = 0
+				audio_codec = ''
+				video_codec = ''
 
-			#TODO get frames
-			frames = 0
+				probe_json = subprocess.getoutput([
+					self.config['ffprobe_path'],
+					'-v',
+					'quiet',
+					'-print_format',
+					'json',
+					'-show_streams',
+					'-i',
+					'"' + file_path + '"'
+				])
+				probe = json.dumps(probe_json)
 
-			#TODO get duration
-			duration_ms = 0
+				if 'streams' in probe:
+					for stream in probe['streams']:
+						for key, value in probe['streams'][stream]:
+							if 'width' == key or 'coded_width' == key:
+								width = value
+							elif 'height' == key or 'coded_height' == key:
+								height = value
+							elif 'duration' == key:
+								duration_s = value
+					if (
+							'codec_type' in probe['streams'][stream]
+							and 'codec_name' == probe['streams'][stream]
+						):
+						codec_name = probe['streams'][stream]['codec_name']
 
-			#TODO get self.config['video_snapshots'] at even intervals throughout the video
-			#TODO create thumbnails from copy of first snapshot resource
-			#TODO create slideshow preview from snapshot resources at self.config['video_slideshow_width']
+						if 'audio' == probe['streams'][stream]['codec_type']:
+							audio_codec = codec_name
+						elif 'video' == probe['streams'][stream]['codec_type']:
+							video_codec = codec_name
 
-			#TODO calculate hsv average of first snapshot resource
-			hsv_average = 0
+				# missing duration after streams probe, do packets probe
+				if not duration_s:
+					probe_json = subprocess.getoutput([
+						self.config['ffprobe_path'],
+						'-v',
+						'quiet',
+						'-print_format',
+						'json',
+						'-show_packets',
+						'-i',
+						'"' + file_path + '"'
+					])
+					probe = json.dumps(probe_json)
 
-			updates['data1'] = width
-			updates['data2'] = height
-			updates['data3'] = hsv_average
-			updates['data4'] = frames
-			updates['data5'] = duration_ms
+					last_frame = array.pop(probe['packets'])
+					if 'dts_time' in last_frame:
+						duration_s = math.floor(last_frame['dts_time'])
+					elif 'pts_time' in last_frame:
+						duration_s = math.floor(last_frame['pts_time'])
+
+				# still missing duration after packets probe
+				if not duration_s:
+					#TODO attempt to estimate duration by seeking last keyframe from end
+					# and doing some math based on frame length
+					#try:
+					#	fh = fopen(file_path, 'rb')
+					#	fseek(fh, -4, SEEK_END)
+					#	r = unpack('N', fread(fh, 4))
+					#	last_tag_offset = r[1]
+					#	fseek(fh, -(last_tag_offset + 4), SEEK_END)
+					#	fseek(fh, 4, SEEK_CUR)
+					#	t0 = fread(fh, 3)
+					#	t1 = fread(fh, 1)
+					#	r = unpack('N', t1 . t0)
+					#	duration_ms = r[1]
+					#	$duration_s = duration_ms / 1000
+					pass
+
+				if duration_s:
+					import uuid
+
+					from PIL import Image
+
+					# space the snapshot intervals out with the intention to skip first and last
+					interval_s = duration_s / (self.config['video_snapshots'] + 2)
+
+					snapshots = []
+					for i in range(1, self.config['video_snapshots']):
+						snapshot_path = os.path.join(__name__, 'tmp', 'temp_snapshot_' + str(uuid.uuid4()))
+
+						subprocess.call([
+							self.config['ffmpeg_path'],
+							'-i',
+							'"' + file_path + '"',
+							'-ss',
+							str(i * interval_s),
+							'-frames:v',
+							'1',
+							snapshot_path,
+						])
+
+						img = Image.open(snapshot_path)
+
+						# use snapshot dimensions if dimensions missing
+						if not width:
+							width = img.width
+						if not height:
+							height = img.height
+
+						if 1 == i:
+							self.summaries_from_image(img, summary_path)
+							updates['data3'] = hsv_average_from_image(img)
+						img.thumbnail(self.config['video_slideshow_edge'])
+						snapshots.append(img)
+					#TODO create slideshow strip from snapshots
+					pass
+				# reencode non-websafe video for the view page
+				if (
+						0 != self.config['video_reencode_edge']
+						and width
+						and height
+						and 'video/mp4' != medium.mime
+						and 'video/mpeg' != medium.mime
+						and 'video/webm' != medium.mime
+						and 'application/ogg' != medium.mime
+						and 'video/ogg' != medium.mime
+					):
+					# using libvpx instead of libx264, so maybe the divisible by 2 requirement isn't needed?
+					#if 0 != self.config['video_reencode_edge'] % 2:
+						# libx264 requires sizes divisble by 2
+						#abort(500, 'invalid_video_reencode_edge')
+					if width < height:
+						width = -1
+						#width = 'trunc(oh*a/2)*2'
+						height = self.config['video_reencode_edge']
+					else:
+						width = self.config['video_reencode_edge']
+						height = -1
+						#height = 'trunc(ow/a/2)*2'
+					subprocess.call([
+						self.config['ffmpeg_path'],
+						'-i',
+						'"' + file_path + '"',
+						'-vcodec',
+						'libvpx',
+						'-quality',
+						'good',
+						'-cpu-used',
+						'5',
+						'-vf',
+						'scale="' + str(width) + ':' + str(height) + '"',
+						'-deadline realtime',
+						'"' + summary_path.format('.webm') + '"',
+					])
 		elif 'audio':
 			if 'audio/mpeg' == medium.mime:
 				#TODO get id3 info for mp3

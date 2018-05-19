@@ -112,7 +112,7 @@ def search():
 		)
 		filter['without_group_bits'] = user_inverse_permissions
 
-	media = g.media_archive.media.search_media(filter=filter)
+	media = g.media_archive.search_media(filter=filter)
 
 	#TODO loop through media and any the current user doesn't have permissions for remove the media id
 

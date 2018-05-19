@@ -24,11 +24,10 @@ label[for=generate_summaries] + br {
 	display: none;
 }
 a#generate_summaries, #remove_summaries, #remove_file, #remove_medium {
+	margin-top: 1em;
 	display: inline-block;
 	width: 100%;
-	margin-top: 1em;
 	border-radius: 0.25em;
-	background-color: var(--b_l);
 	color: var(--f_l);
 	font-weight: bold;
 	cursor: pointer;
@@ -37,10 +36,24 @@ a#generate_summaries, #remove_summaries, #remove_file, #remove_medium {
 	padding: 0.1em 0.5em;
 	text-decoration: none;
 }
-a#generate_summaries {
-	margin-bottom: 2em;
+a#generate_summaries, #remove_file {
+	margin-top: 2em;
+	margin-bottom: 1px;
 	background-color: var(--b_m);
 	color: var(--f_m);
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+#remove_summaries, #remove_medium {
+	margin-top: 0;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+#remove_summaries, #remove_file {
+	background-color: var(--b_l);
+}
+#remove_medium {
+	background-color: #ff0000;
 }
 .medium video,
 .medium picture img,

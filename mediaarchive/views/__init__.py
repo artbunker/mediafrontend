@@ -243,8 +243,8 @@ def edit_medium(medium_id):
 		'groups': [],
 
 		'owner_id': medium.owner_id,
-		'searchability': medium.searchability,
-		'protection': medium.protection,
+		'searchability': medium.searchability.name.lower(),
+		'protection': medium.protection.name.lower(),
 		'creation_time': medium.creation_time,
 		'creation_date': medium.creation_time.strftime('%Y-%m-%dT%H:%M:%S.%f%z'),
 

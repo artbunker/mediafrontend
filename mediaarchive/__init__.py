@@ -547,7 +547,6 @@ class MediaArchive:
 					cb(summary_path, medium.id + '.reencoded.webm')
 
 	def place_medium_summaries(self, medium):
-		print('placing medium summaries')
 		protected_path = os.path.join(self.config['summaries_path'], 'protected')
 		nonprotected_path = os.path.join(self.config['summaries_path'], 'nonprotected')
 
@@ -558,7 +557,6 @@ class MediaArchive:
 			source_path = protected_path
 			destination_path = nonprotected_path
 
-		print('at iterate medium summaries lambda')
 		self.iterate_medium_summaries(
 			medium,
 			lambda summary_path, summary_file: (

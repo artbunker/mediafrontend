@@ -58,6 +58,8 @@ a#generate_summaries, #remove_file {
 .medium video,
 .medium picture,
 .medium picture img {
+	background-color: inherit;
+	display: inline-block;
 	width: auto;
 	height: auto;
 	max-width: 100%;

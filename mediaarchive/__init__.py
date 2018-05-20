@@ -266,6 +266,18 @@ def hsv_average_from_image(image):
 	#TODO hsv average
 	pass
 
+def is_websafe_video(mime):
+	if (
+			'video/mp4' == mime
+			or 'video/mpeg' == mime
+			or 'video/webm' == mime
+			or 'application/ogg' == mime
+			or 'video/ogg' == mime
+		):
+		return True
+	return False
+
+
 class MediaArchive:
 	def __init__(self, config, media, accounts, access_log=None):
 		self.config = config

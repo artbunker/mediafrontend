@@ -115,6 +115,18 @@ def search():
 	media = g.media_archive.search_media(filter=filter)
 
 	#TODO loop through media and any the current user doesn't have permissions for remove the media id
+	for medium in media:
+		if (
+			medium.group_bits
+			and (
+				not g.media_archive.accounts.current_user
+				or not g.media_archive.accounts.current_user_has_permissions(
+						medium.group_bits,
+						'global'
+					)
+				)
+			):
+				medium.id = ''
 
 	return render_template(
 		'search.html',
@@ -276,6 +288,13 @@ def edit_medium(medium_id):
 		'file_uri': '',
 	}
 
+	for group in g.media_archive.accounts.users.available_groups:
+		if g.media_archive.accounts.users.contains_all_group_bits(
+				medium.group_bits,
+				g.media_archive.accounts.users.group_name_to_bit(group)
+			):
+			fields['groups'].append(group)
+
 	errors = []
 	if 'POST' != request.method:
 		return render_template(
@@ -327,17 +346,20 @@ def edit_medium(medium_id):
 		else:
 			updates['creation_time'] = creation_time.timestamp()
 
-	groups = []
+	fields['groups'] = []
 	for group in g.media_archive.accounts.users.available_groups:
 		field = 'groups[' + group + ']'
 		if field in request.form:
 			fields['groups'].append(group)
-	if 0 < len(groups):
+	updates['group_bits'] = 0
+	if 0 < len(fields['groups']):
 		updates['group_bits'] = int.from_bytes(
-			self.accounts.users.combine_groups(names=groups),
+			g.media_archive.accounts.users.combine_groups(names=fields['groups']),
 			'big'
 		)
 
+	#TODO maybe compare updates['group_bits'] to medium.group_bits and remove it if they're the same
+	# otherwise this isn't necessary since it'll always have group_bits in update
 	if 0 < len(updates):
 		g.media_archive.media.update_medium(medium, **updates)
 

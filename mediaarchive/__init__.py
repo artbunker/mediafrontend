@@ -277,7 +277,7 @@ def rgb_average_from_image(image):
 	r = round(r / total_pixels)
 	g = round(g / total_pixels)
 	b = round(b / total_pixels)
-	return (r, g, b)
+	return r, g, b
 
 def hsv_average_from_image(image):
 	import colorsys

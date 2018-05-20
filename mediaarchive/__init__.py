@@ -314,59 +314,73 @@ class MediaArchive:
 		)
 
 	def populate_uris(self, medium):
-		if not self.config['api_uri']:
-			self.config['api_uri'] = url_for('media_archive.protected_medium_file', medium_filename='MEDIUM_FILENAME').replace('MEDIUM_FILENAME', '{}')
-		if not self.config['media_uri']:
-			self.config['media_uri'] = url_for('media_archive.medium_file', medium_filename='MEDIUM_FILENAME').replace('MEDIUM_FILENAME', '{}')
+		if self.config['api_uri']:
+			fetch_uri = self.config['api_uri'].format('fetch/{}')
+		else:
+			fetch_uri = url_for(
+				'media_archive.protected_medium_file',
+				medium_filename='MEDIUM_FILENAME').replace('MEDIUM_FILENAME', '{}'
+			)
 
-		from media import MediumProtection
+		if not self.config['medium_file_uri']:
+			self.config['medium_file_uri'] = url_for(
+				'media_archive.medium_file',
+				medium_filename='MEDIUM_FILENAME').replace('MEDIUM_FILENAME', '{}'
+			)
 
 		if MediumProtection.NONE != medium.protection:
 			protection_path = 'protected'
-			media_uri = self.config['api_uri'].format('fetch/{}')
+			media_uri = fetch_uri
 		else:
 			protection_path = 'nonprotected'
-			media_uri = self.config['media_uri']
+			media_uri = self.config['medium_file_uri']
 
 		medium.uris = {
-			#TODO uri to category placeholder images
 			'original': '',
-			'reencoded': {},
+			'static': {},
 			'fallback': {},
-			'slideshow': {},
-			'clip': {},
+			'reencoded': {},
 		}
 
-		filename = medium.id + '.' + mime_to_extension(medium.mime)
-		if os.path.exists(os.path.join(self.config['media_path'], protection_path, filename)):
-			medium.uris['original'] = media_uri.format(filename)
+		medium_file = medium.id + '.' + mime_to_extension(medium.mime)
+		if os.path.exists(os.path.join(self.config['media_path'], protection_path, medium_file)):
+			medium.uris['original'] = media_uri.format(medium_file)
+
+		summary_path = os.path.join(self.config['summaries_path'], protection_path)
 		for edge in self.config['summary_edges']:
-			filename = medium.id + '.' + str(edge)
+			summary_file = medium.id + '.' + str(edge)
 			if 'image' == medium.category:
-				if os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.webp')):
-					medium.uris['reencoded'][edge] = media_uri.format(filename + '.webp')
-				if os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.png')):
-					medium.uris['fallback'][edge] = media_uri.format(filename + '.png')
+				if os.path.exists(os.path.join(summary_path, summary_file + '.webp')):
+					medium.uris['static'][edge] = media_uri.format(summary_file + '.webp')
+				if os.path.exists(os.path.join(summary_path, summary_file + '.png')):
+					medium.uris['fallback'][edge] = media_uri.format(summary_file + '.png')
 				if (
 						'image/gif' == medium.mime
 						and 1 < medium.data4
-						and os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.clip.gif'))
+						and os.path.exists(os.path.join(summary_path, summary_file + '.gif'))
 					):
-					medium.uris['clip'][edge] = media_uri.format(filename + '.clip.gif')
+					medium.uris['reencoded'][edge] = media_uri.format(summary_file + '.gif')
 			elif 'video' == medium.category:
-				if os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.png')):
-					medium.uris[edge] = media_uri.format(filename + '.png')
-				if os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.slideshow.gif')):
-					medium.uris['slideshow'][edge] = media_uri.format(filename + '.slideshow.gif')
-				if os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.clip.gif')):
-					medium.uris['clip'][edge] = media_uri.format(filename + '.clip.gif')
-		if (
-				'video' == medium.category
-				and 'video/mpeg' != medium.mime
-				and 'video/webm' != medium.mime
-				and os.path.exists(os.path.join(self.config['summaries_path'], protection_path, filename + '.webm'))
-			):
-			medium.uris['reencoded']['original'] = media_uri.format(mime.id + '.webm')
+				if os.path.exists(os.path.join(summary_path, summary_file + '.png')):
+					medium.uris['static'][edge] = media_uri.format(summary_file + '.png')
+				if os.path.exists(os.path.join(summary_path, summary_file + '.png')):
+					medium.uris['fallback'][edge] = media_uri.format(summary_file + '.webp')
+
+			elif medium.category in ['audio', 'archive']:
+				if os.path.exists(os.path.join(summary_path, summary_file + '.webp')):
+					medium.uris['static'][edge] = media_uri.format(summary_file + '.webp')
+				if os.path.exists(os.path.join(summary_path, summary_file + '.png')):
+					medium.uris['fallback'][edge] = media_uri.format(summary_file + '.png')
+		if 'video' == medium.category:
+			if os.path.exists(os.path.join(summary_path,  medium.id + '.slideshow.webp')):
+				medium.uris['static']['slideshow'] = media_uri.format( medium.id + '.slideshow.webp')
+			if os.path.exists(os.path.join(summary_path,  medium.id + '.slideshow.png')):
+				medium.uris['fallback']['slideshow'] = media_uri.format( medium.id + '.slideshow.png')
+			if (
+					not is_websafe_video(medium.mime)
+					and os.path.exists(os.path.join(summary_path, medium.id + '.webm'))
+				):
+				medium.uris['reencoded']['original'] = media_uri.format(medium.id + '.reencoded.webm')
 
 	def get_medium(self, medium_md5):
 		medium = self.media.get_medium(medium_md5)
@@ -401,9 +415,7 @@ class MediaArchive:
 		return tag
 
 	def place_medium_file(self, medium, source_file_path=None):
-		from media import MediumProtection
-
-		filename = medium.id + '.' + mime_to_extension(medium.mime)
+		medium_file = medium.id + '.' + mime_to_extension(medium.mime)
 
 		protected_path = os.path.join(self.config['media_path'], 'protected')
 		nonprotected_path = os.path.join(self.config['media_path'], 'nonprotected')
@@ -418,19 +430,61 @@ class MediaArchive:
 		if source_file_path:
 			source = source_file_path
 		else:
-			source = os.path.join(source_path, filename)
+			source = os.path.join(source_path, medium_file)
 
-		# eat exceptions to ignore already exists or not found
-		try:
-			os.rename(source, os.path.join(destination_path, filename))
-		except FileExistsError:
-			pass
-		except FileNotFoundError:
-			pass
+		if os.path.exists(source):
+			os.rename(
+				source,
+				os.path.join(destination_path, medium_file)
+			)
+
+	def remove_medium_file(self, medium):
+		medium_file = medium.id + '.' + mime_to_extension(medium.mime)
+
+		for protection_path in ['protected', 'nonprotected']:
+			file_path = os.path.join(self.config['media_path'], protection_path, medium_file)
+			if os.path.exists(file_path):
+				os.remove(file_path)
+
+	def iterate_medium_summaries(self, medium, cb):
+		for protection_path in ['protected', 'nonprotected']:
+			for edge in self.config['summary_edges']:
+				summary_path = os.path.join(
+					self.config['summaries_path'],
+					protection_path
+				)
+				summary_file_template = medium.id + '.' + str(edge) + '.'
+
+				extensions = []
+				if 'image' == medium.category:
+					# static, fallback, reencode
+					extensions = ['webp', 'png', 'gif']
+				elif 'video' == medium.category:
+					# static, fallback
+					extensions = ['webp', 'png']
+				elif medium.category in ['audio', 'archive']:
+					# static, fallback
+					extensions = ['webp', 'png']
+					
+				for extension in extensions:
+					summary_file =  summary_file_template + extension
+					if os.path.exists(os.path.join(summary_path, summary_file)):
+						cb(summary_path, summary_file)
+			if 'video' == medium.category:
+				# slideshow strips
+				for extension in ['slideshow.webp', 'slideshow.png']:
+					summary_file = medium.id + '.' + extension
+					if os.path.exists(os.path.join(summary_path, summary_file)):
+						cb(summary_path, summary_file)
+				# reencode
+				if (
+						not websafe_video(medium.mime)
+						and os.path.exists(os.path.join(summary_path, medium.id + '.reencoded.webm'))
+					):
+					cb(summary_path, medium.id + '.reencoded.webm')
 
 	def place_medium_summaries(self, medium):
-		from media import MediumProtection
-
+		print('placing medium summaries')
 		protected_path = os.path.join(self.config['summaries_path'], 'protected')
 		nonprotected_path = os.path.join(self.config['summaries_path'], 'nonprotected')
 
@@ -441,69 +495,40 @@ class MediaArchive:
 			source_path = protected_path
 			destination_path = nonprotected_path
 
-		for extension in summary_extensions:
-			for edge in self.config['summary_edges']:
-				filename = medium.id + '.' + edge + '.' + extension
-
-				# eat exceptions to ignore already exists or not found
-				try:
-					os.rename(os.path.join(source_path, filename), os.path.join(destination_path, filename))
-				except FileExistsError:
-					pass
-				except FileNotFoundError:
-					pass
-
-	def remove_medium_file(self, medium):
-		filename = medium.id + '.' + mime_to_extension(medium.mime)
-
-		for protection_path in ['protected', 'nonprotected']:
-			file_path = os.path.join(self.config['media_path'], protection_path, filename)
-			if os.path.exists(file_path):
-				os.remove(file_path)
+		print('at iterate medium summaries lambda')
+		self.iterate_medium_summaries(
+			medium,
+			lambda summary_path, summary_file: (
+				os.rename(
+					os.path.join(summary_path, summary_file),
+					os.path.join(destination_path, summary_file)
+				)
+			)
+		)
 
 	def remove_medium_summaries(self, medium):
-		for protection_path in ['protected', 'nonprotected']:
-			for edge in self.config['summary_edges']:
-				summary_path = os.path.join(
-					self.config['summaries_path'],
-					protection_path,
-					medium.id + '.' + str(edge) + '.{}'
-				)
-				if 'image' == medium.category:
-					for extension in ['png', 'webp', 'gif']:
-						summary_file =  summary_path.format(extension)
-						if os.path.exists(summary_file):
-							os.remove(summary_file)
-				elif 'video' == medium.category:
-					for extension in ['png', 'webp', 'webm']:
-						summary_file = summary_path.format(extension)
-						if os.path.exists(summary_file):
-							os.remove(summary_file)
-				elif 'audio' == medium.category:
-					pass
-			if (
-					'video' == medium.category
-					and 'video/mp4' != medium.mime
-					and 'video/mpeg' != medium.mime
-					and 'video/webm' != medium.mime
-					and 'application/ogg' != medium.mime
-					and 'video/ogg' != medium.mime
-					and os.path.exists(summary_path.format('webm'))
-				):
-				os.remove(summary_path.format('webm'))
+		self.iterate_medium_summaries(
+			medium,
+			lambda summary_path, summary_file: (
+				os.remove(os.path.join(summary_path, summary_file))
+			)
+		)
 
-	def summaries_from_image(self, image, path):
+	def summaries_from_image(self, image, summary_path):
 		from copy import copy
+
+		from PIL import Image
+
 		for edge in self.config['summary_edges']:
-			thumbnail = copy(img)
+			thumbnail = copy(image)
 			thumbnail.thumbnail((edge, edge), Image.BICUBIC)
 
-			# summary
-			thumbnail_path = path.format(str(edge) + '.webp')
+			# static
+			thumbnail_path = summary_path.format(str(edge) + '.webp')
 			thumbnail.save(thumbnail_path, 'WebP', lossless=True)
 
 			# fallback
-			thumbnail_path = os.path.join(summary_path, medium.id + '.' + str(edge) + '.png')
+			thumbnail_path = summary_path.format(str(edge) + '.png')
 			thumbnail.save(thumbnail_path, 'PNG', optimize=True)
 
 	def generate_medium_summaries(self, medium):
@@ -663,7 +688,7 @@ class MediaArchive:
 
 						img = Image.open(snapshot_path)
 
-						# use snapshot dimensions if dimensions missing
+						# use snapshot dimensions if dimensions are missing
 						if not width:
 							width = img.width
 						if not height:
@@ -672,20 +697,17 @@ class MediaArchive:
 						if 1 == i:
 							self.summaries_from_image(img, summary_path)
 							updates['data3'] = hsv_average_from_image(img)
-						img.thumbnail(self.config['video_slideshow_edge'])
-						snapshots.append(img)
+						#img.thumbnail(self.config['video_slideshow_edge'])
+						#snapshots.append(img)
 					#TODO create slideshow strip from snapshots
+					#TODO save slidedown with .slideshow.webp and .slideshow.png
 					pass
 				# reencode non-websafe video for the view page
 				if (
 						0 != self.config['video_reencode_edge']
 						and width
 						and height
-						and 'video/mp4' != medium.mime
-						and 'video/mpeg' != medium.mime
-						and 'video/webm' != medium.mime
-						and 'application/ogg' != medium.mime
-						and 'video/ogg' != medium.mime
+						and not is_websafe_video(medium.mime)
 					):
 					# using libvpx instead of libx264, so maybe the divisible by 2 requirement isn't needed?
 					#if 0 != self.config['video_reencode_edge'] % 2:
@@ -712,36 +734,44 @@ class MediaArchive:
 						'-vf',
 						'scale="' + str(width) + ':' + str(height) + '"',
 						'-deadline realtime',
-						'"' + summary_path.format('.webm') + '"',
+						'"' + summary_path.format('.reencoded.webm') + '"',
 					])
 		elif 'audio':
 			if 'audio/mpeg' == medium.mime:
 				#TODO get id3 info for mp3
 				#TODO add #title:, #tracknum:, #album:, and #author: based on id3?
-				#TODO if id3 cover image is present then generate summaries from it
-				pass
+
+				#TODO if id3 cover image is present then get image resource from it
+				if False:
+					from PIL import Image
+
+					#img = Image.open(cover_path)
+					#self.summaries_from_image(img)
+					#os.remove(cover_path)
+					pass
 			else:
 				#TODO nothing for other audio types yet
 				pass
 		elif 'application':
 			if 'application/x-shockwave-flash' == medium.mime:
-				#TODO get dimensions
-				width = 0
-				height = 0
-
-				#TODO frames?
-				#TODO fps?
-				#TODO flash version?
-				#TODO pull frame of flash video and create summaries?
-
-				updates['data1'] = width
-				updates['data2'] = height
-			pass
+				#TODO parse flash headers, maybe hexagonit-swfheader, or implementing from scratch
+				if False:
+					header = {
+						'width': 0,
+						'height': 0,
+						'frames': 0,
+						'fps': 0,
+						'version': 0,
+					}
+					updates['data1'] = header['width']
+					updates['data2'] = header['height']
+					updates['data4'] = header['frames']
+					updates['data5'] = header['fps']
+					updates['data6'] = header['version']
 		elif 'archive':
 			#TODO no archive summary yet
-			pass
-		elif 'text':
-			#TODO no text summary
+			#TODO check for cbr/cbz and get cover summary
+			#TODO check for smgez and get cover summary
 			pass
 		if 0 < len(updates):
 			self.media.update_medium(medium, **updates)
@@ -778,6 +808,8 @@ class MediaArchive:
 			if not owner:
 				if MediumProtection.PRIVATE == medium.protection:
 					abort(404, {'message': 'medium_not_found'})
+				if MediumProtection.NONE == medium.protection:
+					return
 				if not signed_in:
 					abort(401, {'message': 'medium_protected'})
 				if MediumProtection.GROUPS == medium.protection:
@@ -815,15 +847,14 @@ class MediaArchive:
 					errors.append('remote_file_request_empty_response')
 				else:
 					file_contents = response.read()
-					#TODO get filename
+					filename = request.form['file_uri'].replace('\\', '/').split('/').pop()
 		elif 'file_upload' in request.files:
 			try:
 				file_contents = request.files['file_upload'].stream.read()
 			except ValueError as e:
 				errors.append('problem_uploading_file')
 			else:
-				#TODO get filename
-				pass
+				filename = request.files['file_upload'].filename
 		elif 'local' in request.form:
 			#TODO local file
 			#request.form['local']
@@ -844,11 +875,8 @@ class MediaArchive:
 			errors.append('mimetype_not_allowed')
 
 		if 0 < len(errors):
-			# eat exceptions to ignore not found
-			try:
+			if os.path.exists(file_path):
 				os.remove(file_path)
-			except FileNotFoundError:
-				pass
 			return errors, None
 
 		md5 = get_file_md5(file_path)
@@ -872,11 +900,8 @@ class MediaArchive:
 		try:
 			medium = self.media.create_medium(md5, uploader_remote_origin, uploader_uuid, owner_uuid, mime, size)
 		except ValueError as e:
-			# eat exceptions to ignore not found
-			try:
+			if os.path.exists(file_path):
 				os.remove(file_path)
-			except FileNotFoundError:
-				pass
 
 			medium = e.args[0]
 			populate_id(medium)
@@ -925,7 +950,7 @@ class MediaArchive:
 			if self.accounts.current_user.display:
 				tags.append('#author:' + self.accounts.current_user.display)
 
-		if 'filename_tag' in request.form:
+		if 'filename_tag' in request.form and filename:
 			tags.append('#filename:' + filename)
 
 		if 'tags' in request.form:
@@ -938,11 +963,8 @@ class MediaArchive:
 		medium = self.get_medium(medium.md5)
 
 		if 0 < len(errors):
-			# eat exceptions to ignore not found
-			try:
+			if os.path.exists(file_path):
 				os.remove(file_path)
-			except FileNotFoundError:
-				pass
 			return errors, medium
 
 		self.place_medium_file(medium, file_path)

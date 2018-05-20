@@ -141,25 +141,32 @@ def manage():
 def protected_medium_file(medium_filename):
 	import os
 
-	if 1 == medium_filename.count('.'):
-		media_path = os.path.join(g.media_archive.config['media_path'], 'protected')
-	else:
-		media_path = os.path.join(g.media_archive.config['summaries_path'], 'protected')
-
-	pieces = medium_filename.split('.')
-	if 2 > len(pieces):
+	filename_pieces = medium_filename.split('.')
+	if 2 > len(filename_pieces):
 		abort(404, {'message': 'medium_not_found'})
 
-	medium_id = pieces[0]
+	medium_id = filename_pieces[0]
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
 	# trying to access nonprotected medium through protected medium path
 	if MediumProtection.NONE == medium.protection:
 		abort(400)
 
-	g.media_archive.require_access(medium)
+	if 2 == len(filename_pieces):
+		medium_extension = filename_pieces[1]
+		# reencode
+		if (
+				'video' == medium.category
+				and 'webm' == medium_extension
+				and not is_websafe_video(medium.mime)
+			):
+			media_path = os.path.join(g.media_archive.config['summaries_path'], 'protected')
+		else:
+			media_path = os.path.join(g.media_archive.config['media_path'], 'protected')
+	else:
+		media_path = os.path.join(g.media_archive.config['summaries_path'], 'protected')
 
-	media_path = os.path.join(g.media_archive.config['media_path'], 'protected')
+	g.media_archive.require_access(medium)
 
 	if not os.path.exists(os.path.join(media_path, medium_filename)):
 		abort(404, {'message': 'medium_not_found'})
@@ -174,17 +181,32 @@ def protected_medium_file(medium_filename):
 def medium_file(medium_filename):
 	import os
 
-	if 1 == medium_filename.count('.'):
-		media_path = os.path.join(g.media_archive.config['media_path'], 'nonprotected')
+	summary_file = os.path.join(
+		g.media_archive.config['summaries_path'],
+		'nonprotected',
+		medium_filename
+	)
+	medium_file = os.path.join(
+		g.media_archive.config['media_path'],
+		'nonprotected',
+		medium_filename
+	)
+	if os.path.exists(summary_file):
+		directory = os.path.join(
+			g.media_archive.config['summaries_path'],
+			'nonprotected'
+		)
+	elif os.path.exists(medium_file):
+		directory = os.path.join(
+			g.media_archive.config['media_path'],
+			'nonprotected'
+		)
 	else:
-		media_path = os.path.join(g.media_archive.config['summaries_path'], 'nonprotected')
-
-	if not os.path.exists(os.path.join(media_path, medium_filename)):
 		abort(404, {'message': 'medium_not_found'})
 
 	from flask import send_from_directory
 
-	return send_from_directory(media_path, medium_filename, conditional=True)
+	return send_from_directory(directory, medium_filename, conditional=True)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>")
 def view_medium(medium_id):
@@ -196,8 +218,11 @@ def view_medium(medium_id):
 	edit_tags = False
 
 	if (
-			medium.owner_uuid == g.media_archive.accounts.current_user.uuid
-			or g.media_archive.accounts.current_user_has_global_group('manager')
+			g.media_archive.accounts.current_user
+			and (
+				medium.owner_uuid == g.media_archive.accounts.current_user.uuid
+				or g.media_archive.accounts.current_user_has_global_group('manager')
+			)
 		):
 		edit_medium = True
 		edit_tags = True
@@ -263,10 +288,6 @@ def edit_medium(medium_id):
 			medium=medium,
 		)
 
-	if 'generate_summaries' in request.form:
-		#TODO rebuild summaries
-		pass
-
 	updates = {}
 
 	# manager can set medium owner directly
@@ -287,9 +308,14 @@ def edit_medium(medium_id):
 		#TODO add exception handling here for ValueErrors
 		updates['searchability'] = request.form['searchability'].upper()
 
+	place_files = False
 	if 'protection' in request.form:
-		#TODO add exception handling here for ValueErrors
-		updates['protection'] = request.form['protection'].upper()
+		protection = request.form['protection'].upper()
+		if protection != medium.protection.name:
+			#TODO add exception handling here for ValueErrors
+			updates['protection'] = protection
+			place_files = True
+			
 
 	if 'creation_date' in request.form:
 		import dateutil.parser
@@ -315,13 +341,16 @@ def edit_medium(medium_id):
 	if 0 < len(updates):
 		g.media_archive.media.update_medium(medium, **updates)
 
+	medium = g.media_archive.get_medium(medium.md5)
+
+	if place_files:
+		g.media_archive.place_medium_file(medium)
+		g.media_archive.place_medium_summaries(medium)
+
 	#TODO replace medium
 
 	if 0 == len(errors):
 		return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
-
-	for field in ['generate_summaries', 'author_tag', 'filename_tag']:
-		fields[field] = (field in request.form)
 
 	form_fields = [
 		'owner_id',

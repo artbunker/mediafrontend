@@ -264,6 +264,9 @@ def rgb_average_from_image(image):
 	g = 0
 	b = 0
 	for pixel in data:
+		#TODO gif breaks this for some reason
+		if isinstance(pixel, int):
+			return 0, 0, 0
 		if 4 == len(pixel):
 			pr, pg, pb, pa = pixel
 			if 0 == pa:

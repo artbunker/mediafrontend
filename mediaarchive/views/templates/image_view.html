@@ -5,6 +5,9 @@
 				 <source srcset="{{ medium.uris['static'][1024] }}" type="image/webp">
 				 <source srcset="{{ medium.uris['fallback'][1024] }}" type="image/png">
 				 <img srcset="{{ medium.uris['fallback'][1024] }}" alt="">
+				{% if 'image/gif' == medium.mime and medium.uris['reencoded'][1024] %}
+					<source srcset="{{ medium.mime and medium.uris['reencoded'][1024] }}" type="image/gif">
+				{% endif %}
 			</picture>
 		</a>
 	</div>

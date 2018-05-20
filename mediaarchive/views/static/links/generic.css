@@ -8,3 +8,25 @@
 	width: 100%;
 	height: 100%;
 }
+.medium, .thumbnail {
+	/*checker*/
+	--checker_h: #c0c0c0;
+	--checker_l: #808080;
+	background-color: var(--checker_h);
+	background-image:
+		-moz-linear-gradient(45deg, var(--checker_l) 25%, transparent 25%), 
+		-moz-linear-gradient(-45deg, var(--checker_l) 25%, transparent 25%),
+		-moz-linear-gradient(45deg, transparent 75%, var(--checker_l) 75%),
+		-moz-linear-gradient(-45deg, transparent 75%, var(--checker_l) 75%);
+	background-image:
+		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.25, var(--checker_l)), color-stop(.25, transparent)), 
+		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, var(--checker_l)), color-stop(.25, transparent)),
+		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.75, transparent), color-stop(.75, var(--checker_l))),
+		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.75, transparent), color-stop(.75, var(--checker_l)));
+
+	-moz-background-size: 32px 32px;
+	background-size: 32px 32px;
+	-webkit-background-size: 32px 32px;
+
+	background-position: 0 0, 16px 0, 16px -16px, 0px 16px;
+}

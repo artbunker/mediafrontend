@@ -262,9 +262,67 @@ def get_file_md5(file_path):
 			hash_algo.update(chunk)
 	return hash_algo.digest()
 
+def rgb_average_from_image(image):
+	from PIL import Image
+
+	small_image = image.copy()
+	small_image.thumbnail((256, 256), Image.BICUBIC)
+	data = list(small_image.getdata())
+	total_pixels = len(data)
+	r = 0
+	g = 0
+	b = 0
+	for pixel in data:
+		if 4 == len(pixel):
+			pr, pg, pb, pa = pixel
+			if 0 == pa:
+				total_pixels -= 1
+				continue
+		else:
+			(pr, pg, pb) = pixel
+		r += pr
+		g += pg
+		b += pb
+	r = round(r / total_pixels)
+	g = round(g / total_pixels)
+	b = round(b / total_pixels)
+	return (r, g, b)
+
 def hsv_average_from_image(image):
-	#TODO hsv average
-	pass
+	import colorsys
+	return colorsys.rgb_to_hsv(*rgb_average_from_image(image))
+
+def hsv_to_int(h, s, v):
+	import math
+
+	if isinstance(h, float):
+		h = math.floor(h * 255)
+	if isinstance(s, float):
+		s = math.floor(s * 255)
+	if isinstance(v, float):
+		v = math.floor(v * 255)
+
+	# store in 3 bytes
+	h = h << 16
+	s = s << 8
+
+	return (h + s + v)
+
+def int_to_hsv(hsv_int):
+	h = hsv_int >> 16
+	hsv_int -= h << 16
+	s = hsv_int >> 8
+	v = hsv_int - (s << 8)
+	return h, s, v
+
+def hsv_int_to_rgb(hsv_int):
+	import colorsys
+	import math
+
+	h, s, v = int_to_hsv(hsv_int)
+	r, g, b = colorsys.hsv_to_rgb(h / 255, s / 255, v / 255)
+
+	return math.floor(r * 255), math.floor(g * 255), math.floor(b * 255)
 
 def is_websafe_video(mime):
 	if (
@@ -558,7 +616,7 @@ class MediaArchive:
 
 			updates['data1'] = img.width
 			updates['data2'] = img.height
-			updates['data3'] = hsv_average_from_image(img)
+			updates['data3'] = hsv_to_int(*hsv_average_from_image(img))
 
 			if 'image/gif' == medium.mime:
 				#TODO check for multiple frames
@@ -693,7 +751,7 @@ class MediaArchive:
 
 						if 1 == i:
 							self.summaries_from_image(img, summary_path)
-							updates['data3'] = hsv_average_from_image(img)
+							updates['data3'] = hsv_to_int(*hsv_average_from_image(img))
 						#img.thumbnail(self.config['video_slideshow_edge'])
 						#snapshots.append(img)
 					#TODO create slideshow strip from snapshots

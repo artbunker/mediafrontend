@@ -277,7 +277,6 @@ def is_websafe_video(mime):
 		return True
 	return False
 
-
 class MediaArchive:
 	def __init__(self, config, media, accounts, access_log=None):
 		self.config = config
@@ -373,9 +372,9 @@ class MediaArchive:
 					medium.uris['fallback'][edge] = media_uri.format(summary_file + '.png')
 		if 'video' == medium.category:
 			if os.path.exists(os.path.join(summary_path,  medium.id + '.slideshow.webp')):
-				medium.uris['static']['slideshow'] = media_uri.format( medium.id + '.slideshow.webp')
+				medium.uris['static']['slideshow'] = media_uri.format(medium.id + '.slideshow.webp')
 			if os.path.exists(os.path.join(summary_path,  medium.id + '.slideshow.png')):
-				medium.uris['fallback']['slideshow'] = media_uri.format( medium.id + '.slideshow.png')
+				medium.uris['fallback']['slideshow'] = media_uri.format(medium.id + '.slideshow.png')
 			if (
 					not is_websafe_video(medium.mime)
 					and os.path.exists(os.path.join(summary_path, medium.id + '.webm'))
@@ -515,12 +514,10 @@ class MediaArchive:
 		)
 
 	def summaries_from_image(self, image, summary_path):
-		from copy import copy
-
 		from PIL import Image
 
 		for edge in self.config['summary_edges']:
-			thumbnail = copy(image)
+			thumbnail = image.copy()
 			thumbnail.thumbnail((edge, edge), Image.BICUBIC)
 
 			# static

@@ -430,23 +430,3 @@ def remove_medium(medium_id):
 	g.media_archive.remove_medium(medium)
 
 	return redirect(url_for('media_archive.manage'), 302)
-
-@media_archive.route('/mediatest')
-def mediatest():
-	import os
-	from PIL import Image
-
-	source_file = os.path.join('d:/', 'home', 'secretisdead', 'archive', 'programming', 'bomb', 'test.png')
-	thumbnail_file = os.path.join('d:/', 'home', 'secretisdead', 'archive', 'programming', 'bomb', 'test.128.png')
-
-	img = Image.open(source_file)
-	width = img.width
-	height = img.height
-	img.thumbnail((128, 128), Image.BICUBIC)
-	img.save(thumbnail_file, 'PNG')
-
-	output = 'test.png<br>'
-	output += 'original dimensions: ' + str(width) + 'x' + str(height) + '<br>'
-	output += 'thumbnail dimensions: ' + str(img.width) + 'x' + str(img.height) + '<br>'
-
-	return output

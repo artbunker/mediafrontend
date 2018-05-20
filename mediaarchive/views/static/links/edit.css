@@ -56,8 +56,8 @@ a#generate_summaries, #remove_file {
 	background-color: #ff0000;
 }
 .medium video,
-.medium picture img,
-.medium picture {
+.medium picture,
+.medium picture img {
 	width: auto;
 	height: auto;
 	max-width: 100%;

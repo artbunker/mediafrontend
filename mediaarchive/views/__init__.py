@@ -114,7 +114,6 @@ def search():
 
 	media = g.media_archive.search_media(filter=filter)
 
-	#TODO loop through media and any the current user doesn't have permissions for remove the media id
 	for medium in media:
 		if (
 			medium.group_bits

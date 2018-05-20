@@ -1,7 +1,7 @@
 {% if medium.uris['static'][256] and medium.uris['fallback'][256] %}
 	<div class="summary thumb">
 		<a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">
-			<picture{% if medium.rgb %} style="background-color: rgb({{ medium.rgb['r'] }}, {{ medium.rgb['g'] }}, {{ medium.rgb['b'] }});"{% endif %}>
+			<picture>
 				 <source srcset="{{ medium.uris['static'][256] }}" type="image/webp">
 				 <source srcset="{{ medium.uris['fallback'][256] }}" type="image/png">
 				 <img srcset="{{ medium.uris['fallback'][256] }}" alt="">

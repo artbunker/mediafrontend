@@ -12,7 +12,7 @@
 		{% from 'media.jinja' import render_thumb, render_protected %}
 		<div id="results">
 			{% for medium in media %}
-				<div class="thumbnail">
+				<div class="thumbnail"{% include 'rgb.html' %}>
 					{{ render_thumb(medium) }}
 				</div>
 			{% endfor %}

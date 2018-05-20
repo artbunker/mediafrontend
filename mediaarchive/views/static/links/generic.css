@@ -10,19 +10,19 @@
 }
 .medium, .thumbnail {
 	/*checker*/
-	--checker_h: #c0c0c0;
-	--checker_l: #808080;
-	background-color: var(--checker_h);
+	--checker_l: rgba(128, 128, 128, 0.33);
+	--checker_h: rgba(128, 128, 128, 0.5);
+	background-color: var(--checker_l);
 	background-image:
-		-moz-linear-gradient(45deg, var(--checker_l) 25%, transparent 25%), 
-		-moz-linear-gradient(-45deg, var(--checker_l) 25%, transparent 25%),
-		-moz-linear-gradient(45deg, transparent 75%, var(--checker_l) 75%),
-		-moz-linear-gradient(-45deg, transparent 75%, var(--checker_l) 75%);
+		-moz-linear-gradient(45deg, var(--checker_h) 25%, transparent 25%), 
+		-moz-linear-gradient(-45deg, var(--checker_h) 25%, transparent 25%),
+		-moz-linear-gradient(45deg, transparent 75%, var(--checker_h) 75%),
+		-moz-linear-gradient(-45deg, transparent 75%, var(--checker_h) 75%);
 	background-image:
-		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.25, var(--checker_l)), color-stop(.25, transparent)), 
-		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, var(--checker_l)), color-stop(.25, transparent)),
-		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.75, transparent), color-stop(.75, var(--checker_l))),
-		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.75, transparent), color-stop(.75, var(--checker_l)));
+		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.25, var(--checker_h)), color-stop(.25, transparent)), 
+		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, var(--checker_h)), color-stop(.25, transparent)),
+		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.75, transparent), color-stop(.75, var(--checker_h))),
+		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.75, transparent), color-stop(.75, var(--checker_h)));
 
 	-moz-background-size: 32px 32px;
 	background-size: 32px 32px;

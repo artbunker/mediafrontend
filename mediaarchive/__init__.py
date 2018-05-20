@@ -439,24 +439,30 @@ class MediaArchive:
 				):
 				medium.uris['reencoded']['original'] = media_uri.format(medium.id + '.reencoded.webm')
 
+	def populate_medium_properties(self, medium):
+		populate_id(medium)
+		populate_category(medium)
+		self.populate_uris(medium)
+		medium.uploader_id = uuid_to_id(medium.uploader_uuid)
+		medium.owner_id = uuid_to_id(medium.owner_uuid)
+		if medium.category in ['image', 'video'] and medium.data3:
+			r, g, b = hsv_int_to_rgb(medium.data3)
+			medium.rgb = {
+				'r': r,
+				'g': g,
+				'b': b,
+			}
+
 	def get_medium(self, medium_md5):
 		medium = self.media.get_medium(medium_md5)
 		if medium:
-			populate_id(medium)
-			populate_category(medium)
-			self.populate_uris(medium)
-			medium.uploader_id = uuid_to_id(medium.uploader_uuid)
-			medium.owner_id = uuid_to_id(medium.owner_uuid)
+			self.populate_medium_properties(medium)
 		return medium
 
 	def search_media(self, **kwargs):
 		media = self.media.search_media(**kwargs)
 		for medium in media:
-			populate_id(medium)
-			populate_category(medium)
-			self.populate_uris(medium)
-			medium.uploader_id = uuid_to_id(medium.uploader_uuid)
-			medium.owner_id = uuid_to_id(medium.owner_uuid)
+			self.populate_medium_properties(medium)
 		return media
 
 	def require_medium(self, medium_md5):

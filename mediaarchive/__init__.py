@@ -272,8 +272,10 @@ def rgb_average_from_image(image):
 			if 0 == pa:
 				total_pixels -= 1
 				continue
-		else:
+		elif 3 == len(pixel):
 			(pr, pg, pb) = pixel
+		else:
+			return 0, 0, 0
 		r += pr
 		g += pg
 		b += pb

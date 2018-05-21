@@ -8,26 +8,30 @@
 	width: 100%;
 	height: 100%;
 }
+/*checker bg*/
+:root {
+	--checker_h: rgba(255, 255, 255, 0.20);
+}
 .medium, .thumbnail {
-	/*checker*/
-	--checker_l: rgba(128, 128, 128, 0.33);
-	--checker_h: rgba(128, 128, 128, 0.5);
-	background-color: var(--checker_l);
-	background-image:
-		-moz-linear-gradient(45deg, var(--checker_h) 25%, transparent 25%), 
-		-moz-linear-gradient(-45deg, var(--checker_h) 25%, transparent 25%),
-		-moz-linear-gradient(45deg, transparent 75%, var(--checker_h) 75%),
-		-moz-linear-gradient(-45deg, transparent 75%, var(--checker_h) 75%);
-	background-image:
-		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.25, var(--checker_h)), color-stop(.25, transparent)), 
-		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, var(--checker_h)), color-stop(.25, transparent)),
-		-webkit-gradient(linear, 0 100%, 100% 0, color-stop(.75, transparent), color-stop(.75, var(--checker_h))),
-		-webkit-gradient(linear, 0 0, 100% 100%, color-stop(.75, transparent), color-stop(.75, var(--checker_h)));
+	position: relative;
+	background-position: center;
+	background-color: #101010;
+	background-image: url('data:image/svg+xml,\
+		<svg class="checker" xmlns="http://www.w3.org/2000/svg" width="48" height="48">\
+			<rect x="24" width="24" height="24" />\
+			<rect y="24" width="24" height="24" />\
+		</svg>');
+	/*background-attachment: fixed;*/
+}
+.medium::before, .thumbnail::before {
+	display: inline-block;
+	content: "";
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	font-size: 0;
 
-	-moz-background-size: 32px 32px;
-	background-size: 32px 32px;
-	-webkit-background-size: 32px 32px;
-
-	background-position: 0 0, 16px 0, 16px -16px, 0px 16px;
-	background-attachment: fixed;
+	background-color: var(--checker_h);
 }

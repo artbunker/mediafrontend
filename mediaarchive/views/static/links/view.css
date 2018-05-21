@@ -13,8 +13,6 @@ body,
 	display: block;
 	margin-bottom: 1px;
 	font-size: 0;
-	border-top-left-radius: 8px;
-	border-top-right-radius: 8px;
 }
 .info {
 	background-color: var(--b_h);
@@ -37,10 +35,11 @@ body,
 	margin-right: 0px;
 	float: right;
 }
-.summary {
-	display: inline-block;
-}
-.summary.view.nofile {
+.summary.nofile {
 	width: 512px;
 	height: 512px;
+}
+.medium, .medium::before {
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
 }

@@ -64,7 +64,7 @@ a#generate_summaries, #remove_file {
 	max-width: 100%;
 	max-height: 128px;
 }
-.medium .summary.nofile {
+.summary.nofile {
 	width: 128px;
 	height: 128px;
 }

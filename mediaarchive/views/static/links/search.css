@@ -31,11 +31,11 @@
 .summary.thumb video,
 .summary.thumb picture,
 .summary.thumb picture img {
-	width: 100%;
-	height: 100%;
 	position: absolute;
 	top: 0px;
 	left: 0px;
+	width: 100%;
+	height: 100%;
 	object-fit: cover;
 	object-position: center center;
 }

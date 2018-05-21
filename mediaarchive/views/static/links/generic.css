@@ -1,9 +1,13 @@
-.summary.nofile {
+.summary {
 	display: inline-block;
+	position: relative;
+	z-index: 10;
+}
+.summary.nofile {
 	/*TODO background images for generic view/thumb */
 	background-color: #f00;
 }
-.summary.nofile a {
+.summary a {
 	display: block;
 	width: 100%;
 	height: 100%;

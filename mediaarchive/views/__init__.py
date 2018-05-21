@@ -116,14 +116,17 @@ def search():
 
 	for medium in media:
 		if (
-			medium.group_bits
-			and (
-				not g.media_archive.accounts.current_user
-				or not g.media_archive.accounts.current_user_has_permissions(
-						medium.group_bits,
-						'global'
+				(
+					0 < int.from_bytes(medium.group_bits, 'big')
+					or MediumProtection.NONE != medium.protection
 					)
-				)
+				and (
+					not g.media_archive.accounts.current_user
+					or not g.media_archive.accounts.current_user_has_permissions(
+							medium.group_bits,
+							'global'
+						)
+					)
 			):
 				medium.id = ''
 

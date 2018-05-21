@@ -617,29 +617,38 @@ class MediaArchive:
 			updates['data3'] = hsv_to_int(*hsv_average_from_image(img))
 
 			if 'image/gif' == medium.mime:
-				#TODO check for multiple frames
 				frames = 1
+				try:
+					while True:
+						img.seek(img.tell() + 1)
+						frames += 1
+				except EOFError:
+					pass
 				if 1 < frames:
 					updates['data4'] = frames
 					if self.config['ffmpeg_path']:
+						import subprocess
+
 						portrait = (img.width < img.height)
 						for edge in self.config['summary_edges']:
 							if portrait:
 								width = -1
-								height = edge
+								height = min(edge, img.height)
 							else:
-								width = edge
+								width = min(edge, img.width)
 								height = -1
-							subprocess.call([
+							subprocess.run([
 								self.config['ffmpeg_path'],
 								'-i',
-								'"' + file_path + '"',
+								file_path,
 								'-vf',
 								'scale=' + str(width) + ':' + str(height),
-								summary_path.format(edge + '.gif')
+								summary_path.format(str(edge) + '.gif'),
 							])
 		elif 'video' == medium.category:
 			if self.config['ffprobe_path'] and self.config['ffmpeg_path']:
+				import subprocess
+
 				width = 0
 				height = 0
 				duration_s = 0
@@ -731,7 +740,7 @@ class MediaArchive:
 						subprocess.call([
 							self.config['ffmpeg_path'],
 							'-i',
-							'"' + file_path + '"',
+							file_path,
 							'-ss',
 							str(i * interval_s),
 							'-frames:v',
@@ -777,7 +786,7 @@ class MediaArchive:
 					subprocess.call([
 						self.config['ffmpeg_path'],
 						'-i',
-						'"' + file_path + '"',
+						file_path,
 						'-vcodec',
 						'libvpx',
 						'-quality',
@@ -787,7 +796,7 @@ class MediaArchive:
 						'-vf',
 						'scale="' + str(width) + ':' + str(height) + '"',
 						'-deadline realtime',
-						'"' + summary_path.format('.reencoded.webm') + '"',
+						summary_path.format('.reencoded.webm'),
 					])
 		elif 'audio':
 			if 'audio/mpeg' == medium.mime:

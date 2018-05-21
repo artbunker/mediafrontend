@@ -1,0 +1,10 @@
+{% set placeholder = ['links/placeholder_', medium.category, '.']|join('') %}
+{% if 'application/swf' == medium.category %}
+	{% set placeholder = 'links/placeholder_flash.' %}
+{% endif %}
+<picture>
+	<source srcset="{{ url_for('media_archive.static', filename=placeholder) }}svg" type="image/svg+xml">
+	<source srcset="{{ url_for('media_archive.static', filename=placeholder) }}webp" type="image/webp">
+	<source srcset="{{ url_for('media_archive.static', filename=placeholder) }}png" type="image/png">
+	<img src="{{ url_for('media_archive.static', filename=placeholder) }}png" alt="">
+</picture>

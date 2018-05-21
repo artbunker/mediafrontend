@@ -1,1 +1,8 @@
-<div class="summary thumb nofile protected">Protected Medium</div>
+<div class="summary thumb nofile protected">
+	<picture>
+		<source srcset="{{ url_for('media_archive.static', filename='links/protected.svg') }}" type="image/svg+xml">
+		<source srcset="{{ url_for('media_archive.static', filename='links/protected.webp') }}" type="image/webp">
+		<source srcset="{{ url_for('media_archive.static', filename='links/protected.png') }}" type="image/png">
+		<img src="{{ url_for('media_archive.static', filename='links/protected.png') }}" alt="">
+	</picture>
+</div>

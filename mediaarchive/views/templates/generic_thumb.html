@@ -1,3 +1,5 @@
 <div class="summary thumb nofile">
-	<a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">View Medium</a>
+	<a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">
+		{% include 'generic_placeholder.html' %}
+	</a>
 </div>

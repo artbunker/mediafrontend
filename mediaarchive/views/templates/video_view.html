@@ -3,11 +3,11 @@
 	{% set video_uri = medium.uris['reencoded']['original'] %}
 	{% set video_mime = 'video/webm' %}
 {% elif medium.uris['original'] and (
-	'video/mp4' == mime
-	or 'video/mpeg' == mime
-	or 'video/webm' == mime
-	or 'application/ogg' == mime
-	or 'video/ogg' == mime
+	'video/mp4' == medium.mime
+	or 'video/mpeg' == medium.mime
+	or 'video/webm' == medium.mime
+	or 'application/ogg' == medium.mime
+	or 'video/ogg' == medium.mime
 ) %}
 	{% set video_uri = medium.uris['original'] %}
 	{% set video_mime = medium.mime %}

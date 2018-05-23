@@ -639,14 +639,27 @@ class MediaArchive:
 							else:
 								width = min(edge, img.width)
 								height = -1
-							subprocess.run([
+
+							ffmpeg_call = [
 								self.config['ffmpeg_path'],
 								'-i',
 								file_path,
 								'-vf',
 								'scale=' + str(width) + ':' + str(height),
+							]
+							if (
+									self.config['ffmpeg_thread_limit']
+									and isinstance(self.config['ffmpeg_thread_limit'], int)
+									and 0 < self.config['ffmpeg_thread_limit']
+								):
+								ffmpeg_call += [
+									'-threads',
+									str(self.config['ffmpeg_thread_limit']),
+								]
+							ffmpeg_call += [
 								summary_path.format(str(edge) + '.gif'),
-							])
+							]
+							subprocess.run(ffmpeg_call)
 		elif 'video' == medium.category:
 			if self.config['ffprobe_path'] and self.config['ffmpeg_path']:
 				import subprocess
@@ -739,7 +752,7 @@ class MediaArchive:
 					for i in range(1, self.config['video_snapshots']):
 						snapshot_path = os.path.join(__name__, 'tmp', 'temp_snapshot_' + str(uuid.uuid4()))
 
-						subprocess.call([
+						ffmpeg_call = [
 							self.config['ffmpeg_path'],
 							'-i',
 							file_path,
@@ -747,8 +760,20 @@ class MediaArchive:
 							str(i * interval_s),
 							'-frames:v',
 							'1',
+						]
+						if (
+								self.config['ffmpeg_thread_limit']
+								and isinstance(self.config['ffmpeg_thread_limit'], int)
+								and 0 < self.config['ffmpeg_thread_limit']
+							):
+							ffmpeg_call += [
+								'-threads',
+								str(self.config['ffmpeg_thread_limit']),
+							]
+						ffmpeg_call += [
 							snapshot_path,
-						])
+						]
+						subprocess.run(ffmpeg_call)
 
 						img = Image.open(snapshot_path)
 
@@ -785,7 +810,8 @@ class MediaArchive:
 						width = self.config['video_reencode_edge']
 						height = -1
 						#height = 'trunc(ow/a/2)*2'
-					subprocess.call([
+
+					ffmpeg_call = [
 						self.config['ffmpeg_path'],
 						'-i',
 						file_path,
@@ -798,8 +824,20 @@ class MediaArchive:
 						'-vf',
 						'scale="' + str(width) + ':' + str(height) + '"',
 						'-deadline realtime',
+					]
+					if (
+							self.config['ffmpeg_thread_limit']
+							and isinstance(self.config['ffmpeg_thread_limit'], int)
+							and 0 < self.config['ffmpeg_thread_limit']
+						):
+						ffmpeg_call += [
+							'-threads',
+							str(self.config['ffmpeg_thread_limit']),
+						]
+					ffmpeg_call += [
 						summary_path.format('.reencoded.webm'),
-					])
+					]
+					subprocess.run(ffmpeg_call)
 		elif 'audio':
 			if 'audio/mpeg' == medium.mime:
 				#TODO get id3 info for mp3

@@ -1,3 +1,41 @@
-<div class="medium">
-	{{ medium.id }}
-</div>
+{% set video_uri = '' %}
+{% if medium.uris['reencoded']['original'] %}
+	{% set video_uri = medium.uris['reencoded']['original'] %}
+	{% set video_mime = 'video/webm' %}
+{% elif medium.uris['original'] and (
+	'video/mp4' == mime
+	or 'video/mpeg' == mime
+	or 'video/webm' == mime
+	or 'application/ogg' == mime
+	or 'video/ogg' == mime
+) %}
+	{% set video_uri = medium.uris['original'] %}
+	{% set video_mime = medium.mime %}
+{% endif %}
+{% if video_uri %}
+	<video 
+		{% if medium.data1 and medium.data2 %}
+			width="{{ medium.data1 }}" height="{{ medium.data2 }}" 
+		{% endif %}
+		{% if medium.uris['static']['1024'] %}
+			poster="{{ medium.uris['static']['1024'] }}" 
+		{% endif %}
+		preload="auto" 
+		controls loop>
+		<source src="{{ video_uri }}" type="{{ video_mime }}">
+		Video element not supported
+	</video>
+	<a href="{{ medium.uris['original'] }}">Original</a>
+{% elif medium.uris['static'][1024] and medium.uris['fallback'][1024] %}
+	<div class="summary view">
+		<a href="{{ medium.uris['original'] }}">
+			<picture>
+				<source srcset="{{ medium.uris['static'][1024] }}" type="image/webp">
+				<source srcset="{{ medium.uris['fallback'][1024] }}" type="image/png">
+				<img srcset="{{ medium.uris['fallback'][1024] }}" alt="">
+			</picture>
+		</a>
+	</div>
+{% else %}
+	{% include 'generic_view.html' %}
+{% endif %}

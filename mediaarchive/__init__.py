@@ -431,7 +431,7 @@ class MediaArchive:
 				medium.uris['fallback']['slideshow'] = media_uri.format(medium.id + '.slideshow.png')
 			if (
 					not is_websafe_video(medium.mime)
-					and os.path.exists(os.path.join(summary_path, medium.id + '.webm'))
+					and os.path.exists(os.path.join(summary_path, medium.id + '.reencoded.webm'))
 				):
 				medium.uris['reencoded']['original'] = media_uri.format(medium.id + '.reencoded.webm')
 
@@ -531,16 +531,14 @@ class MediaArchive:
 						cb(summary_path, summary_file)
 			if 'video' == medium.category:
 				# slideshow strips
-				for extension in ['slideshow.webp', 'slideshow.png']:
+				extensions = ['slideshow.webp', 'slideshow.png']
+				# reencode
+				if not is_websafe_video(medium.mime):
+					extensions.append('reencoded.webm')
+				for extension in extensions:
 					summary_file = medium.id + '.' + extension
 					if os.path.exists(os.path.join(summary_path, summary_file)):
 						cb(summary_path, summary_file)
-				# reencode
-				if (
-						not websafe_video(medium.mime)
-						and os.path.exists(os.path.join(summary_path, medium.id + '.reencoded.webm'))
-					):
-					cb(summary_path, medium.id + '.reencoded.webm')
 
 	def place_medium_summaries(self, medium):
 		protected_path = os.path.join(self.config['summaries_path'], 'protected')
@@ -663,6 +661,7 @@ class MediaArchive:
 		elif 'video' == medium.category:
 			if self.config['ffprobe_path'] and self.config['ffmpeg_path']:
 				import subprocess
+				import json
 
 				width = 0
 				height = 0
@@ -678,28 +677,27 @@ class MediaArchive:
 					'json',
 					'-show_streams',
 					'-i',
-					'"' + file_path + '"'
+					file_path,
 				])
-				probe = json.dumps(probe_json)
+				probe = json.loads(probe_json)
 
 				if 'streams' in probe:
 					for stream in probe['streams']:
-						for key, value in probe['streams'][stream]:
+						for key, value in stream.items():
 							if 'width' == key or 'coded_width' == key:
-								width = value
+								width = int(value)
 							elif 'height' == key or 'coded_height' == key:
-								height = value
+								height = int(value)
 							elif 'duration' == key:
-								duration_s = value
+								duration_s = float(value)
 					if (
-							'codec_type' in probe['streams'][stream]
-							and 'codec_name' == probe['streams'][stream]
+							'codec_type' in stream
+							and 'codec_name' in stream
 						):
-						codec_name = probe['streams'][stream]['codec_name']
-
-						if 'audio' == probe['streams'][stream]['codec_type']:
+						codec_name = stream['codec_name']
+						if 'audio' == stream['codec_type']:
 							audio_codec = codec_name
-						elif 'video' == probe['streams'][stream]['codec_type']:
+						elif 'video' == stream['codec_type']:
 							video_codec = codec_name
 
 				# missing duration after streams probe, do packets probe
@@ -712,15 +710,15 @@ class MediaArchive:
 						'json',
 						'-show_packets',
 						'-i',
-						'"' + file_path + '"'
+						file_path,
 					])
-					probe = json.dumps(probe_json)
+					probe = json.loads(probe_json)
 
-					last_frame = array.pop(probe['packets'])
+					last_frame = probe['packets'].pop()
 					if 'dts_time' in last_frame:
-						duration_s = math.floor(last_frame['dts_time'])
+						duration_s = float(last_frame['dts_time'])
 					elif 'pts_time' in last_frame:
-						duration_s = math.floor(last_frame['pts_time'])
+						duration_s = float(last_frame['pts_time'])
 
 				# still missing duration after packets probe
 				if not duration_s:
@@ -737,20 +735,24 @@ class MediaArchive:
 					#	t1 = fread(fh, 1)
 					#	r = unpack('N', t1 . t0)
 					#	duration_ms = r[1]
-					#	$duration_s = duration_ms / 1000
+					#	duration_s = duration_ms / 1000
 					pass
 
 				if duration_s:
 					import uuid
+					import math
 
 					from PIL import Image
 
+					# duration ms
+					updates['data5'] = int(math.floor(duration_s * 1000))
+
 					# space the snapshot intervals out with the intention to skip first and last
-					interval_s = duration_s / (self.config['video_snapshots'] + 2)
+					interval_s = math.floor(duration_s) / (self.config['video_snapshots'] + 2)
 
 					snapshots = []
 					for i in range(1, self.config['video_snapshots']):
-						snapshot_path = os.path.join(__name__, 'tmp', 'temp_snapshot_' + str(uuid.uuid4()))
+						snapshot_path = os.path.join(__name__, 'tmp', 'temp_snapshot_' + str(uuid.uuid4()) + '.png')
 
 						ffmpeg_call = [
 							self.config['ffmpeg_path'],
@@ -777,15 +779,20 @@ class MediaArchive:
 
 						img = Image.open(snapshot_path)
 
-						# use snapshot dimensions if dimensions are missing
-						if not width:
-							width = img.width
-						if not height:
-							height = img.height
-
 						if 1 == i:
+							# use snapshot dimensions if dimensions are missing
+							if not width:
+								width = img.width
+							if not height:
+								height = img.height
+
 							self.summaries_from_image(img, summary_path)
 							updates['data3'] = hsv_to_int(*hsv_average_from_image(img))
+							#TODO for now only generate the one static summary, do slideshow later
+							os.remove(snapshot_path)
+							break
+
+						os.remove(snapshot_path)
 						#img.thumbnail(self.config['video_slideshow_edge'])
 						#snapshots.append(img)
 					#TODO create slideshow strip from snapshots
@@ -803,13 +810,13 @@ class MediaArchive:
 						# libx264 requires sizes divisble by 2
 						#abort(500, 'invalid_video_reencode_edge')
 					if width < height:
-						width = -1
-						#width = 'trunc(oh*a/2)*2'
-						height = self.config['video_reencode_edge']
+						resize_width = -1
+						#resize_width = 'trunc(oh*a/2)*2'
+						resize_height = self.config['video_reencode_edge']
 					else:
-						width = self.config['video_reencode_edge']
-						height = -1
-						#height = 'trunc(ow/a/2)*2'
+						resize_width = self.config['video_reencode_edge']
+						resize_height = -1
+						#resize_height = 'trunc(ow/a/2)*2'
 
 					ffmpeg_call = [
 						self.config['ffmpeg_path'],
@@ -822,8 +829,7 @@ class MediaArchive:
 						'-cpu-used',
 						'5',
 						'-vf',
-						'scale="' + str(width) + ':' + str(height) + '"',
-						'-deadline realtime',
+						'scale=' + str(resize_width) + ':' + str(resize_height),
 					]
 					if (
 							self.config['ffmpeg_thread_limit']
@@ -835,9 +841,22 @@ class MediaArchive:
 							str(self.config['ffmpeg_thread_limit']),
 						]
 					ffmpeg_call += [
-						summary_path.format('.reencoded.webm'),
+						summary_path.format('reencoded.webm'),
 					]
 					subprocess.run(ffmpeg_call)
+				if width:
+					updates['data1'] = width
+				if height:
+					updates['data2'] = height
+				tags = []
+				if audio_codec:
+					tags.append('audio codec:' + audio_codec)
+				if video_codec:
+					tags.append('video codec:' + video_codec)
+				if 0 < len(tags):
+					#TODO auto-add tags
+					pass
+
 		elif 'audio':
 			if 'audio/mpeg' == medium.mime:
 				#TODO get id3 info for mp3

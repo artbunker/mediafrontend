@@ -1069,10 +1069,10 @@ class MediaArchive:
 		tags = []
 		if 'author_tag' in request.form:
 			if self.accounts.current_user.display:
-				tags.append('#author:' + self.accounts.current_user.display)
+				tags.append('author:' + self.accounts.current_user.display)
 
 		if 'filename_tag' in request.form and filename:
-			tags.append('#filename:' + filename)
+			tags.append('filename:' + filename)
 
 		if 'tags' in request.form:
 			tags += self.tag_string_to_list(request.form['tags'])

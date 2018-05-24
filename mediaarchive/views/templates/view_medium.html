@@ -38,7 +38,7 @@
 						{% set dimensions = '' %}
 						{% if medium.data1 and medium.data2 %}
 							{% set dimensions = [' width="', medium.data1, '" height="', medium.data2, '"']|join('') %}
-						{% endif %}>
+						{% endif %}
 						<object data="{{ medium.uris['original'] }}"{{ dimensions }}>
 							<param name="movie" value="{{ medium.uris['original'] }}">
 							<param name="allowFullScreen" value="true">

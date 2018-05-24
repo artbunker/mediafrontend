@@ -1,3 +1,14 @@
+{% set dimensions = '' %}
+{% if medium.data1 and medium.data2 %}
+	{% set dimensions = [' width="', medium.data1, '" height="', medium.data2, '"']|join('') %}
+{% endif %}>
 <div class="medium">
-	{{ medium.id }}
+	<div class="summary view">
+		<object data="{{ medium.uris['original'] }}"{{ dimensions }}>
+			<param name="movie" value="{{ medium.uris['original'] }}">
+			<param name="allowFullScreen" value="true">
+			<param name="quality" value="high">
+			<embed src="{{ medium.uris['original'] }}" type="application/x-shockwave-flash" allowfullscreen="true" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer"{{ dimensions }}>
+		</object>
+	</div>
 </div>

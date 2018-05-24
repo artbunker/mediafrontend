@@ -29,7 +29,7 @@
 {% macro render_view(medium) %}
 	{% if not medium.uris['original'] %}
 		{% include 'generic_view.html' %}
-	{% elif 'application/swf' == medium.mime %}
+	{% elif 'application/x-shockwave-flash' == medium.mime %}
 		{% include 'flash_view.html' %}
 	{% elif medium.category in ['image', 'audio', 'video'] %}
 		{% set view_template = (medium.category + '_view.html') %}
@@ -44,8 +44,6 @@
 		{% include 'protected_thumb.html' %}
 	{% elif not medium.uris['original'] %}
 		{% include 'generic_thumb.html' %}
-	{% elif 'application/swf' == medium.mime %}
-		{% include 'flash_thumb.html' %}
 	{% elif medium.category in ['image', 'audio', 'video'] %}
 		{% set thumb_template = (medium.category + '_thumb.html') %}
 		{% include thumb_template %}
@@ -57,7 +55,7 @@
 {% macro render_info(medium) %}
 	{% if not medium.uris['original'] %}
 		{% include 'generic_info.html' %}
-	{% elif 'application/swf' == medium.mime %}
+	{% elif 'application/x-shockwave-flash' == medium.mime %}
 		{% include 'flash_info.html' %}
 	{% elif medium.category in ['image', 'audio', 'video'] %}
 		{% set info_template = (medium.category + '_info.html') %}

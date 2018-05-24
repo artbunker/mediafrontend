@@ -1,0 +1,23 @@
+<div class="info">
+	{% if edit_medium %}
+		<span class="manage">
+			<a href="{{ url_for('media_archive.edit_medium', medium_id=medium.id) }}">Edit</a>
+		</span>
+	{% endif %}
+	<span class="size">{{ medium.size }} bytes</span>
+	<span class="creation_date" data-timestamp="{{ medium.creation_time.timestamp() }}">{{ medium.creation_time.strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}</span>
+	{% if 0 < medium.data1 and 0 < medium.data2 %}
+		<span class="dimensions">
+			<span class="width">{{ medium.data1 }}</span>x<span class="height">{{ medium.data2 }}</span>
+		</span>
+	{% endif %}
+	{% if 1 < medium.data4 %}
+		<span class="frames">{{ medium.data4 }} frames</span>
+	{% endif %}
+	{% if 0 < medium.data5 %}
+		<span class="duration">{{ medium.data5 }} ms</span>
+	{% endif %}
+	{% if 0 < medium.data6 %}
+		<span class="bitrate">{{ medium.data6 }} kbps</span>
+	{% endif %}
+</div>

@@ -55,9 +55,9 @@ a#generate_summaries, #remove_file {
 #remove_medium {
 	background-color: #ff0000;
 }
-.medium video,
-.medium picture,
-.medium picture img {
+.summary video,
+.summary picture,
+.summary picture img {
 	display: inline-block;
 	width: auto;
 	height: auto;
@@ -67,4 +67,8 @@ a#generate_summaries, #remove_file {
 .summary.nofile {
 	width: 128px;
 	height: 128px;
+}
+.thumbnail {
+	font-size: 0;
+	margin-bottom: 1px;
 }

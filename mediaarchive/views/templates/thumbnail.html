@@ -1,0 +1,41 @@
+{% if not medium.id %}
+	<div class="thumbnail">
+		<div class="summary thumb nofile protected">Protected Medium</div>
+	</div>
+{% else %}
+	{% set thumb_medium = medium %}
+	{% if medium.cover %}
+		{% set thumb_medium = medium.cover %}
+	{% endif %}
+	<div 
+		class="thumbnail" 
+		{% if thumb_medium.uris['reencoded'][256] %}
+			data-reencoded="{{ thumb_medium.uris['reencoded'][256] }}" 
+		{% endif %}
+		data-category="{{ medium.category }}" 
+		data-mime="{{ medium.mime }}" 
+		data-data1="{{ medium.data }}" 
+		data-data2="{{ medium.data2 }}" 
+		data-data3="{{ medium.data3 }}" 
+		data-data4="{{ medium.data4 }}" 
+		data-data5="{{ medium.data5 }}" 
+		data-data6="{{ medium.data6 }}"{% include 'rgb.html' %}>
+		{% if thumb_medium.uris['static'][256] and thumb_medium.uris['fallback'][256] %}
+			<div class="summary thumb">
+				<a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">
+					<picture>
+						<source srcset="{{ thumb_medium.uris['static'][256] }}" type="image/webp">
+						<source srcset="{{ thumb_medium.uris['fallback'][256] }}" type="image/png">
+						<img srcset="{{ thumb_medium.uris['fallback'][256] }}" alt="">
+					</picture>
+				</a>
+			</div>
+		{% else %}
+			<div class="summary thumb nofile">
+				<a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">
+					View Medium
+				</a>
+			</div>
+		{% endif %}
+	</div>
+{% endif %}

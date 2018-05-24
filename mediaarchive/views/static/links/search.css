@@ -39,6 +39,24 @@
 	object-fit: cover;
 	object-position: center center;
 }
+.thumbnail[data-mime="application/flash"] .summary:not(.nofile)::after,
+.thumbnail[data-category=audio] .summary:not(.nofile)::after,
+.thumbnail[data-category=video] .summary:not(.nofile)::after {
+	display: inline-block;
+	z-index: 20;
+}
+.thumbnail:hover .summary:not(.nofile)::after {
+	display: none;
+}
+.thumbnail .summary.protected::after {
+	opacity: 1;
+	background-image: url(protected.svg);
+	background-color: transparent;
+	width: 50%;
+	height: 50%;
+	top: 25%;
+	left: 25%;
+}
 @media only screen and (max-width: 1024px) {
 	#results {
 		grid-template-columns: repeat(4, 4fr);

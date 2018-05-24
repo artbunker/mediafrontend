@@ -1,3 +1,9 @@
 <div class="medium">
-	{{ medium.id }}
+	{% if medium.uris['static'][1024] and medium.uris['fallback'][1024] %}
+		{# cover image here #}
+	{% endif %}
+	<audio controls>
+		<source src="{{ medium.uris['original'] }}" type="{{ medium.mime }}">
+		Audio element not supported
+	</audio>
 </div>

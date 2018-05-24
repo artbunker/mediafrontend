@@ -8,11 +8,39 @@
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/tags.css') }}">
 {% endblock %}
 {% block content %}
-	<div id="media_search">
-		<div id="results">
-			{% for medium in media %}
-				{% include 'thumbnail.html' %}
-			{% endfor %}
+	{% if search_field %}
+		<div id="search">
+			<form method="post">
+				<input type="text" id="tags" name="tags" value="{{ tags_raw }}">
+				<br>
+				<input type="submit" value="Search">
+			</form>
+			{#TODO<script type="module">
+				import { TagEditor } from '{{ url_for('media_archive.static', filename='scripts/tag_editor.js') }}';
+				new TagEditor(document.getElementById('tags'));
+			</script>#}
 		</div>
+	{% endif %}
+	<div class="menu">
+		{% if 0 < media|length %}
+			<span id="media_total">{{ media_total }} media</span>
+			<a href="{{ url_for('media_archive.slideshow', medium_id=media[0].id, tags=tags_query) }}">Slideshow</a>
+		{% endif %}
+		<a href="{{ url_for('media_archive.help') }}">Help</a>
 	</div>
+	<div id="tags_this_page">
+		{#TODO tags this page #}
+	</div>
+	<div id="media_search">
+		{% if 0 == media|length %}
+			<h1>No results</h1>
+		{% else %}
+			<div id="results">
+				{% for medium in media %}
+					{% include 'thumbnail.html' %}
+				{% endfor %}
+			</div>
+		{% endif %}
+	</div>
+	{#TODO pagination #}
 {% endblock %}

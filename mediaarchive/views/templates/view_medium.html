@@ -96,7 +96,22 @@
 		{% include 'info.html' %}
 		{% include 'fuzzy_time.html' %}
 		{% if 0 < medium.tags|length %}
-			{# tags rendering #}
+			<div class="tags">
+				{% for tag in medium.tags %}
+					<span class="tag">{{ tag }}</span>
+				{% endfor %}
+			</div>
+			{# tags editor #}
+		{% endif %}
+		{% if edit_tags %}
+			<div id="tag_editor">
+				<form method="post">
+					<input type="text" id="tags" name="tags"{% if 0 < medium.tags|length %} value="{{ medium.tags|join('#') }}"{% endif %}>
+					<br>
+					<input type="submit" value="Save Tags">
+				</form>
+			</div>
+			{#TODO tag editor js #}
 		{% endif %}
 	</div>
 {% endblock %}

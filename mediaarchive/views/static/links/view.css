@@ -50,7 +50,24 @@ body,
 	object-fit: cover;
 	object-position: center center;
 }
+audio {
+	display: block;
+}
 .medium, .medium::before {
 	border-top-left-radius: 8px;
 	border-top-right-radius: 8px;
 }
+.tags {
+	margin-top: 1em;
+	background-color: var(--b_h);
+	color: var(--f_h);
+	border-radius: 0.25em;
+}
+#tag_editor {
+	margin-top: 1em;
+}
+#tags {
+	margin-top: 0;
+	width: 100%;
+}
+

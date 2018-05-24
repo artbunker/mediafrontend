@@ -453,12 +453,14 @@ class MediaArchive:
 		medium = self.media.get_medium(medium_md5)
 		if medium:
 			self.populate_medium_properties(medium)
+			self.media.populate_medium_tags(medium)
 		return medium
 
 	def search_media(self, **kwargs):
 		media = self.media.search_media(**kwargs)
 		for medium in media:
 			self.populate_medium_properties(medium)
+		self.media.populate_media_tags(self.media.media_dictionary(media))
 		return media
 
 	def require_medium(self, medium_md5):
@@ -904,6 +906,10 @@ class MediaArchive:
 
 	def tag_string_to_list(self, tag_string):
 		return tag_string.split('#')
+
+	def filter_from_tags_search(self, tags):
+		#TODO process tags
+		return {'with_tags': tags}
 
 	def remove_medium(self, medium):
 		self.remove_medium_file(medium)

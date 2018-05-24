@@ -94,25 +94,43 @@ def upload():
 		medium=medium,
 	)
 
-@media_archive.route('/search')
-def search():
-	filter = {
-		'without_searchabilities': MediumSearchability.HIDDEN,
-		'without_protections': MediumProtection.PRIVATE,
-	}
-	if g.media_archive.accounts.current_user:
-		user_group_bits = []
-		if 'global' in g.media_archive.accounts.current_user.permissions:
-			user_group_bits.append(g.media_archive.accounts.current_user.permissions['global'].group_bits)
-		if 'media' in g.media_archive.accounts.current_user.permissions:
-			user_group_bits.append(g.media_archive.accounts.current_user.permissions['media'].group_bits)
-		user_inverse_permissions = ~int.from_bytes(
-			g.media_archive.accounts.users.combine_groups(bits=user_group_bits),
-			'big'
-		)
-		filter['without_group_bits'] = user_inverse_permissions
+@media_archive.route('/help')
+def help():
+	#TODO user help
+	#TODO check for contributor or manager send flag to append advanced help
+	return 'media archive help page'
+
+def search(overrides={}, search_field=True, tools=False):
+	#TODO filter from tags
+	tags_raw = ''
+	tags_query = ''
+	tags = []
+	filter = {}
+	pagination = {}
+
+	if 0 < len(overrides):
+		if 'tags' in overrides:
+			print('tags override:')
+			print(overrides['tags'])
+			tags = overrides['tags']
+		else:
+			if 'add_tags' in overrides:
+				for tag in overrides['add_tags']:
+					if tag not in tags:
+						tags.append(tag)
+			if 'remove_tags' in overrides:
+				for tag in overrides['remove_tags']:
+					if tag in tags:
+						tags.remove(tag)
+
+	filter = g.media_archive.filter_from_tags_search(tags)
+
+	if 0 < len(overrides) and 'filter' in overrides:
+		for key, value in overrides['filter'].items():
+			filter[key] = value
 
 	media = g.media_archive.search_media(filter=filter)
+	media_total = g.media_archive.media.count_media(filter=filter)
 
 	for medium in media:
 		if (
@@ -133,23 +151,26 @@ def search():
 	return render_template(
 		'search.html',
 		media=media,
+		media_total=media_total,
+		tags_raw=tags_raw,
+		tags_query=tags_query,
+		pagination=pagination,
+		search_field=search_field,
+		tools=tools,
 	)
 
 @media_archive.route('/manage')
 def manage():
-	filter = {}
+	overrides = {
+		'filter': {},
+	}
 
 	if not g.media_archive.accounts.has_global_group(g.media_archive.accounts.current_user, 'manager'):
 		# contributor manage self
 		g.media_archive.accounts.require_global_group('contributor')
-		filter['owner_uuids'] = g.accounts.current_user.uuid
+		overrides['filter']['owner_uuids'] = g.accounts.current_user.uuid
 
-	media = g.media_archive.search_media(filter=filter)
-
-	return render_template(
-		'search.html',
-		media=media,
-	)
+	return search(overrides, tools=True)
 
 @media_archive.route('/fetch/<medium_filename>')
 def protected_medium_file(medium_filename):
@@ -222,8 +243,8 @@ def medium_file(medium_filename):
 
 	return send_from_directory(directory, medium_filename, conditional=True)
 
-@media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>")
-def view_medium(medium_id):
+@media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>", methods=['GET', 'POST'])
+def view_medium(medium_id, slideshow=False):
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
 	g.media_archive.require_access(medium)
@@ -243,12 +264,53 @@ def view_medium(medium_id):
 	elif g.media_archive.accounts.current_user_has_global_group('taxonomist'):
 		edit_tags = True
 
+	if edit_tags and 'POST' == request.method:
+		print(request.form['tags'])
+		tags = g.media_archive.tag_string_to_list(request.form['tags'])
+		print(tags)
+		g.media_archive.media.remove_tags(medium)
+		if 0 < len(tags):
+			g.media_archive.media.add_tags(medium, tags)
+		if slideshow:
+			return redirect(
+				url_for(
+					'media_archive.slideshow',
+					medium_id=medium_id,
+					tags=request.args['tags']
+				),
+				302
+			)
+		return redirect(
+			url_for(
+				'media_archive.view_medium',
+				medium_id=medium_id
+			),
+			302
+		)
+
+	if slideshow:
+		#TODO get slideshow tags
+		slideshow_tags = ''
+		#TODO get slideshow adjacent
+		slideshow_next = None
+		slideshow_prev = None
+		slideshow = {
+			'tags': slideshow_tags,
+			'prev': slideshow_prev,
+			'next': slideshow_next,
+		}
+
 	return render_template(
 		'view_medium.html',
 		medium=medium,
 		edit_medium=edit_medium,
 		edit_tags=edit_tags,
+		slideshow=slideshow,
 	)
+
+@media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/slideshow")
+def slideshow(medium_id):
+	return view_medium(medium_id, True)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/edit", methods=['GET', 'POST'])
 def edit_medium(medium_id):

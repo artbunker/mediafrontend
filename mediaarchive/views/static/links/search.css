@@ -45,6 +45,12 @@
 	display: inline-block;
 	z-index: 20;
 }
+.thumbnail[data-mime="image/gif"]:not([data-data4="0"]):not([data-data4="1"]) .summary:not(.nofile)::after {
+	background-image: url(placeholder_video.svg);
+	display: inline-block;
+	z-index: 20;
+}
+.thumbnail[data-mime="image/gif"]:not([data-data4="0"]):not([data-data4="1"]):hover .summary:not(.nofile)::after,
 .thumbnail:hover .summary:not(.nofile)::after {
 	display: none;
 }

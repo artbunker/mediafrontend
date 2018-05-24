@@ -12,7 +12,7 @@
 		{% from 'media.jinja' import render_thumb, render_protected %}
 		<div id="results">
 			{% for medium in media %}
-				<div class="thumbnail" data-category="{{ medium.category }}" data-mime="{{ medium.mime }}"{% include 'rgb.html' %}>
+				<div class="thumbnail" data-category="{{ medium.category }}" data-mime="{{ medium.mime }}" data-data1="{{ medium.data }}" data-data2="{{ medium.data2 }}" data-data3="{{ medium.data3 }}" data-data4="{{ medium.data4 }}" data-data5="{{ medium.data5 }}" data-data6="{{ medium.data6 }}"{% include 'rgb.html' %}>
 					{{ render_thumb(medium) }}
 				</div>
 			{% endfor %}

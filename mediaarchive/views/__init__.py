@@ -244,7 +244,7 @@ def edit_tag(mode):
 	return redirect(url_for('media_archive.manage_tags'), 302)
 
 @media_archive.route('/manage')
-def manage():
+def manage_media():
 	overrides = {
 		'filter': {},
 	}
@@ -354,6 +354,8 @@ def view_medium(medium_id, slideshow=False):
 		print(tags)
 		g.media_archive.media.remove_tags(medium)
 		if 0 < len(tags):
+			#TODO
+			medium.tags = []
 			g.media_archive.media.add_tags(medium, tags)
 		if slideshow:
 			return redirect(

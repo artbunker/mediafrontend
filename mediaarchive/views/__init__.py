@@ -96,9 +96,7 @@ def upload():
 
 @media_archive.route('/help')
 def help():
-	#TODO user help
-	#TODO check for contributor or manager send flag to append advanced help
-	return 'media archive help page'
+	return render_template('help.html')
 
 def search(overrides={}, search_field=True, tools=False):
 	#TODO filter from tags

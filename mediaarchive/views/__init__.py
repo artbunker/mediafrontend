@@ -98,7 +98,7 @@ def upload():
 def help():
 	return render_template('help.html')
 
-def search(overrides={}, search_field=True, tools=False):
+def search(overrides={}, search_field=True, manage=False):
 	#TODO filter from tags
 	tags_raw = ''
 	tags_query = ''
@@ -130,21 +130,22 @@ def search(overrides={}, search_field=True, tools=False):
 	media = g.media_archive.search_media(filter=filter)
 	media_total = g.media_archive.media.count_media(filter=filter)
 
-	for medium in media:
-		if (
-				(
-					0 < int.from_bytes(medium.group_bits, 'big')
-					or MediumProtection.NONE != medium.protection
-					)
-				and (
-					not g.media_archive.accounts.current_user
-					or not g.media_archive.accounts.current_user_has_permissions(
-							medium.group_bits,
-							'global'
+	if not manage:
+		for medium in media:
+			if (
+					(
+							0 < int.from_bytes(medium.group_bits, 'big')
+							or MediumProtection.NONE != medium.protection
 						)
-					)
-			):
-				medium.id = ''
+					and (
+						not g.media_archive.accounts.current_user
+						or not g.media_archive.accounts.current_user_has_permissions(
+								medium.group_bits,
+								'global'
+							)
+						)
+				):
+					medium.id = ''
 
 	return render_template(
 		'search.html',
@@ -154,7 +155,7 @@ def search(overrides={}, search_field=True, tools=False):
 		tags_query=tags_query,
 		pagination=pagination,
 		search_field=search_field,
-		tools=tools,
+		tools=manage,
 	)
 
 @media_archive.route('/manage')
@@ -168,7 +169,7 @@ def manage():
 		g.media_archive.accounts.require_global_group('contributor')
 		overrides['filter']['owner_uuids'] = g.accounts.current_user.uuid
 
-	return search(overrides, tools=True)
+	return search(overrides, manage=True)
 
 @media_archive.route('/fetch/<medium_filename>')
 def protected_medium_file(medium_filename):

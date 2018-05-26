@@ -158,6 +158,91 @@ def search(overrides={}, search_field=True, manage=False):
 		tools=manage,
 	)
 
+@media_archive.route('/tags')
+def manage_tags():
+	#g.media_archive.media.remove_tag('')
+	#return 'test'
+	search = {
+		'tag': '',
+	}
+	if 'tag' in request.args:
+		search['tag'] = request.args['tag']
+
+	filter = {}
+	escape = lambda value: (
+		value
+			.replace('\\', '\\\\')
+			.replace('_', '\_')
+			.replace('%', '\%')
+			.replace('-', '\-')
+	)
+	if search['tag']:
+		filter['tag'] = '%' + escape(search['tag']) + '%'
+
+	pagination = pagination_from_request('tag', 'asc', 0, 32)
+
+	if not g.media_archive.accounts.current_user_has_global_group('manager'):
+		g.media_archive.accounts.require_global_group('contributor')
+		filter['owner_uuid'] = g.media_archive.accounts.current_user.uuid
+
+	total_tags = g.media_archive.media.count_tags(filter=filter, group=True)
+	tags = g.media_archive.media.search_tags(filter=filter, **pagination, group=True)
+
+	import math
+
+	return render_template(
+		'tags_list.html',
+		tags=tags,
+		search=search,
+		pagination=pagination,
+		total_tags=total_tags,
+		total_pages=math.ceil(total_tags / pagination['perpage']),
+	)
+
+@media_archive.route('/tags/<mode>')
+def edit_tag(mode):
+	owner_uuid = None
+	if not g.media_archive.accounts.current_user_has_global_group('manager'):
+		g.media_archive.accounts.require_global_group('contributor')
+		owner_uuid = g.media_archive.accounts.current_user.uuid
+
+	if mode not in ['remove', 'replace', 'accompany']:
+		abort(400)
+
+	tag = ''
+	if 'tag' in request.args:
+		tag = request.args['tag']
+
+	tag2 = ''
+	for key in ['replacement', 'accompaniment']:
+		if key in request.args:
+			tag2 = request.args[key]
+
+	if 'POST' != request.method:
+		return render_template(mode + '_tag.html', tag=tag, tag2=tag2)
+
+	if 'tag' in request.form and request.form['tag']:
+		if 'remove' == mode:
+			g.media_archive.media.remove_tag(tag, owner_uuid)
+		elif 'tag2' in request.form and request.form['tag2']:
+			if 'replace' == mode:
+				g.media_archive.media.replace_tag(
+					request.form['tag'],
+					request.form['tag2'],
+					owner_uuid
+				)
+			elif 'accompany' == mode:
+				filter = {
+					'with_tags': request.form['tag'],
+				}
+				if owner_uuid:
+					filter['owner_uuids'] = owner_uuid
+				media = g.media_archive.search_media(filter=filter)
+				if media:
+					g.media_archive.media.add_tags(media, request.form['tag2'])
+
+	return redirect(url_for('media_archive.manage_tags'), 302)
+
 @media_archive.route('/manage')
 def manage():
 	overrides = {

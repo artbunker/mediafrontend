@@ -177,7 +177,7 @@ def manage_tags():
 			.replace('-', '\-')
 	)
 	if search['tag']:
-		filter['tag'] = '%' + escape(search['tag']) + '%'
+		filter['tags'] = '%' + escape(search['tag']) + '%'
 
 	pagination = pagination_from_request('tag', 'asc', 0, 32)
 

@@ -10,8 +10,8 @@
 {% block content %}
 	{% if search_field %}
 		<div id="search">
-			<form method="post">
-				<input type="text" id="tags" name="tags" value="{{ tags_raw }}">
+			<form method="get">
+				<input type="text" id="tags" name="tags" value="{{ tags_query }}">
 				<br>
 				<input type="submit" value="Search">
 			</form>

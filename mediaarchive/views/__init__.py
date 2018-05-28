@@ -98,38 +98,64 @@ def upload():
 def help():
 	return render_template('help.html')
 
-def search(overrides={}, search_field=True, manage=False):
-	#TODO filter from tags
-	tags_raw = ''
+def search(overrides={}, search_field=True, manage=False, omit_future=True):
 	tags_query = ''
-	tags = []
-	filter = {}
-	pagination = {}
+	if 'tags' in request.args:
+		tags_query = request.args['tags']
+
+	tags = g.media_archive.tag_string_to_list(tags_query)
+
+	if 'sort:random' in tags:
+		tags.remove('sort:random')
+		import random, string
+		seed = ''.join(random.choices(string.ascii_letters + string.digits, k=6)).upper()
+		tags.append('sort:random:' + seed)
 
 	if 0 < len(overrides):
 		if 'tags' in overrides:
-			print('tags override:')
-			print(overrides['tags'])
 			tags = overrides['tags']
 		else:
 			if 'add_tags' in overrides:
-				for tag in overrides['add_tags']:
-					if tag not in tags:
-						tags.append(tag)
+				tags += overrides['add_tags']
 			if 'remove_tags' in overrides:
 				for tag in overrides['remove_tags']:
 					if tag in tags:
 						tags.remove(tag)
 
-	filter = g.media_archive.filter_from_tags_search(tags)
+	if omit_future:
+		from datetime import datetime, timezone
+		import time
+		current_datetime_atom = datetime.fromtimestamp(
+			time.time(),
+			timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f%z'
+		)
+		tags.append('created before:' + current_datetime_atom)
+
+
+	filter = {}
+	if tags:
+		filter = g.media_archive.parse_search_tags(tags)
+
+	pagination = {}
+	if 'page' in request.args:
+		pagination['page'] = int(request.args['page'])
+
+	if 'sort' in filter:
+		pagination['sort'] = filter['sort']
+		
+	if 'order' in filter:
+		pagination['order'] = filter['order']
+	if 'perpage' in filter:
+		pagination['perpage'] = int(filter['perpage'])
 
 	if 0 < len(overrides) and 'filter' in overrides:
 		for key, value in overrides['filter'].items():
 			filter[key] = value
 
-	media = g.media_archive.search_media(filter=filter)
+	media = g.media_archive.search_media(filter=filter, **pagination)
 	media_total = g.media_archive.media.count_media(filter=filter)
 
+	# strip medium ids from protected media if not managing
 	if not manage:
 		for medium in media:
 			if (
@@ -151,11 +177,10 @@ def search(overrides={}, search_field=True, manage=False):
 		'search.html',
 		media=media,
 		media_total=media_total,
-		tags_raw=tags_raw,
 		tags_query=tags_query,
-		pagination=pagination,
 		search_field=search_field,
 		tools=manage,
+		pagination=pagination,
 	)
 
 @media_archive.route('/tags')
@@ -254,7 +279,7 @@ def manage_media():
 		g.media_archive.accounts.require_global_group('contributor')
 		overrides['filter']['owner_uuids'] = g.accounts.current_user.uuid
 
-	return search(overrides, manage=True)
+	return search(overrides, manage=True, omit_future=False)
 
 @media_archive.route('/fetch/<medium_filename>')
 def protected_medium_file(medium_filename):

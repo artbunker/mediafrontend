@@ -907,9 +907,158 @@ class MediaArchive:
 	def tag_string_to_list(self, tag_string):
 		return tag_string.split('#')
 
-	def filter_from_tags_search(self, tags):
-		#TODO process tags
-		return {'with_tags': tags}
+	def parse_search_tags(self, tags=[]):
+		groups = []
+		without_groups = []
+		filter = {}
+		for tag in tags:
+			if not tag or ('-' == tag[0] and 2 > len(tag)):
+				continue
+
+			# pagination tags
+			if 'sort:' == tag[:5]:
+				sort = tag[5:]
+				if 'color' == sort:
+					sort = 'data3'
+				elif 'creation' == sort:
+					sort = 'creation_time'
+				elif 'upload' == sort:
+					sort = 'upload_time'
+				filter['sort'] = tag[5:]
+			elif 'order:' == tag[:6]:
+				if 'desc' != tag[6:]:
+					filter['order'] = 'asc'
+			elif 'perpage:' == tag[:8]:
+				perpage = tag[8:]
+				try:
+					filter['perpage'] = int(perpage)
+				except ValueError:
+					pass
+			# search tags
+			elif 'md5:' == tag[:4]:
+				if 'md5s' not in filter:
+					filter['md5s'] = []
+				filter['md5s'].append(id_to_md5(tag[4:]))
+			elif 'origin:' == tag[:7]:
+				if 'uploader_remote_origins' not in filter:
+					filter['uploader_remote_origins'] = []
+				filter['uploader_remote_origins'].append(tag[7:])
+			elif 'uploaded after:' == tag[:15]:
+				import dateutil.parser
+				try:
+					uploaded_after = dateutil.parser.parse(tag[15:]).timestamp()
+				except ValueError:
+					pass
+				else:
+					if 'uploaded_afters' not in filter:
+						filter['uploaded_afters'] = []
+					filter['uploaded_befores'].append(uploaded_before)
+			elif 'uploaded before:' == tag[:16]:
+				import dateutil.parser
+				try:
+					uploaded_before = dateutil.parser.parse(tag[16:]).timestamp()
+				except ValueError:
+					pass
+				else:
+					if 'uploaded_befores' not in filter:
+						filter['uploaded_befores'] = []
+					filter['uploaded_befores'].append(uploaded_before)
+			elif 'created after:' == tag[:14]:
+				import dateutil.parser
+				try:
+					created_after = dateutil.parser.parse(tag[14:]).timestamp()
+				except ValueError:
+					pass
+				else:
+					if 'created_afters' not in filter:
+						filter['created_afters'] = []
+					filter['created_afters'].append(created_after)
+			elif 'created before:' == tag[:15]:
+				import dateutil.parser
+				try:
+					created_before = dateutil.parser.parse(tag[15:]).timestamp()
+				except ValueError:
+					pass
+				else:
+					if 'created_befores' not in filter:
+						filter['created_befores'] = []
+					filter['created_befores'].append(created_before)
+			elif 'uploader:' == tag[:9]:
+				if not 'uploader_uuids' in filter:
+					filter['uploader_uuids'] = []
+				filter['uploader_uuids'].append(id_to_uuid(tag[9:]))
+			elif 'owner:' == tag[:6]:
+				if not 'owner_uuids' in filter:
+					filter['owner_uuids'] = []
+				filter['owner_uuids'].append(id_to_uuid(tag[6:]))
+			elif 'status:' == tag[:7]:
+				filter['status'] = tag[7:].upper()
+			elif '-status:' == tag[:8]:
+				if 'without_statuses' not in filter:
+					filter['without_statuses'] = []
+				filter['without_statuses'].append(tag[8:].upper())
+			elif 'protection:' == tag[:11]:
+				filter['protection'] = tag[11:].upper()
+			elif '-protection:' == tag[:12]:
+				if 'without_protections' not in filter:
+					filter['without_protections'] = []
+				filter['without_protections'].append(tag[12:].upper())
+			elif 'searchability:' == tag[:14]:
+				filter['searchability'] = tag[14:].upper()
+			elif '-searchability:' == tag[:15]:
+				if 'without_searchabilities' not in filter:
+					filter['without_searchabilities'] = []
+				filter['without_searchabilities'].append(tag[15:].upper())
+			elif 'group:' == tag[:6]:
+				groups.append(tag[6:])
+			elif '-group:' == tag[:7]:
+				without_groups.append(tag[7:])
+			elif 'mimetype:' == tag[:9]:
+				filter['mime'] = tag[9:]
+			elif '-mimetype:' == tag[:10]:
+				if 'without_mimes' not in filter:
+					filter['without_mimes'] = []
+				filter['without_mimes'].append(tag[10:])
+			elif 'smaller than:' == tag[:13]:
+				filter['smaller_than'] = tag[13:]
+			elif 'larger than:' == tag[:12]:
+				filter['larger_than'] = tag[12:]
+			elif 'data' == tag[:4]:
+				for i in range(1, 7):
+					data = 'data' + str(i)
+					if data + ' less than:' == tag[:16]:
+						filter[data + '_less_than'] = tag[:16]
+					if data + ' more than:' == tag[:16]:
+						filter[data + '_more_than'] = tag[:16]
+			#TODO without tags like escaping
+			#elif '-~' == tag[:2] and 2 < len(tag):
+			#	if 'without_tags_like' not in filter:
+			#		filter['without_tags_like'] = []
+			#	filter['without_tags_like'].append(tag[2:])
+			elif '-' == tag[:1]:
+				if 'without_tags' not in filter:
+					filter['without_tags'] = []
+				filter['without_tags'].append(tag[1:])
+			#TODO with tags like escaping
+			#elif '~' == tag[:1] and 1 < len(tag):
+			#	if 'with_tags_like' not in filter:
+			#		filter['with_tags_like'] = []
+			#	filter['with_tags_like'].append(tag[1:])
+			else:
+				if 'with_tags' not in filter:
+					filter['with_tags'] = []
+				filter['with_tags'].append(tag)
+
+		if groups:
+			print('combining with groups:')
+			print(groups)
+			filter['with_group_bits'] = self.accounts.users.combine_groups(names=groups)
+			print('group bits:')
+			print(filter['with_group_bits'])
+		if without_groups:
+			filter['without_group_bits'] = self.accounts.users.combine_groups(names=without_groups)
+
+		return filter
 
 	def remove_medium(self, medium):
 		self.remove_medium_file(medium)

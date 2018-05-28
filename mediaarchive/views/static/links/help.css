@@ -1,0 +1,12 @@
+table {
+	width: 512px;
+}
+td[colspan="2"] {
+	background-color: var(--b_m);
+	color: var(--f_m);
+	padding: 0.5em;
+	font-size: 0.9em;
+}
+td:not([colspan="2"]):not(:last-child):first-child {
+	white-space: nowrap;
+}

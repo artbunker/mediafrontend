@@ -4,17 +4,257 @@
 	{{ super() }}
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/tables.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/tags.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/help.css') }}">
 {% endblock %}
 {% block content %}
 	<div id="help">
-		<h2>Help</h2>
-		<div></div>
+		<table>
+			<caption>Search Help</caption>
+			<tbody>
+				<tr>
+					<td colspan="2">
+						Search for media by tag. Use "#" to separate multiple tags.
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						Only full tags are searchable, partial tags will return no results; but if you have JavaScript enabled then suggestions will appear below the tag search field as you type
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						If you have JavaScript enabled press enter after typing a tag to add it to the list of tags to search.
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						Pressing enter while the search field is empty will submit the search.
+					</td>
+				</tr>
+				<tr>
+					<td>{tag}</td>
+					<td>Search generic tags</td>
+				</tr>
+				<tr>
+					<td>-{tag}</td>
+					<td>Prefixing a tag with "-" will omit media which have that tag from the search</td>
+				</tr>
+				<!-- tr>
+					<td>~{tag}</td>
+					<td>Prefixing a tag with "~" will return media which have tags containing that tag</td>
+				</tr>
+				<tr>
+					<td>-~{tag}</td>
+					<td>Prefixing a tag with "~-" will omit media which have tags containing the searched tag from the search</td>
+				</tr -->
+			</tbody>
+		</table>
+		<table>
+			<caption>Customizing Pages</caption>
+			<tbody>
+				<tr>
+					<td>sort:{creation | upload | color | random}</td>
+					<td>Choose how the results are sorted.</td>
+				</tr>
+				<tr>
+					<td>order:{asc | desc}</td>
+					<td>Choose how the results are ordered.</td>
+				</tr>
+				<tr>
+					<td>perpage:{integer}</td>
+					<td>Change the number of results per page.</td>
+				</tr>
+			</tbody>
+		</table>
+		<table>
+			<caption>Advanced Help</caption>
+				<tr>
+					<td>group:{group name}</td>
+					<td>
+						Returns media which have the specified group protection and which you also have all permissions to search for
+						<br><br>
+						<small>You may specify multiple group: or -group: tags to search for media with specific group permissions</small>
+					</td>
+				</tr>
+				<tr>
+					<td>uploaded after:{date string}</td>
+					<td>
+						Returns media uploaded after the specified date
+						<br><br>
+						<small>-uploaded after: is not allowed, use before:</small>
+					</td>
+				</tr>
+				<tr>
+					<td>uploaded before:{date string}</td>
+					<td>
+						Returns media uploaded before the specified date
+						<br><br>
+						<small>-uploaded before: is not allowed, use after:</small>
+					</td>
+				</tr>
+				<tr>
+					<td>created after:{date string}</td>
+					<td>
+						Returns media created after the specified date
+						<br><br>
+						<small>-created after: is not allowed, use before:</small>
+					</td>
+				</tr>
+				<tr>
+					<td>created before:{date string}</td>
+					<td>
+						Returns media created before the specified date
+						<br><br>
+						<small>-created before: is not allowed, use after:</small>
+					</td>
+				</tr>
+				<tr>
+					<td>mimetype:{medium mimetype}</td>
+					<td>
+						Returns only media which have the specified MIME type
+						<br><br>
+						<small>Because media can have only one MIME type, specifying more than one mimetype: tag will return no results, but you may specify multiple -mimetype: tags to narrow your search</small>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
 		{% if (
 			g.media_archive.accounts.current_user_has_global_group('manager')
 			or g.media_archive.accounts.current_user_has_global_group('contributor')
 		) %}
-		<h2>Advanced Help</h2>
-		<div></div>
+			<table>
+				<caption>Management Mode</caption>
+				<tbody>
+					<tr>
+						<td>
+							Management mode is a special state which allows you to select multiple media by their thumbnails and apply actions to them. Management mode requires JavaScript and is available to managers on any media search page and to contributors viewing their own media.
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Toggle management mode by clicking "Management" in the topmenu, or by pressing "E" on the keyboard. You can leave management mode either by toggling normally or by pressing "Escape" on the keyboard.
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Most management actions should be self-explanatory, and have counterparts on the individual media edit pages, but note that because management mode is based around being able to select multiple media <strong>the state of the forms that appear in management mode do not reflect the current state of any media selected</strong>. E.g. if you select a media which is currently Protection:Private and then click Protection in the management drawer, <strong>the protection form may show the initial selection of the pulldown as something other than Protection:Private</strong>.
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Always pay attention to the actual media you're selecting.
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<table>
+				<caption>Contributor Search Help</caption>
+				<tbody>
+					<tr>
+						<td>protection:{none | groups | private}</td>
+						<td>Returns media of a protection type</td>
+					</tr>
+					<tr>
+						<td>searchability:{public | groups | hidden}</td>
+						<td>Returns media of a searchability type</td>
+					</tr>
+					<tr>
+						<td>smaller than:{bytesize}</td>
+						<td>Returns media smaller than a filesize</td>
+					</tr>
+					<tr>
+						<td>larger than:{bytesize}</td>
+						<td>Returns media larger than a filesize</td>
+					</tr>
+					<tr>
+						<td>data{1-6} less than:{integer}</td>
+						<td>Returns media with specified data values less than a value</td>
+					</tr>
+					<tr>
+						<td>data{1-6} more than:{integer}</td>
+						<td>Returns media with specified data values more than a value</td>
+					</tr>
+				</tbody>
+			</table>
+			<table>
+				<caption>Contributor Semantic Tags</caption>
+				<tbody>
+					<tr>
+						<td colspan="2">
+							Some tags have a special meaning that affects how the view pages are displayed.
+						</td>
+					</tr>
+					<tr>
+						<td>set:{set name}</td>
+						<td>
+							Used to create visual set groupings below a medium on the view page.
+							<br><br>
+							{set name} can be any text string but should probably be something you can remember and re-type if you're adding it to multiple media manually.
+							<br><br>
+							By default the order that set media appear in the set is by their Creation Date (not their Upload Date) from earliest to latest, but this can be overridden by adding :{weight} to the set tag after {set name} (e.g. set:some set:5) in which case the medium with {weight} will appear after any media without {weight} and be sorted among any other media with {weight} from least to greatest.
+							<br><br>
+							If two media in a set have the same {weight} then they will be sorted by their respective Creation Time from earliest to latest
+							<br><br>
+							A medium can be part of multiple sets, in which case multiple set containers will appear below the medium.
+						</td>
+					</tr>
+					<tr>
+						<td>cover:{medium ID}</td>
+						<td>
+							Used to make the thumbnail of another medium appear for the medium you've added the tag to.
+							<br><br>
+							This is mostly useful for audio/text/archive/application media, which normally only appear as a filetype placeholder icon.
+							<br><br>
+							In addition to displaying a thumbnail in search results and in set lists, for audio the cover medium will appear above the actual player on the view page.
+						</td>
+					</tr>
+					<tr>
+						<td>next:{medium ID}</td>
+						<td>
+							Used to specify another medium as the next in a series. This will automatically assign the "Next page" key to redirect to the view page of the specified medium.
+						</td>
+					</tr>
+					<tr>
+						<td>prev:{medium ID}</td>
+						<td>
+							Used to specify another medium as the previous in a series. This will automatically assign the "Previous page" key to redirect to the view page of the specified medium.
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		{% endif %}
+		{% if g.media_archive.accounts.current_user_has_global_group('manager') %}
+			<table>
+				<caption>Management Help</caption>
+				<tbody>
+					<tr>
+						<td colspan="2">
+							Some additional tags are available to managers for the purpose of moderating.
+						</td>
+					</tr>
+					<tr>
+						<td>md5:{base64 url md5 of medium}</td>
+						<td>Returns media with the specified md5 IDs</td>
+					</tr>
+					<tr>
+						<td>origin:{IPv4 or IPv6}</td>
+						<td>Returns media uploaded by IP addresses</td>
+					</tr>
+					<tr>
+						<td>uploader:{user ID}</td>
+						<td>Returns media uploaded by a user ID</td>
+					</tr>
+					<tr>
+						<td>owner:{user ID}</td>
+						<td>Returns media currently owned by a user ID</td>
+					</tr>
+					<tr>
+						<td>status:{allowed | copyright | forbidden}</td>
+						<td>Returns media of a status type</td>
+					</tr>
+				</tbody>
+			</table>
 		{% endif %}
 	</div>
 {% endblock %}

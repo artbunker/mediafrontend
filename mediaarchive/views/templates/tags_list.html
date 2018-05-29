@@ -6,7 +6,6 @@
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/tables.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/tabular_list.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/pages.css') }}">
-	<link rel="stylesheet" type="text/css" href="{{ url_for('.static', filename='links/tags.css') }}">
 {% endblock %}
 {% block content %}
 	<div id="tags_list">
@@ -65,7 +64,7 @@
 				<tbody>
 				{% for tag in tags %}
 					<tr>
-						<td>{{ tag.tag }}</td>
+						<td><a href="{{ url_for('media_archive.manage_media', tags=tag.tag) }}">{{ tag.tag }}</a></td>
 						<td>{{ tag.count }}</td>
 					</tr>
 				{% endfor %}

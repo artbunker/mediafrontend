@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% block title %}Edit Tag{% endblock %}
+{% block style %}
+	{{ super() }}
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/forms.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/tags.css') }}">
+{% endblock %}
+{% block content %}
+	{% set label = 'Remove' %}
+	{% if 'accompany' == mode %}
+		{% set label = 'Accompany' %}
+	{% elif 'replace' == mode %}
+		{% set label = 'Replace' %}
+	{% endif %}
+	<div id="edit_tag">
+		<form method="post">
+			<label for="tag">{{ label }}</label>
+			<input id="tag" name="tag" type="text" value="{{ tag }}">
+			<br>
+			{% if 'remove' != mode %}
+				<label for="tag2">With</label>
+				<input id="tag2" name="tag2" type="text" value="{{ tag2 }}">
+				<br>
+			{% endif %}
+			<input type="submit" value="Submit">
+		</form>
+	</div>
+{% endblock %}

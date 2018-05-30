@@ -1,7 +1,7 @@
 table {
-	width: 512px;
+	width: 600px;
 }
-td[colspan="2"] {
+tr:first-child td[colspan="2"] {
 	background-color: var(--b_m);
 	color: var(--f_m);
 	padding: 0.5em;
@@ -9,4 +9,7 @@ td[colspan="2"] {
 }
 td:not([colspan="2"]):not(:last-child):first-child {
 	white-space: nowrap;
+}
+.tag {
+	margin: 0;
 }

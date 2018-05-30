@@ -12,32 +12,47 @@
 			<caption>Search Help</caption>
 			<tbody>
 				<tr>
-					<td colspan="2">
+					<td colspan="3">
 						Search for media by tag. Use "#" to separate multiple tags.
 					</td>
 				</tr>
 				<tr>
-					<td colspan="2">
+					<td colspan="3">
 						Only full tags are searchable, partial tags will return no results; but if you have JavaScript enabled then suggestions will appear below the tag search field as you type
 					</td>
 				</tr>
 				<tr>
-					<td colspan="2">
+					<td colspan="3">
 						If you have JavaScript enabled press enter after typing a tag to add it to the list of tags to search.
 					</td>
 				</tr>
 				<tr>
-					<td colspan="2">
+					<td colspan="3">
 						Pressing enter while the search field is empty will submit the search.
 					</td>
 				</tr>
+			</tbody>
+		</table>
+		<table>
+			<caption>Basic Tags</caption>
+			<tbody>
 				<tr>
 					<td>{tag}</td>
-					<td>Search generic tags</td>
+					<td>
+						<span class="tag" data-tag="cat">
+							<span>#cat</span>
+						</span>
+					</td>
+					<td>Returns media which have the specified tag</td>
 				</tr>
 				<tr>
 					<td>-{tag}</td>
-					<td>Prefixing a tag with "-" will omit media which have that tag from the search</td>
+					<td>
+						<span class="tag" data-tag="-dog">
+							<span>#dog</span>
+						</span>
+					</td>
+					<td>Prefixing a tag with "-" will omit media which have that tag</td>
 				</tr>
 				<!-- tr>
 					<td>~{tag}</td>
@@ -47,21 +62,73 @@
 					<td>-~{tag}</td>
 					<td>Prefixing a tag with "~-" will omit media which have tags containing the searched tag from the search</td>
 				</tr -->
+				<tr>
+					<td colspan="2">
+						<span class="tag" data-tag="author:">
+							<span>#author:{author name or handle}</span>
+						</span>
+					</td>
+					<td>Used to specify the creator of a medium</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<span class="tag" data-tag="name:">
+							<span>#name:{subject name}</span>
+						</span>
+					</td>
+					<td>Used to identify a character or person being portrayed</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<span class="tag" data-tag="source:">
+							<span>#source:{source title}</span>
+						</span>
+					</td>
+					<td>Used to specify the source material where the content originated</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<span class="tag" data-tag="title:">
+							<span>#title:{title}</span>
+						</span>
+					</td>
+					<td>Used to specify the title of an individual work</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<span class="tag" data-tag="filename:">
+							<span>#filename:{filename}</span>
+						</span>
+					</td>
+					<td>Used to specify the original filename of a medium</td>
+				</tr>
 			</tbody>
 		</table>
 		<table>
 			<caption>Customizing Pages</caption>
 			<tbody>
 				<tr>
-					<td>sort:{creation | upload | color | random}</td>
+					<td>
+						<span class="tag" data-tag="sort:">
+							<span>#sort:{creation | upload | color | random}</span>
+						</span>
+					</td>
 					<td>Choose how the results are sorted.</td>
 				</tr>
 				<tr>
-					<td>order:{asc | desc}</td>
+					<td>
+						<span class="tag" data-tag="order:">
+							<span>#order:{asc | desc}</span>
+						</span>
+					</td>
 					<td>Choose how the results are ordered.</td>
 				</tr>
 				<tr>
-					<td>perpage:{integer}</td>
+					<td>
+						<span class="tag" data-tag="perpage:">
+							<span>#perpage:{integer}</span>
+						</span>
+					</td>
 					<td>Change the number of results per page.</td>
 				</tr>
 			</tbody>
@@ -69,7 +136,11 @@
 		<table>
 			<caption>Advanced Help</caption>
 				<tr>
-					<td>group:{group name}</td>
+					<td>
+						<span class="tag" data-tag="group:">
+							<span>#group:{group name}</span>
+						</span>
+					</td>
 					<td>
 						Returns media which have the specified group protection and which you also have all permissions to search for
 						<br><br>
@@ -77,39 +148,43 @@
 					</td>
 				</tr>
 				<tr>
-					<td>uploaded after:{date string}</td>
 					<td>
-						Returns media uploaded after the specified date
-						<br><br>
-						<small>-uploaded after: is not allowed, use before:</small>
+						<span class="tag" data-tag="uploaded after:">
+							<span>#uploaded after:{date string}</span>
+						</span>
 					</td>
+					<td>Returns media uploaded after the specified date</td>
 				</tr>
 				<tr>
-					<td>uploaded before:{date string}</td>
 					<td>
-						Returns media uploaded before the specified date
-						<br><br>
-						<small>-uploaded before: is not allowed, use after:</small>
+						<span class="tag" data-tag="uploaded before:">
+							<span>#uploaded before:{date string}</span>
+						</span>
 					</td>
+					<td>Returns media uploaded before the specified date</td>
 				</tr>
 				<tr>
-					<td>created after:{date string}</td>
 					<td>
-						Returns media created after the specified date
-						<br><br>
-						<small>-created after: is not allowed, use before:</small>
+						<span class="tag" data-tag="created after:">
+							<span>#created after:{date string}</span>
+						</span>
 					</td>
+					<td>Returns media created after the specified date</td>
 				</tr>
 				<tr>
-					<td>created before:{date string}</td>
 					<td>
-						Returns media created before the specified date
-						<br><br>
-						<small>-created before: is not allowed, use after:</small>
+						<span class="tag" data-tag="created before:">
+							<span>#created before:{date string}</span>
+						</span>
 					</td>
+					<td>Returns media created before the specified date</td>
 				</tr>
 				<tr>
-					<td>mimetype:{medium mimetype}</td>
+					<td>
+						<span class="tag" data-tag="mimetype:">
+							<span>#mimetype:{medium mimetype}</span>
+						</span>
+					</td>
 					<td>
 						Returns only media which have the specified MIME type
 						<br><br>
@@ -152,33 +227,60 @@
 				<caption>Contributor Search Help</caption>
 				<tbody>
 					<tr>
-						<td>protection:{none | groups | private}</td>
+						<td colspan="2">Some additional tags are available to contributors</td>
+					</tr>
+					<tr>
+						<td>
+							<span class="tag" data-tag="protection:">
+								<span>#protection:{none | groups | private}</span>
+							</span>
+						</td>
 						<td>Returns media of a protection type</td>
 					</tr>
 					<tr>
-						<td>searchability:{public | groups | hidden}</td>
+						<td>
+							<span class="tag" data-tag="searchability:">
+								<span>#searchability:{public | groups | hidden}</span>
+							</span>
+						</td>
 						<td>Returns media of a searchability type</td>
 					</tr>
 					<tr>
-						<td>smaller than:{bytesize}</td>
+						<td>
+							<span class="tag" data-tag="smaller than:">
+								<span>#smaller than:{bytesize}</span>
+							</span>
+						</td>
 						<td>Returns media smaller than a filesize</td>
 					</tr>
 					<tr>
-						<td>larger than:{bytesize}</td>
+						<td>
+							<span class="tag" data-tag="larger than:">
+								<span>#larger than:{bytesize}</span>
+							</span>
+						</td>
 						<td>Returns media larger than a filesize</td>
 					</tr>
 					<tr>
-						<td>data{1-6} less than:{integer}</td>
-						<td>Returns media with specified data values less than a value</td>
+						<td>
+							<span class="tag" data-tag="data1 less than:">
+								<span>#data{1-6} less than:{integer}</span>
+							</span>
+						</td>
+						<td>Returns media with data properties less than a specified value</td>
 					</tr>
 					<tr>
-						<td>data{1-6} more than:{integer}</td>
-						<td>Returns media with specified data values more than a value</td>
+						<td>
+							<span class="tag" data-tag="data1 more than:">
+								<span>#data{1-6} more than:{integer}</span>
+							</span>
+						</td>
+						<td>Returns media with data properties more than a specified value</td>
 					</tr>
 				</tbody>
 			</table>
 			<table>
-				<caption>Contributor Semantic Tags</caption>
+				<caption>Semantic Tags</caption>
 				<tbody>
 					<tr>
 						<td colspan="2">
@@ -186,13 +288,17 @@
 						</td>
 					</tr>
 					<tr>
-						<td>set:{set name}</td>
+						<td>
+							<span class="tag" data-tag="set:">
+								<span>#set:{set name}</span>
+							</span>
+						</td>
 						<td>
 							Used to create visual set groupings below a medium on the view page.
 							<br><br>
 							{set name} can be any text string but should probably be something you can remember and re-type if you're adding it to multiple media manually.
 							<br><br>
-							By default the order that set media appear in the set is by their Creation Date (not their Upload Date) from earliest to latest, but this can be overridden by adding :{weight} to the set tag after {set name} (e.g. set:some set:5) in which case the medium with {weight} will appear after any media without {weight} and be sorted among any other media with {weight} from least to greatest.
+							By default the order that set media appear in the set is by their Creation Date (not their Upload Date) from earliest to latest, but this can be overridden by adding :{weight} to the set tag after {set name} (e.g. <span class="tag" data-tag="set:"><span>#set:some set name:5</span></span>) in which case the medium with {weight} will appear after any media without {weight} and be sorted among any other media with {weight} from least to greatest.
 							<br><br>
 							If two media in a set have the same {weight} then they will be sorted by their respective Creation Time from earliest to latest
 							<br><br>
@@ -200,7 +306,11 @@
 						</td>
 					</tr>
 					<tr>
-						<td>cover:{medium ID}</td>
+						<td>
+							<span class="tag" data-tag="cover:">
+								<span>#cover:{medium ID}</span>
+							</span>
+						</td>
 						<td>
 							Used to make the thumbnail of another medium appear for the medium you've added the tag to.
 							<br><br>
@@ -210,47 +320,107 @@
 						</td>
 					</tr>
 					<tr>
-						<td>next:{medium ID}</td>
+						<td>
+							<span class="tag" data-tag="next:">
+								<span>#next:{medium ID}</span>
+							</span>
+						</td>
 						<td>
 							Used to specify another medium as the next in a series. This will automatically assign the "Next page" key to redirect to the view page of the specified medium.
 						</td>
 					</tr>
 					<tr>
-						<td>prev:{medium ID}</td>
+						<td>
+							<span class="tag" data-tag="prev:">
+								<span>#prev:{medium ID}</span>
+							</span>
+						</td>
 						<td>
 							Used to specify another medium as the previous in a series. This will automatically assign the "Previous page" key to redirect to the view page of the specified medium.
 						</td>
+					</tr>
+					<tr>
+						<td>
+							<span class="tag" data-tag="suppress:">
+								<span>#suppress:{feature name}</span>
+							</span>
+						</td>
+						<td>Used to disable a normal feature of the view page. E.g. the comment field, or stickers</td>
+					</tr>
+					<tr>
+						<td>
+							<span class="tag" data-tag="mirror:">
+								<span>#mirror:{URI}</span>
+							</span>
+						</td>
+						<td>Used to specify a mirror of a medium at an outside URI</td>
+					</tr>
+					<tr>
+						<td>
+							<span class="tag" data-tag="superior of:">
+								<span>#superior of:{media ID}</span>
+							</span>
+						</td>
+						<td>Used to indicate a medium is a superior version of another medium</td>
+					</tr>
+					<tr>
+						<td>
+							<span class="tag" data-tag="inferior of:">
+								<span>#inferior of:{media ID}</span>
+							</span>
+						</td>
+						<td>Used to indicate when a medium is an inferior version of another medium</td>
 					</tr>
 				</tbody>
 			</table>
 		{% endif %}
 		{% if g.media_archive.accounts.current_user_has_global_group('manager') %}
 			<table>
-				<caption>Management Help</caption>
+				<caption>Management Search Help</caption>
 				<tbody>
 					<tr>
 						<td colspan="2">
-							Some additional tags are available to managers for the purpose of moderating.
+							Some additional tags are available to managers.
 						</td>
 					</tr>
 					<tr>
-						<td>md5:{base64 url md5 of medium}</td>
-						<td>Returns media with the specified md5 IDs</td>
+						<td>
+							<span class="tag" data-tag="id:">
+								<span>#id:{medium ID}</span>
+							</span>
+						</td>
+						<td>Returns media with the specified IDs</td>
 					</tr>
 					<tr>
-						<td>origin:{IPv4 or IPv6}</td>
+						<td>
+							<span class="tag" data-tag="origin:">
+								<span>#origin:{IPv4 or IPv6}</span>
+							</span>
+						</td>
 						<td>Returns media uploaded by IP addresses</td>
 					</tr>
 					<tr>
-						<td>uploader:{user ID}</td>
+						<td>
+							<span class="tag" data-tag="uploader:">
+								<span>#uploader:{user ID}</span>
+							</span>
+						</td>
 						<td>Returns media uploaded by a user ID</td>
 					</tr>
 					<tr>
-						<td>owner:{user ID}</td>
+						<td>
+							<span class="tag" data-tag="owner:">
+								<span>#owner:{user ID}</span>
+							</span>
+						</td>
 						<td>Returns media currently owned by a user ID</td>
 					</tr>
 					<tr>
-						<td>status:{allowed | copyright | forbidden}</td>
+						<td>
+							<span class="tag" data-tag="status:">
+								<span>#status:{allowed | copyright | forbidden}</span>
+							</span>
+						</td>
 						<td>Returns media of a status type</td>
 					</tr>
 				</tbody>

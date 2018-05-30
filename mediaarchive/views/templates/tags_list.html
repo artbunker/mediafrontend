@@ -6,6 +6,8 @@
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/tables.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/tabular_list.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/pages.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/tags.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/tags_list.css') }}">
 {% endblock %}
 {% block content %}
 	<div id="tags_list">
@@ -64,7 +66,14 @@
 				<tbody>
 				{% for tag in tags %}
 					<tr>
-						<td><a href="{{ url_for('media_archive.manage_media', tags=tag.tag) }}">{{ tag.tag }}</a></td>
+						<td>
+							<span class="tag" data-tag="{{ tag.tag }}">
+								<a href="{{ url_for('media_archive.manage_media', tags=tag.tag) }}">{{ tag.tag }}</a>
+								<a href="{{ url_for('media_archive.edit_tag', mode='remove', tag=tag.tag) }}" class="action remove" title="Remove this tag from media">ˣ</a>
+								<a href="{{ url_for('media_archive.edit_tag', mode='accompany', tag=tag.tag) }}" class="action accompany" title="Add a tag to media with this tag">+</a>
+								<a href="{{ url_for('media_archive.edit_tag', mode='replace', tag=tag.tag) }}" class="action replace" title="Replace this tag with another tag">›</a>
+							</span>
+						</td>
 						<td>{{ tag.count }}</td>
 					</tr>
 				{% endfor %}

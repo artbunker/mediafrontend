@@ -3,6 +3,7 @@
 {% block style %}
 	{{ super() }}
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/forms.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/pages.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/general.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/search.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/tags.css') }}">
@@ -11,7 +12,7 @@
 	{% if search_field %}
 		<div id="search">
 			<form method="get">
-				<input type="text" id="tags" name="tags" value="{{ tags_query }}">
+				<input type="text" id="tags" name="tags" value="{{ tags_query }}" data-max-tags="{{ g.media_archive.config['maximum_search_tags'] }}">
 				<br>
 				<input type="submit" value="Search">
 			</form>
@@ -23,14 +24,29 @@
 	{% endif %}
 	<div class="menu">
 		{% if 0 < media|length %}
-			<span id="media_total">{{ media_total }} media</span>
-			<a href="{{ url_for('media_archive.slideshow', medium_id=media[0].id, tags=tags_query) }}">Slideshow</a>
+			<span id="total_media">{{ total_media }} media</span>
+			<a href="{{ url_for('media_archive.view_medium', medium_id=media[0].id, tags=tags_query) }}">Slideshow</a>
 		{% endif %}
 		<a href="{{ url_for('media_archive.help') }}">Help</a>
 	</div>
-	<div id="tags_this_page">
-		{#TODO tags this page #}
-	</div>
+	{% if 0 < tags_this_page|length %}
+		<div id="tags_this_page">
+			<span>Tags this page</span>
+			<div>
+				{% for tag in tags_this_page %}
+					{% set clear_query = re.sub('#+', '#', re.sub('(^|#)\-?' + tag + '(#|$)', '#', tags_query + '#')) %}
+					{% if '#' == clear_query[0] %}
+						{% set clear_query = clear_query[1:] %}
+					{% endif %}
+					<span class="tag" data-tag="{{ tag }}">
+						<a href="{{ url_for(current_endpoint, tags=tag, **kwargs) }}" title="Search this tag">{{ tag }}</a>
+						<a class="action add" href="{{ url_for(current_endpoint, tags=clear_query + tag, **kwargs) }}" title="Add this tag to current search">+</a>
+						<a class="action remove" href="{{ url_for(current_endpoint, tags=clear_query + '-' + tag,**kwargs) }}" title="Remove this tag from current search">-</a>
+					</span>
+				{% endfor %}
+			</div>
+		</div>
+	{% endif %}
 	<div id="media_search">
 		{% if 0 == media|length %}
 			<h1>No results</h1>
@@ -40,7 +56,8 @@
 					{% include 'thumbnail.html' %}
 				{% endfor %}
 			</div>
+			{% from 'pages_list.jinja' import pages_list %}
+			{{ pages_list(total_pages=total_pages, url=url_for(current_endpoint, page='PAGE', tags=tags_query, **kwargs).replace('page=PAGE', 'page={}'), current_page=pagination['page']) }}
 		{% endif %}
 	</div>
-	{#TODO pagination #}
 {% endblock %}

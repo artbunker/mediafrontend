@@ -1,0 +1,6 @@
+.tag {
+	margin: 2px;
+}
+tbody td:first-child {
+	padding: 0;
+}

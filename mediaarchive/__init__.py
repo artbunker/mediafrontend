@@ -460,7 +460,8 @@ class MediaArchive:
 		media = self.media.search_media(**kwargs)
 		for medium in media:
 			self.populate_medium_properties(medium)
-		self.media.populate_media_tags(self.media.media_dictionary(media))
+		media_dictionary = self.media.media_dictionary(media)
+		self.media.populate_media_tags(media_dictionary)
 		return media
 
 	def require_medium(self, medium_md5):
@@ -907,7 +908,7 @@ class MediaArchive:
 	def tag_string_to_list(self, tag_string):
 		return tag_string.split('#')
 
-	def parse_search_tags(self, tags=[]):
+	def parse_search_tags(self, tags=[], manage=False):
 		groups = []
 		without_groups = []
 		filter = {}
@@ -915,7 +916,7 @@ class MediaArchive:
 			if not tag or ('-' == tag[0] and 2 > len(tag)):
 				continue
 
-			# pagination tags
+			# pagination
 			if 'sort:' == tag[:5]:
 				sort = tag[5:]
 				if 'color' == sort:
@@ -934,15 +935,11 @@ class MediaArchive:
 					filter['perpage'] = int(perpage)
 				except ValueError:
 					pass
-			# search tags
-			elif 'md5:' == tag[:4]:
-				if 'md5s' not in filter:
-					filter['md5s'] = []
-				filter['md5s'].append(id_to_md5(tag[4:]))
-			elif 'origin:' == tag[:7]:
-				if 'uploader_remote_origins' not in filter:
-					filter['uploader_remote_origins'] = []
-				filter['uploader_remote_origins'].append(tag[7:])
+			# properties
+			elif 'group:' == tag[:6]:
+				groups.append(tag[6:])
+			elif '-group:' == tag[:7]:
+				without_groups.append(tag[7:])
 			elif 'uploaded after:' == tag[:15]:
 				import dateutil.parser
 				try:
@@ -983,36 +980,6 @@ class MediaArchive:
 					if 'created_befores' not in filter:
 						filter['created_befores'] = []
 					filter['created_befores'].append(created_before)
-			elif 'uploader:' == tag[:9]:
-				if not 'uploader_uuids' in filter:
-					filter['uploader_uuids'] = []
-				filter['uploader_uuids'].append(id_to_uuid(tag[9:]))
-			elif 'owner:' == tag[:6]:
-				if not 'owner_uuids' in filter:
-					filter['owner_uuids'] = []
-				filter['owner_uuids'].append(id_to_uuid(tag[6:]))
-			elif 'status:' == tag[:7]:
-				filter['status'] = tag[7:].upper()
-			elif '-status:' == tag[:8]:
-				if 'without_statuses' not in filter:
-					filter['without_statuses'] = []
-				filter['without_statuses'].append(tag[8:].upper())
-			elif 'protection:' == tag[:11]:
-				filter['protection'] = tag[11:].upper()
-			elif '-protection:' == tag[:12]:
-				if 'without_protections' not in filter:
-					filter['without_protections'] = []
-				filter['without_protections'].append(tag[12:].upper())
-			elif 'searchability:' == tag[:14]:
-				filter['searchability'] = tag[14:].upper()
-			elif '-searchability:' == tag[:15]:
-				if 'without_searchabilities' not in filter:
-					filter['without_searchabilities'] = []
-				filter['without_searchabilities'].append(tag[15:].upper())
-			elif 'group:' == tag[:6]:
-				groups.append(tag[6:])
-			elif '-group:' == tag[:7]:
-				without_groups.append(tag[7:])
 			elif 'mimetype:' == tag[:9]:
 				filter['mime'] = tag[9:]
 			elif '-mimetype:' == tag[:10]:
@@ -1030,6 +997,41 @@ class MediaArchive:
 						filter[data + '_less_than'] = tag[:16]
 					if data + ' more than:' == tag[:16]:
 						filter[data + '_more_than'] = tag[:16]
+			elif 'protection:' == tag[:11]:
+				filter['protection'] = tag[11:].upper()
+			elif '-protection:' == tag[:12]:
+				if 'without_protections' not in filter:
+					filter['without_protections'] = []
+				filter['without_protections'].append(tag[12:].upper())
+			elif 'searchability:' == tag[:14]:
+				filter['searchability'] = tag[14:].upper()
+			elif '-searchability:' == tag[:15]:
+				if 'without_searchabilities' not in filter:
+					filter['without_searchabilities'] = []
+				filter['without_searchabilities'].append(tag[15:].upper())
+			# management tags
+			elif 'id:' == tag[:3] and manage:
+				if 'md5s' not in filter:
+					filter['md5s'] = []
+				filter['md5s'].append(id_to_md5(tag[3:]))
+			elif 'origin:' == tag[:7] and manage:
+				if 'uploader_remote_origins' not in filter:
+					filter['uploader_remote_origins'] = []
+				filter['uploader_remote_origins'].append(tag[7:])
+			elif 'uploader:' == tag[:9] and manage:
+				if not 'uploader_uuids' in filter:
+					filter['uploader_uuids'] = []
+				filter['uploader_uuids'].append(id_to_uuid(tag[9:]))
+			elif 'owner:' == tag[:6] and manage:
+				if not 'owner_uuids' in filter:
+					filter['owner_uuids'] = []
+				filter['owner_uuids'].append(id_to_uuid(tag[6:]))
+			elif 'status:' == tag[:7] and manage:
+				filter['status'] = tag[7:].upper()
+			elif '-status:' == tag[:8] and manage:
+				if 'without_statuses' not in filter:
+					filter['without_statuses'] = []
+				filter['without_statuses'].append(tag[8:].upper())
 			#TODO without tags like escaping
 			#elif '-~' == tag[:2] and 2 < len(tag):
 			#	if 'without_tags_like' not in filter:
@@ -1050,11 +1052,7 @@ class MediaArchive:
 				filter['with_tags'].append(tag)
 
 		if groups:
-			print('combining with groups:')
-			print(groups)
 			filter['with_group_bits'] = self.accounts.users.combine_groups(names=groups)
-			print('group bits:')
-			print(filter['with_group_bits'])
 		if without_groups:
 			filter['without_group_bits'] = self.accounts.users.combine_groups(names=without_groups)
 

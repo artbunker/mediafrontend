@@ -98,18 +98,25 @@ def upload():
 def help():
 	return render_template('help.html')
 
-def search(overrides={}, search_field=True, manage=False, omit_future=True):
+def search(current_endpoint, overrides={}, search_field=True, manage=False, omit_future=True, **kwargs):
 	tags_query = ''
 	if 'tags' in request.args:
 		tags_query = request.args['tags']
 
 	tags = g.media_archive.tag_string_to_list(tags_query)
+	limited_tags = []
+	for tag in tags:
+		if g.media_archive.config['maximum_search_tags'] == len(limited_tags):
+			break
+		limited_tags.append(tag)
+	tags = limited_tags
 
 	if 'sort:random' in tags:
 		tags.remove('sort:random')
 		import random, string
 		seed = ''.join(random.choices(string.ascii_letters + string.digits, k=6)).upper()
 		tags.append('sort:random:' + seed)
+		return redirect(url_for(current_endpoint, tags='#'.join(tags), **kwargs), 302)
 
 	if 0 < len(overrides):
 		if 'tags' in overrides:
@@ -136,13 +143,16 @@ def search(overrides={}, search_field=True, manage=False, omit_future=True):
 	if tags:
 		filter = g.media_archive.parse_search_tags(tags)
 
-	pagination = {}
+	pagination = {
+		'page': 0,
+		'sort': 'creation',
+		'order': 'desc',
+		'perpage': 32,
+	}
 	if 'page' in request.args:
 		pagination['page'] = int(request.args['page'])
-
 	if 'sort' in filter:
 		pagination['sort'] = filter['sort']
-		
 	if 'order' in filter:
 		pagination['order'] = filter['order']
 	if 'perpage' in filter:
@@ -153,7 +163,7 @@ def search(overrides={}, search_field=True, manage=False, omit_future=True):
 			filter[key] = value
 
 	media = g.media_archive.search_media(filter=filter, **pagination)
-	media_total = g.media_archive.media.count_media(filter=filter)
+	total_media = g.media_archive.media.count_media(filter=filter)
 
 	# strip medium ids from protected media if not managing
 	if not manage:
@@ -173,20 +183,33 @@ def search(overrides={}, search_field=True, manage=False, omit_future=True):
 				):
 					medium.id = ''
 
+	tags_this_page = []
+	for medium in media:
+		if 0 < len(medium.tags):
+			for tag in medium.tags:
+				if tag not in tags_this_page:
+					tags_this_page.append(tag)
+
+	import math
+	import re
+
 	return render_template(
 		'search.html',
 		media=media,
-		media_total=media_total,
 		tags_query=tags_query,
 		search_field=search_field,
 		tools=manage,
+		tags_this_page=tags_this_page,
 		pagination=pagination,
+		total_media=total_media,
+		total_pages=math.ceil(total_media / pagination['perpage']),
+		current_endpoint=current_endpoint,
+		kwargs=kwargs,
+		re=re,
 	)
 
 @media_archive.route('/tags')
 def manage_tags():
-	#g.media_archive.media.remove_tag('')
-	#return 'test'
 	search = {
 		'tag': '',
 	}
@@ -204,7 +227,7 @@ def manage_tags():
 	if search['tag']:
 		filter['tags'] = '%' + escape(search['tag']) + '%'
 
-	pagination = pagination_from_request('tag', 'asc', 0, 32)
+	pagination = pagination_from_request('count', 'desc', 0, 32)
 
 	if not g.media_archive.accounts.current_user_has_global_group('manager'):
 		g.media_archive.accounts.require_global_group('contributor')
@@ -224,7 +247,7 @@ def manage_tags():
 		total_pages=math.ceil(total_tags / pagination['perpage']),
 	)
 
-@media_archive.route('/tags/<mode>')
+@media_archive.route('/tags/<mode>', methods=['GET', 'POST'])
 def edit_tag(mode):
 	owner_uuid = None
 	if not g.media_archive.accounts.current_user_has_global_group('manager'):
@@ -244,7 +267,12 @@ def edit_tag(mode):
 			tag2 = request.args[key]
 
 	if 'POST' != request.method:
-		return render_template(mode + '_tag.html', tag=tag, tag2=tag2)
+		return render_template(
+			'edit_tag.html',
+			mode=mode,
+			tag=tag,
+			tag2=tag2,
+		)
 
 	if 'tag' in request.form and request.form['tag']:
 		if 'remove' == mode:
@@ -270,16 +298,14 @@ def edit_tag(mode):
 
 @media_archive.route('/manage')
 def manage_media():
-	overrides = {
-		'filter': {},
-	}
+	filter = {}
 
 	if not g.media_archive.accounts.has_global_group(g.media_archive.accounts.current_user, 'manager'):
 		# contributor manage self
 		g.media_archive.accounts.require_global_group('contributor')
-		overrides['filter']['owner_uuids'] = g.accounts.current_user.uuid
+		filter['owner_uuids'] = g.accounts.current_user.uuid
 
-	return search(overrides, manage=True, omit_future=False)
+	return search('media_archive.manage_media', overrides={'filter': filter}, manage=True, omit_future=False)
 
 @media_archive.route('/fetch/<medium_filename>')
 def protected_medium_file(medium_filename):
@@ -353,7 +379,7 @@ def medium_file(medium_filename):
 	return send_from_directory(directory, medium_filename, conditional=True)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>", methods=['GET', 'POST'])
-def view_medium(medium_id, slideshow=False):
+def view_medium(medium_id):
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
 	g.media_archive.require_access(medium)
@@ -374,18 +400,16 @@ def view_medium(medium_id, slideshow=False):
 		edit_tags = True
 
 	if edit_tags and 'POST' == request.method:
-		print(request.form['tags'])
 		tags = g.media_archive.tag_string_to_list(request.form['tags'])
-		print(tags)
 		g.media_archive.media.remove_tags(medium)
 		if 0 < len(tags):
 			#TODO
 			medium.tags = []
 			g.media_archive.media.add_tags(medium, tags)
-		if slideshow:
+		if 'tags' in request.args and request.args['tags']:
 			return redirect(
 				url_for(
-					'media_archive.slideshow',
+					'media_archive.view_medium',
 					medium_id=medium_id,
 					tags=request.args['tags']
 				),
@@ -399,9 +423,9 @@ def view_medium(medium_id, slideshow=False):
 			302
 		)
 
-	if slideshow:
-		#TODO get slideshow tags
-		slideshow_tags = ''
+	slideshow = None
+	if 'tags' in request.args and request.args['tags']:
+		slideshow_tags = g.media_archive.tag_string_to_list(request.args['tags'])
 		#TODO get slideshow adjacent
 		slideshow_next = None
 		slideshow_prev = None
@@ -417,11 +441,8 @@ def view_medium(medium_id, slideshow=False):
 		edit_medium=edit_medium,
 		edit_tags=edit_tags,
 		slideshow=slideshow,
+		search_endpoint=g.media_archive.config['search_endpoint'],
 	)
-
-@media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/slideshow")
-def slideshow(medium_id):
-	return view_medium(medium_id, True)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/edit", methods=['GET', 'POST'])
 def edit_medium(medium_id):

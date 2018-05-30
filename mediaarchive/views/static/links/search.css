@@ -77,8 +77,43 @@ input#tags {
 	margin-left: 0;
 	margin-right: 0.75em;
 }
-#media_total {
+#total_media {
 	float: right;
+}
+#tags_this_page {
+	margin-bottom: 1em;
+	border-radius: 0.25em;
+	overflow: hidden;
+}
+#tags_this_page>span {
+	display: inline-block;
+	background-color: var(--b_m);
+	color: var(--f_m);
+	width: 100%;
+	padding: 0.25em 0.5em;
+	box-sizing: border-box;
+	margin-bottom: 1px;
+	text-align: right;
+	font-size: 0.9em;
+}
+#tags_this_page>div {
+	text-align: left;
+	background-color: var(--b_h);
+	padding-left: 1px;
+	padding-bottom: 1px;
+	font-size: 0;
+}
+/*omit some rendering tags from tags_this_page to reduce clutter*/
+.tag[data-tag^="filename:"],
+.tag[data-tag^="set:"],
+.tag[data-tag^="cover:"],
+.tag[data-tag^="mirror:"],
+.tag[data-tag^="superior of:"],
+.tag[data-tag^="inferior of:"],
+.tag[data-tag^="next:"],
+.tag[data-tag^="prev:"],
+.tag[data-tag^="suppress:"] {
+	display: none;
 }
 @media only screen and (max-width: 1024px) {
 	#results {

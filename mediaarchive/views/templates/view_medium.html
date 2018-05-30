@@ -97,11 +97,13 @@
 		{% include 'fuzzy_time.html' %}
 		{% if 0 < medium.tags|length %}
 			<div class="tags">
-				{% for tag in medium.tags %}
-					<span class="tag">{{ tag }}</span>
-				{% endfor %}
+				<div>
+					{% for tag in medium.tags %}
+						<span class="tag" data-tag="{{ tag }}"><a href="{{ url_for(search_endpoint, tags=tag) }}">#{{ tag }}</a></span>
+					{% endfor %}
+				</div>
 			</div>
-			{# tags editor #}
+			<script type="module" src="{{ url_for('media_archive.static', filename='scripts/view.js') }}"></script>
 		{% endif %}
 		{% if edit_tags %}
 			<div id="tag_editor">

@@ -1,7 +1,7 @@
 <div class="info">
 	{% if edit_medium %}
 		<span class="manage">
-			<a href="{{ url_for('media_archive.edit_medium', medium_id=medium.id) }}">Edit</a>
+			<a href="{{ url_for('media_archive.edit_medium', medium_id=medium.id) }}">Edit Medium</a>
 		</span>
 	{% endif %}
 	<span class="size">{{ medium.size }} bytes</span>

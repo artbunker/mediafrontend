@@ -433,6 +433,21 @@ def view_medium(medium_id):
 			302
 		)
 
+	visible_tags = 0
+	for tag in medium.tags:
+		if (
+				'filename:' == tag[:9]
+				or 'set:' == tag[:4]
+				or 'cover:' == tag[:6]
+				or 'mirror:' == tag[:7]
+				or 'superior of:' == tag[:12]
+				or 'inferior of:' == tag[:12]
+				or 'next:' == tag[:5]
+				or 'prev:' == tag[:5]
+				or 'suppress:' == tag[:9]
+			):
+			continue
+		visible_tags += 1
 
 	return render_template(
 		'view_medium.html',
@@ -441,6 +456,7 @@ def view_medium(medium_id):
 		edit_tags=edit_tags,
 		slideshow=g.media_archive.get_slideshow(medium),
 		search_endpoint=g.media_archive.config['search_endpoint'],
+		visible_tags=visible_tags,
 	)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/edit", methods=['GET', 'POST'])

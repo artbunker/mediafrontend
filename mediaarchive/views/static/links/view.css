@@ -31,7 +31,7 @@ body,
 	color: var(--f_h);
 }
 .info .manage {
-	margin-left: 2em;
+	margin-left: 0.75em;
 	margin-right: 0px;
 	float: right;
 }
@@ -66,28 +66,71 @@ audio {
 	padding-left: 1px;
 	padding-bottom: 1px;
 	box-sizing: border-box;
+	overflow: hidden;
 }
-.tags div {
+.tags .inner_tags {
 	font-size: 0;
 }
-#tag_editor {
+.tags[data-visible-tags="0"] {
+	display: none;
+}
+.tags_editor {
 	margin-top: 1em;
 }
-#tags {
+.tags_editor input[type=text] {
 	margin-top: 0;
 	width: 100%;
 }
 /*omit some rendering tags from visible tags list to reduce clutter*/
-.tag[data-tag^="filename:"],
-.tag[data-tag^="set:"],
-.tag[data-tag^="cover:"],
-.tag[data-tag^="mirror:"],
-.tag[data-tag^="superior of:"],
-.tag[data-tag^="inferior of:"],
-.tag[data-tag^="next:"],
-.tag[data-tag^="prev:"],
-.tag[data-tag^="suppress:"] {
+.inner_tags .tag[data-tag^="filename:"],
+.inner_tags .tag[data-tag^="set:"],
+.inner_tags .tag[data-tag^="cover:"],
+.inner_tags .tag[data-tag^="mirror:"],
+.inner_tags .tag[data-tag^="superior of:"],
+.inner_tags .tag[data-tag^="inferior of:"],
+.inner_tags .tag[data-tag^="next:"],
+.inner_tags .tag[data-tag^="prev:"],
+.inner_tags .tag[data-tag^="suppress:"] {
 	display: none;
 }
-
-
+/*js tag editor controls*/
+.info .tag_editor_control {
+	margin-left: 0.75em;
+	margin-right: 0px;
+	float: right;
+	cursor: pointer;
+	text-decoration: underline;
+	display: none;
+}
+.info .show_tag_editor,
+.editing_tags .info .tag_editor_control {
+	display: inline-block;
+}
+.editing_tags .info .show_tag_editor {
+	display: none;
+}
+/*js tag editor toggle*/
+.tags .tags_preview,
+.tags input[type=text],
+.editing_tags .inner_tags,
+.scripts_enabled .tags_editor,
+.scripts_enabled .tags_editor form {
+	display: none;
+}
+.editing_tags .tags .tags_preview,
+.editing_tags .tags input[type=text],
+.editing_tags .tags[data-visible-tags="0"] {
+	display: block;
+}
+/*js tag editor input*/
+.tags input[type=text] {
+	width: 100%;
+	outline: none;
+}
+/*js tag editor preview*/
+.tags .tags_preview {
+	font-size: 0;
+}
+.tags_preview .tag {
+	cursor: pointer;
+}

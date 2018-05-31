@@ -412,7 +412,8 @@ def view_medium(medium_id):
 		tags = g.media_archive.tag_string_to_list(request.form['tags'])
 		g.media_archive.media.remove_tags(medium)
 		if 0 < len(tags):
-			#TODO
+			#TODO clearing tags to force tag addition works
+			#TODO but probably should be handled inside the media module
 			medium.tags = []
 			g.media_archive.media.add_tags(medium, tags)
 		if 'tags' in request.args and request.args['tags']:

@@ -1,145 +1,150 @@
 'use strict';
-export class TagEditor {
-	constructor() {
-		this.tags_list = [];
-		this.copy_alert = 'Copy raw tags manually';
-		this.autocopy_alert = 'Tags copied to clipboard';
-		this.input = document.createElement('input');
-		this.input.type = 'text';
-		this.input.placeholder = 'Enter a tag to add, click a tag to remove';
-		// listener for input finish
-		this.input.addEventListener('keydown', e => {
-			//TODO maybe debounce this
-			// not finishing input
-			if ('Enter' != e.key) {
-				this.refresh_suggestions();
-				return;
-			}
-			this.add_tags(this.to_list(this.input.value));
+import { TagField } from './tagfield.js';
+
+export class TagEditor extends TagField {
+	constructor(target_input, strings) {
+		super(strings);
+		this.target_input = target_input;
+		this.additional_fields = {};
+		// strings
+		if ('undefined' == typeof strings) {
+			strings = {};
+		}
+		if (!strings.hasOwnProperty('saving_placeholder')) {
+			strings.saving_placeholder = 'Saving...';
+		}
+		if (!strings.hasOwnProperty('saving_in_progress')) {
+			strings.saving_in_progress = 'Saving in progress';
+		}
+		if (!strings.hasOwnProperty('copy_alert')) {
+			strings.copy_alert = 'Copy raw tags manually';
+		}
+		if (!strings.hasOwnProperty('autocopy_alert')) {
+			strings.autocopy_alert = 'Tags copied to clipboard';
+		}
+		this.strings.saving_placeholder = strings.saving_placeholder;
+		this.strings.saving_in_progress = strings.saving_in_progress;
+		this.strings.copy_alert = strings.copy_alert;
+		this.strings.autocopy_alert = strings.autocopy_alert;
+		// create control buttons
+		this.controls = {
+			show: null,
+			copy: null,
+			save: null,
+			discard: null,
+		}
+		for (let control in this.controls) {
+			this.strings[control + '_link'] = strings[control + '_link'] || control.charAt(0).toUpperCase() + control.slice(1);
+			this.controls[control] = document.createElement('span');
+			this.controls[control].innerText = this.strings[control + '_link'];
+		}
+		// add default control listeners
+		this.controls.show.addEventListener('click', e => {
+			this.clear();
+			this.add_tags(this.to_list(this.target_input.value));
 			setTimeout(() => {
-					this.clear_input();
+				this.input.focus();
 			}, 1);
 		});
-		this.preview = document.createElement('div');
-		// add reference to this tag editor on its preview and input
-		this.input.tag_editor = this;
-		this.preview.tag_editor = this;
-	}
-	show_suggestions() {
-		//TODO
-	}
-	hide_suggestions() {
-		//TODO
-	}
-	refresh_suggestions() {
-		//TODO
-	}
-	add_suggestion(suggestion) {
-		this.add_suggestions([suggestion])
-	}
-	add_suggestions(suggestions_list) {
-		//TODO
-	}
-	clear() {
-		this.clear_tags();
-		this.clear_preview();
-		this.clear_input();
-	}
-	clear_tags() {
-		this.tags_list = [];
-	}
-	clear_preview() {
-		this.preview.innerHTML = '';
-	}
-	clear_input() {
-		this.input.value = '';
-	}
-	discard() {
-		this.clear();
-	}
-	to_list(tags_string) {
-		if ('' == tags_string) {
-			return [];
-		}
-		// single tag
-		if (-1 == tags_string.indexOf('#')) {
-			return [tags_string];
-		}
-		// strip leading and trailing hashes and split on hashes
-		return tags_string.replace(/^#+|#+$/g, '').split('#');
-	}
-	add_tag(tag) {
-		this.add_tags([tag]);
-	}
-	create_tag_element(tag) {
-		let el = document.createElement('span');
-		el.classList.add('tag');
-		el.dataset.tag = tag;
-		let inner_el = document.createElement('span');
-		// for negation tag text shouldn't include the hyphen
-		inner_el.innerText = '#' + ('-' == tag[0] ? tag.substring(1) : tag);
-		el.appendChild(inner_el);
-		return el;
-	}
-	add_tags(tags_list) {
-		for (let i = 0; i < tags_list.length; i++) {
-			let tag = tags_list[i];
-			if (-1 != this.tags_list.indexOf(tag)) {
-				continue;
+		this.controls.copy.addEventListener('click', e => {
+			this.copy();
+		});
+		this.controls.save.addEventListener('click', () => {
+			this.save();
+		});
+		this.controls.discard.addEventListener('click', e => {
+			if (!this.input.disabled) {
+				this.discard();
+				return;
 			}
-			this.tags_list.push(tag);
-			let el = this.create_tag_element(tag)
-			el.addEventListener('click', e => {
-				this.remove_tag(e.currentTarget.dataset.tag);
-			});
-			this.preview.appendChild(el);
-			this.hide_suggestions();
-			// dispatch add event
-			this.input.dispatchEvent(
-				new CustomEvent(
-					'added',
-					{
-						detail:
-						{
-							tag: tag,
-							el: el,
-						}
-					}
+			alert(this.strings.saving_in_progress);
+			e.stopPropagation();
+			
+		});
+		// add event listener for enter submit
+		this.input.addEventListener('submit', () => {
+			this.save();
+		});
+		// add listener to prevent invalid tags
+		this.input.addEventListener('added', e => {
+			if (
+				'-' == e.detail.tag[0]
+				|| 'sort:' == e.detail.tag.substring(0, 5)
+				|| 'order:' == e.detail.tag.substring(0, 6)
+				|| 'perpage:' == e.detail.tag.substring(0, 8)
+				|| 'group:' == e.detail.tag.substring(0, 6)
+				|| 'uploaded after:' == e.detail.tag.substring(0, 15)
+				|| 'uploaded before:' == e.detail.tag.substring(0, 16)
+				|| 'created after:' == e.detail.tag.substring(0, 14)
+				|| 'created before:' == e.detail.tag.substring(0, 15)
+				|| 'mimetype:' == e.detail.tag.substring(0, 9)
+				|| 'size:' == e.detail.tag.substring(0, 5)
+				|| (
+					'data' == e.detail.tag.substring(0, 4)
+					&& (
+						' more than:' == e.detail.tag.substring(5, 16)
+						|| ' less than:' == e.detail.tag.substring(5, 16)
+					)
 				)
-			);
-		}
-	}
-	remove_tag(tag) {
-		console.log('trying to remove tag: ' + tag);
-		this.remove_tags([tag]);
-	}
-	remove_tags(tags_list) {
-		for (let i = 0; i < tags_list.length; i++) {
-			let tag = tags_list[i];
-			let tag_index = this.tags_list.indexOf(tag)
-			if (-1 == tag_index) {
-				continue;
+				|| 'protection:' == e.detail.tag.substring(0, 11)
+				|| 'searchability:' == e.detail.tag.substring(0, 14)
+				|| 'id:' == e.detail.tag.substring(0, 3)
+				|| 'origin:' == e.detail.tag.substring(0, 7)
+				|| 'uploader:' == e.detail.tag.substring(0, 9)
+				|| 'owner:' == e.detail.tag.substring(0, 6)
+				|| 'status:' == e.detail.tag.substring(0, 7)
+			) {
+				this.remove_tag(e.detail.tag);
 			}
-			this.tags_list.splice(tag_index, 1)
-			let tag_el = this.preview.querySelector('.tag[data-tag="' + tag.replace('\\', '\\\\') + '"]');
-			tag_el.parentNode.removeChild(tag_el);
-			// dispatch remove event
-			this.input.dispatchEvent(
-				new CustomEvent(
-					'removed',
-					{
-						detail:
-						{
-							tag: tag,
-						}
-					}
-				)
-			);
-		}
-		this.input.focus();
+		});
 	}
-	to_string(tags_list) {
-		return tags_list.join('#');
+	save() {
+		let form = this.target_input.parentNode;
+		while ('FORM' != form.tagName) {
+			if (document.body == form) {
+				// traversed up from target input and didn't find a form element
+				// dispatch failure event
+				this.input.dispatchEvent(
+					new CustomEvent('submit_failure')
+				);
+				return;
+			}
+		}
+		this.input.disabled = true;
+		this.input.placeholder = this.strings.saving_placeholder;
+		let fd = new FormData();
+		fd.append(this.target_input.name, this.to_string(this.tags_list));
+		//TODO add other fields in the current form to formdata
+		//TODO instead of using custom additional_fields property?
+		for (field in this.additional_fields) {
+			fd.append(field, this.additional_fields[field]);
+		}
+		// send save request
+		let xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = () => {
+			if (xhr.readyState == XMLHttpRequest.DONE) {
+				this.input.disabled = false;
+				this.input.placeholder = this.strings.placeholder;
+				if (200 == xhr.status) {
+					this.target_input.value = this.to_string(this.tags_list);
+					// dispatch success event
+					this.input.dispatchEvent(
+						new CustomEvent('save_success')
+					);
+				}
+				else {
+					// dispatch failure event
+					this.input.dispatchEvent(
+						new CustomEvent('save_failure')
+					);
+				}
+			}
+		};
+		let method = form.method.toUpperCase();
+		let action = form.action;
+		xhr.open(method, action + (-1 != action.indexOf('?') ? '&' : '?') + '_' + new Date().getTime(), true);
+		xhr.withCredentials = true;
+		xhr.send(fd);
 	}
 	copy() {
 		let tag_string = this.to_string(this.tags_list).replace(' #', '#');
@@ -152,18 +157,18 @@ export class TagEditor {
 			document.body.appendChild(temp_input);
 			temp_input.select();
 			if (document.execCommand('copy')) {
-				alert(this.autocopy_alert);
+				alert(this.strings.autocopy_alert);
 			}
 			else {
 				// fallback to prompt
-				prompt(this.copy_alert, tag_string);
+				prompt(this.strings.copy_alert, tag_string);
 			}
 			// destroy temp input
 			document.body.removeChild(temp_input);
 		}
 		catch (err) {
 			// fallback to prompt
-			prompt(this.copy_alert, tag_string);
+			prompt(this.strings.copy_alert, tag_string);
 		}
 		this.input.focus();
 	}

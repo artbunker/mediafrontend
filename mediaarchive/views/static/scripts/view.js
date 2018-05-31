@@ -37,6 +37,10 @@ if (tags_editor) {
 
 	// create tag editor
 	let strings = {
+		'show_link': tags_editor.dataset.showLink,
+		'save_link': tags_editor.dataset.saveLink,
+		'discard_link': tags_editor.dataset.discardLink,
+		'copy_link': tags_editor.dataset.copyLink,
 		'placeholder': tags_editor.dataset.placeholder,
 		'saving_placeholder': tags_editor.dataset.savingPlaceholder,
 		'saving_in_progress': tags_editor.dataset.savingInProgress,

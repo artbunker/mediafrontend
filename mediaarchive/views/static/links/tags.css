@@ -165,7 +165,7 @@
 
 /*actions*/
 .tag .action,
-.tag-field-preview .tag::after {
+.tags_preview .tag::after {
 	display: inline-block;
 	width: 1.25ex;
 	text-align: center;
@@ -173,10 +173,10 @@
 	cursor: pointer;
 }
 .tag .action:hover,
-.tag-field-preview .tag:hover::after {
+.tags_preview .tag:hover::after {
 	background-color: rgba(0, 0, 0, 0.5);
 }
-.tag-field-preview .tag::after {
+.tags_preview .tag::after {
 	color: #ffffff;
 	content: "ˣ";
 	padding: 2px 4px;

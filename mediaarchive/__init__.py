@@ -1091,6 +1091,7 @@ class MediaArchive:
 							'global',
 							medium.group_bits
 						):
+						groups = []
 						for premium_group in self.config['premium_groups']:
 							premium_group_bit = self.accounts.users.group_name_to_bit(premium_group)
 							if self.accounts.users.contains_all_group_bits(
@@ -1101,7 +1102,9 @@ class MediaArchive:
 										self.accounts.current_user,
 										premium_group
 									):
-									abort(402, {'message': 'premium_medium', 'group': premium_group})
+									groups.append(premium_group)
+						if groups:
+							abort(402, {'message': 'premium_medium', 'groups': groups})
 						abort(403, {'message': 'protected_medium'})
 
 	def upload_from_request(self):

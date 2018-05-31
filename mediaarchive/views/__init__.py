@@ -380,9 +380,18 @@ def medium_file(medium_filename):
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>", methods=['GET', 'POST'])
 def view_medium(medium_id):
+	from statuspages import PaymentRequired
+
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
-	g.media_archive.require_access(medium)
+	try:
+		g.media_archive.require_access(medium)
+	except PaymentRequired as e:
+		slideshow = g.media_archive.get_slideshow(medium)
+		groups = []
+		if 'groups' in e.description:
+			groups = e.description['groups']
+		return render_template('premium.html', groups=groups, slideshow=slideshow)
 
 	edit_medium = False
 	edit_tags = False

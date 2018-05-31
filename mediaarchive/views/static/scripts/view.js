@@ -27,6 +27,9 @@ if (0 < tags_editors.length) {
 		tag_editor.tags = view.querySelector('.tags');
 		tag_editor.tags_editor = tags_editor;
 
+		// add reference to tag editor to element
+		tags_editor.tag_editor = tag_editor;
+
 		// insert tag editor controls into info bar
 		let info = view.querySelector('.info');
 		tag_editor.controls = {
@@ -186,7 +189,7 @@ window.addEventListener('keydown', e => {
 	// get first tag editor
 	let tag_editor = document.querySelector('.tags_editor').tag_editor;
 	if ('Escape' == e.key) {
-		tag_editor_discard(tag_editor);
+		tag_editor.controls.discard.click();
 		return;
 	}
 	// ignore editor open if in an input
@@ -194,7 +197,7 @@ window.addEventListener('keydown', e => {
 		return;
 	}
 	if ('t' == e.key) {
-		tag_editor_show(tag_editor);
+		tag_editor.controls.show.click();
 	}
 });
 // add listener for leaving page to check if any tags are still processing

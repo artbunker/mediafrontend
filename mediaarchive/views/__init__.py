@@ -141,7 +141,7 @@ def search(current_endpoint, overrides={}, search_field=True, manage=False, omit
 
 	filter = {}
 	if tags:
-		filter = g.media_archive.parse_search_tags(tags)
+		filter = g.media_archive.parse_search_tags(tags, manage)
 
 	pagination = {
 		'page': 0,
@@ -432,24 +432,13 @@ def view_medium(medium_id):
 			302
 		)
 
-	slideshow = None
-	if 'tags' in request.args and request.args['tags']:
-		slideshow_tags = g.media_archive.tag_string_to_list(request.args['tags'])
-		#TODO get slideshow adjacent
-		slideshow_next = None
-		slideshow_prev = None
-		slideshow = {
-			'tags': slideshow_tags,
-			'prev': slideshow_prev,
-			'next': slideshow_next,
-		}
 
 	return render_template(
 		'view_medium.html',
 		medium=medium,
 		edit_medium=edit_medium,
 		edit_tags=edit_tags,
-		slideshow=slideshow,
+		slideshow=g.media_archive.get_slideshow(medium),
 		search_endpoint=g.media_archive.config['search_endpoint'],
 	)
 

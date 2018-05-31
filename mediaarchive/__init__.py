@@ -1064,6 +1064,23 @@ class MediaArchive:
 		self.media.remove_tags(medium)
 		self.media.remove_medium(medium)
 
+	def get_slideshow(self, medium):
+		slideshow = None
+
+		if 'tags' not in request.args or not request.args['tags']:
+			return slideshow
+
+		slideshow_tags = self.tag_string_to_list(request.args['tags'])
+		#TODO get slideshow adjacent using specified medium and tags
+		slideshow_next = None
+		slideshow_prev = None
+		slideshow = {
+			'tags': slideshow_tags,
+			'prev': slideshow_prev,
+			'next': slideshow_next,
+		}
+		return slideshow
+
 	def require_access(self, medium):
 		signed_in = False
 		owner = False

@@ -1,5 +1,6 @@
 'use strict';
 import { TagEditor } from './tageditor.js';
+import { fetch_tag_suggestions } from './tagfield.js';
 
 function count_visible_tags(tags_list) {
 	let visible_tags = 0;
@@ -119,4 +120,5 @@ if (tags_editor) {
 			return true;
 		}
 	});
+	fetch_tag_suggestions();
 }

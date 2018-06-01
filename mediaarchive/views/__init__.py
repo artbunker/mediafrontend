@@ -190,6 +190,8 @@ def search(current_endpoint, overrides={}, search_field=True, manage=False, omit
 				if tag not in tags_this_page:
 					tags_this_page.append(tag)
 
+	tag_suggestion_lists = g.media_archive.get_tag_suggestion_lists(manage=manage, search=True)
+
 	import math
 	import re
 
@@ -198,6 +200,7 @@ def search(current_endpoint, overrides={}, search_field=True, manage=False, omit
 		media=media,
 		tags_query=tags_query,
 		search_field=search_field,
+		tag_suggestion_lists=tag_suggestion_lists,
 		tools=manage,
 		tags_this_page=tags_this_page,
 		pagination=pagination,
@@ -347,7 +350,7 @@ def protected_medium_file(medium_filename):
 
 	return send_from_directory(media_path, medium_filename, mimetype=medium.mime, conditional=True)
 
-@media_archive.route('/file/<medium_filename>')
+@media_archive.route('/file/media/<medium_filename>')
 def medium_file(medium_filename):
 	import os
 
@@ -378,6 +381,25 @@ def medium_file(medium_filename):
 
 	return send_from_directory(directory, medium_filename, conditional=True)
 
+@media_archive.route('/file/tags/<tags_filename>')
+def tags_file(tags_filename):
+	import os
+
+	tags_file = os.path.join(
+		g.media_archive.config['tags_path'],
+		tags_filename
+	)
+	if not os.path.exists(tags_file):
+		abort(404, {'message': 'tags_not_found'})
+
+	from flask import send_from_directory
+
+	return send_from_directory(
+		g.media_archive.config['tags_path'],
+		tags_filename,
+		conditional=True
+	)
+
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>", methods=['GET', 'POST'])
 def view_medium(medium_id):
 	from statuspages import PaymentRequired
@@ -395,6 +417,7 @@ def view_medium(medium_id):
 
 	edit_medium = False
 	edit_tags = False
+	tag_suggestion_lists = []
 
 	if (
 			g.media_archive.accounts.current_user
@@ -405,8 +428,7 @@ def view_medium(medium_id):
 		):
 		edit_medium = True
 		edit_tags = True
-	elif g.media_archive.accounts.current_user_has_global_group('taxonomist'):
-		edit_tags = True
+		tag_suggestion_lists = g.media_archive.get_tag_suggestion_lists(manage=True, search=False)
 
 	if edit_tags and 'POST' == request.method:
 		tags = g.media_archive.tag_string_to_list(request.form['tags'])
@@ -416,6 +438,7 @@ def view_medium(medium_id):
 			#TODO but probably should be handled inside the media module
 			medium.tags = []
 			g.media_archive.media.add_tags(medium, tags)
+		g.media_archive.build_tag_suggestion_lists()
 		if 'tags' in request.args and request.args['tags']:
 			return redirect(
 				url_for(
@@ -454,6 +477,7 @@ def view_medium(medium_id):
 		medium=medium,
 		edit_medium=edit_medium,
 		edit_tags=edit_tags,
+		tag_suggestion_lists=tag_suggestion_lists,
 		slideshow=g.media_archive.get_slideshow(medium),
 		search_endpoint=g.media_archive.config['search_endpoint'],
 		visible_tags=visible_tags,

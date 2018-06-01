@@ -10,6 +10,12 @@
 {% endblock %}
 {% block content %}
 	{% if search_field %}
+		{% block meta %}
+			{{ super() }}
+			{% for tag_suggestion_list in tag_suggestion_lists %}
+				<meta name="tag_suggestion_list" value="{{ tag_suggestion_list }}">
+			{% endfor %}
+		{% endblock %}
 		<div id="search">
 			<form method="get">
 				<input type="text" id="tags" name="tags" value="{{ tags_query }}" data-max-tags="{{ g.media_archive.config['maximum_search_tags'] }}" data-placeholder="Tag search">

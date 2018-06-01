@@ -372,14 +372,14 @@ class MediaArchive:
 		else:
 			fetch_uri = url_for(
 				'media_archive.protected_medium_file',
-				medium_filename='MEDIUM_FILENAME').replace('MEDIUM_FILENAME', '{}'
-			)
+				medium_filename='MEDIUM_FILENAME'
+			).replace('MEDIUM_FILENAME', '{}')
 
 		if not self.config['medium_file_uri']:
 			self.config['medium_file_uri'] = url_for(
 				'media_archive.medium_file',
-				medium_filename='MEDIUM_FILENAME').replace('MEDIUM_FILENAME', '{}'
-			)
+				medium_filename='MEDIUM_FILENAME'
+			).replace('MEDIUM_FILENAME', '{}')
 
 		if MediumProtection.NONE != medium.protection:
 			protection_path = 'protected'
@@ -1081,6 +1081,57 @@ class MediaArchive:
 		}
 		return slideshow
 
+	def get_tag_suggestion_lists(self, manage=False, search=False):
+		tag_suggestion_lists = []
+		if not self.config['tags_uri']:
+			self.config['tags_uri'] = url_for(
+				'media_archive.tags_file',
+				tags_filename='TAGS_FILENAME'
+			).replace('TAGS_FILENAME', '{}')
+		tag_suggestion_lists.append(self.config['tags_uri'].format('public.json'))
+		#if self.accounts.current_user:
+		#	tag_suggestion_lists.append(self.config['tags_uri'].format('signed_in.json'))
+		#	if manage:
+		#		tag_suggestion_lists.append(self.config['tags_uri'].format('manage.json'))
+		if search:
+			tag_suggestion_lists.append(self.config['tags_uri'].format('search.json'))
+		return tag_suggestion_lists
+
+	def build_tag_suggestion_lists(self):
+		import json
+
+		#TODO this seems like it's going to end up heavier than persephone's build tag lists
+		#TODO maybe add some lighter tag and mimetype retrieval methods to the media module
+
+		suggestions = []
+		for group in self.config['requirable_groups']:
+			suggestions.append('group:' + group)
+		for searchability in MediumSearchability:
+			suggestions.append('searchability:' + str(searchability).lower())
+		for protection in MediumProtection:
+			suggestions.append('protection:' + str(protection).lower())
+		mimes = self.media.get_mimes()
+		for mime in mimes:
+			suggestions.append('mimetype:' + mime)
+
+		f = open(os.path.join(self.config['tags_path'], 'search.json'), 'w')
+		f.write(json.dumps(suggestions))
+		f.close()
+
+		#TODO more granular lists
+		#TODO public with tags from searchability:public and protection:none
+		#TODO signed_in with tags from searchability:groups and protection:groups
+		#TODO manage with tags from searchability:hidden and protection:private
+
+		suggestions = []
+		tags = self.media.search_tags(group=True)
+		for tag in tags:
+			suggestions.append(tag.tag)
+
+		f = open(os.path.join(self.config['tags_path'], 'public.json'), 'w')
+		f.write(json.dumps(suggestions))
+		f.close()
+
 	def require_access(self, medium):
 		signed_in = False
 		owner = False
@@ -1266,3 +1317,4 @@ class MediaArchive:
 			self.generate_medium_summaries(medium)
 
 		return errors, medium
+

@@ -1,5 +1,6 @@
 'use strict';
 import { TagSearch } from './tagsearch.js';
+import { fetch_tag_suggestions } from './tagfield.js';
 
 let target_input = document.getElementById('tags');
 if (target_input) {
@@ -42,6 +43,7 @@ if (target_input) {
 			}
 		});
 	}
+	fetch_tag_suggestions();
 }
 let tags_this_page = document.querySelector('#tags_this_page');
 if (tags_this_page) {

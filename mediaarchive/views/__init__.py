@@ -662,4 +662,4 @@ def remove_medium(medium_id):
 
 	g.media_archive.remove_medium(medium)
 
-	return redirect(url_for('media_archive.manage'), 302)
+	return redirect(url_for('media_archive.manage_media'), 302)

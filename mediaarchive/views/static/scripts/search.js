@@ -50,3 +50,30 @@ if (tags_this_page) {
 		e.currentTarget.parentNode.classList.toggle('closed');
 	});
 }
+// thumbnail hover previews
+let thumbnails = document.querySelectorAll('.thumbnail');
+for (let i = 0; i < thumbnails.length; i++) {
+	let thumbnail = thumbnails[i];
+	if (thumbnail.dataset.hasOwnProperty('reencoded')) {
+		if ('image/gif' == thumbnail.dataset.mime) {
+			let preview_picture = document.createElement('picture');
+			preview_picture.classList.add('preview');
+			let preview_image = document.createElement('img');
+			preview_image.src = thumbnail.dataset.reencoded;
+			preview_picture.appendChild(preview_image);
+
+			let picture = thumbnail.querySelector('picture');
+			picture.parentNode.insertBefore(preview_picture, picture);
+
+			thumbnail.addEventListener('mouseover', e => {
+				e.currentTarget.classList.add('hover');
+			});
+			thumbnail.addEventListener('mouseout', e => {
+				e.currentTarget.classList.remove('hover');
+			});
+		}
+		else if ('video' == thumbnail.dataset.category) {
+			//TODO video hover previews
+		}
+	}
+}

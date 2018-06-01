@@ -43,7 +43,6 @@ if (tags_editor) {
 		'saving_placeholder': tags_editor.dataset.savingPlaceholder,
 		'saving_in_progress': tags_editor.dataset.savingInProgress,
 		'remove_tag': tags_editor.dataset.removeTag,
-		'': '',
 	};
 	let editor = new TagEditor(tags_editor.querySelector('[name="tags"]'), strings);
 

@@ -63,9 +63,10 @@
 	top: 25%;
 	left: 25%;
 }
-input#tags {
+#search input[type=text] {
 	width: 100%;
 	margin-top: 0;
+	outline: none;
 }
 #search {
 	margin-bottom: 1em;
@@ -85,18 +86,18 @@ input#tags {
 	border-radius: 0.25em;
 	overflow: hidden;
 }
-#tags_this_page>span {
+#tags_this_page .header {
 	display: inline-block;
 	background-color: var(--b_m);
 	color: var(--f_m);
 	width: 100%;
 	padding: 0.25em 0.5em;
 	box-sizing: border-box;
-	margin-bottom: 1px;
 	text-align: right;
 	font-size: 0.9em;
 }
 #tags_this_page>div {
+	margin-top: 1px;
 	text-align: left;
 	background-color: var(--b_h);
 	padding-left: 1px;
@@ -115,6 +116,27 @@ input#tags {
 .tag[data-tag^="suppress:"] {
 	display: none;
 }
+/*js search box*/
+.scripts_enabled #tags {
+	display: none;
+}
+.tags_preview_wrapper {
+	font-size: 0;
+	padding-left: 1px;
+	padding-bottom: 1px;
+	background-color: var(--b_h);
+	color: var(--f_h);
+	text-align: left;
+}
+/*js tags this page*/
+.scripts_enabled #tags_this_page .header {
+	cursor: pointer;
+	text-decoration: underline;
+}
+#tags_this_page.closed>div {
+	display: none;
+}
+
 @media only screen and (max-width: 1024px) {
 	#results {
 		grid-template-columns: repeat(4, 4fr);

@@ -31,8 +31,6 @@ if (tags) {
 }
 let tags_editor = document.querySelector('.tags_editor');
 if (tags_editor) {
-	// get medium view
-	let view = tags_editor.parentNode;
 	document.body.classList.add('scripts_enabled');
 
 	// create tag editor

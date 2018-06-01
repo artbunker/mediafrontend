@@ -12,14 +12,11 @@
 	{% if search_field %}
 		<div id="search">
 			<form method="get">
-				<input type="text" id="tags" name="tags" value="{{ tags_query }}" data-max-tags="{{ g.media_archive.config['maximum_search_tags'] }}">
+				<input type="text" id="tags" name="tags" value="{{ tags_query }}" data-max-tags="{{ g.media_archive.config['maximum_search_tags'] }}" data-placeholder="Enter a tag to add, click a tag to remove">
 				<br>
 				<input type="submit" value="Search">
 			</form>
-			{#TODO<script type="module">
-				import { TagEditor } from '{{ url_for('media_archive.static', filename='scripts/tag_editor.js') }}';
-				new TagEditor(document.getElementById('tags'));
-			</script>#}
+			<script type="module" src="{{ url_for('media_archive.static', filename='scripts/search.js') }}"></script>
 		</div>
 	{% endif %}
 	<div class="menu">
@@ -31,7 +28,7 @@
 	</div>
 	{% if 0 < tags_this_page|length %}
 		<div id="tags_this_page">
-			<span>Tags this page</span>
+			<span class="header">Tags this page</span>
 			<div>
 				{% for tag in tags_this_page %}
 					{% set clear_query = re.sub('#+', '#', re.sub('(^|#)\-?' + tag + '(#|$)', '#', tags_query + '#')) %}

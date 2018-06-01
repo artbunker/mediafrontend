@@ -87,9 +87,6 @@ export class TagField {
 		// strip leading and trailing hashes and split on hashes
 		return tags_string.replace(/^#+|#+$/g, '').split('#');
 	}
-	add_tag(tag) {
-		this.add_tags([tag]);
-	}
 	create_tag_element(tag, title, link_uri) {
 		let el = document.createElement('span');
 		el.classList.add('tag');
@@ -109,6 +106,9 @@ export class TagField {
 		inner_el.innerText = '#' + ('-' == tag[0] ? tag.substring(1) : tag);
 		el.appendChild(inner_el);
 		return el;
+	}
+	add_tag(tag) {
+		this.add_tags([tag]);
 	}
 	add_tags(tags_list) {
 		for (let i = 0; i < tags_list.length; i++) {
@@ -168,6 +168,7 @@ export class TagField {
 		this.input.focus();
 	}
 	to_string(tags_list) {
+		tags_list.sort();
 		return tags_list.join('#');
 	}
 }

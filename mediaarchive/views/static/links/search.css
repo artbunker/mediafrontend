@@ -128,6 +128,9 @@
 	color: var(--f_h);
 	text-align: left;
 }
+.tags_preview_wrapper .tag {
+	cursor: pointer;
+}
 /*js tags this page*/
 .scripts_enabled #tags_this_page .header {
 	cursor: pointer;

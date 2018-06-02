@@ -9,8 +9,10 @@
 	{% endif %}
 	<div 
 		class="thumbnail" 
-		{% if thumb_medium.uris['reencoded'][256] %}
-			data-reencoded="{{ thumb_medium.uris['reencoded'][256] }}" 
+		{% if thumb_medium.uris['reencoded']['clip'] %}
+			data-preview="{{ thumb_medium.uris['reencoded']['clip'] }}" 
+		{% elif thumb_medium.uris['reencoded'][256] %}
+			data-preview="{{ thumb_medium.uris['reencoded'][256] }}" 
 		{% endif %}
 		data-category="{{ medium.category }}" 
 		data-mime="{{ medium.mime }}" 

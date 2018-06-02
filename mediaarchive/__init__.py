@@ -425,6 +425,8 @@ class MediaArchive:
 				if os.path.exists(os.path.join(summary_path, summary_file + '.png')):
 					medium.uris['fallback'][edge] = media_uri.format(summary_file + '.png')
 		if 'video' == medium.category:
+			if os.path.exists(os.path.join(summary_path,  medium.id + '.clip.webm')):
+				medium.uris['reencoded']['clip'] = media_uri.format(medium.id + '.clip.webm')
 			if os.path.exists(os.path.join(summary_path,  medium.id + '.slideshow.webp')):
 				medium.uris['static']['slideshow'] = media_uri.format(medium.id + '.slideshow.webp')
 			if os.path.exists(os.path.join(summary_path,  medium.id + '.slideshow.png')):
@@ -641,8 +643,8 @@ class MediaArchive:
 			width,
 			height,
 			edge,
-			start_ms=None,
-			end_ms=None,
+			start_ms=0,
+			end_ms=0,
 			muted=False
 		):
 		import subprocess

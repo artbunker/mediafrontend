@@ -100,7 +100,6 @@ if (tags_editor) {
 
 	// listener for management keys
 	window.addEventListener('keydown', e => {
-		// get first tag editor
 		if ('Escape' == e.key) {
 			editor.controls.discard.click();
 			return;

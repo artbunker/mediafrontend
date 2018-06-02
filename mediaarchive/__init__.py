@@ -533,6 +533,8 @@ class MediaArchive:
 					if os.path.exists(os.path.join(summary_path, summary_file)):
 						cb(summary_path, summary_file)
 			if 'video' == medium.category:
+				# clip
+				extensions.append('clip.webm')
 				# slideshow strips
 				extensions = ['slideshow.webp', 'slideshow.png']
 				# reencode
@@ -586,6 +588,213 @@ class MediaArchive:
 			# fallback
 			thumbnail_path = summary_path.format(str(edge) + '.png')
 			thumbnail.save(thumbnail_path, 'PNG', optimize=True)
+
+	def generate_video_snapshots(self, file_path, duration_s):
+		import uuid
+		import math
+		import subprocess
+
+		from PIL import Image
+
+		# space the snapshot intervals out with the intention to skip first and last
+		interval_s = math.floor(duration_s) / (self.config['video_snapshots'] + 2)
+
+		snapshots = []
+		for i in range(1, self.config['video_snapshots']):
+			snapshot_path = os.path.join(__name__, 'tmp', 'temp_snapshot_' + str(uuid.uuid4()) + '.png')
+
+			ffmpeg_call = [
+				self.config['ffmpeg_path'],
+				'-i',
+				file_path,
+				'-ss',
+				str(i * interval_s),
+				'-frames:v',
+				'1',
+			]
+			if (
+					self.config['ffmpeg_thread_limit']
+					and isinstance(self.config['ffmpeg_thread_limit'], int)
+					and 0 < self.config['ffmpeg_thread_limit']
+				):
+				ffmpeg_call += [
+					'-threads',
+					str(self.config['ffmpeg_thread_limit']),
+				]
+			ffmpeg_call += [
+				snapshot_path,
+			]
+			subprocess.run(ffmpeg_call)
+
+			snapshot = Image.open(snapshot_path)
+			snapshots.append((snapshot_path, snapshot))
+
+			if 1 == i:
+				#TODO for now only generate the one static summary, do slideshow later
+				break
+		return snapshots
+
+	def reencode_video(
+			self,
+			file_path,
+			output_path,
+			width,
+			height,
+			edge,
+			start_ms=None,
+			end_ms=None,
+			muted=False
+		):
+		import subprocess
+
+		if (
+				0 > edge
+				or not width
+				or not height
+			):
+			return
+
+		# using libvpx instead of libx264, so maybe the divisible by 2 requirement isn't needed?
+		if width < height:
+			resize_width = -1
+			resize_height = edge
+		else:
+			resize_width = edge
+			resize_height = -1
+
+		ffmpeg_call = [
+			self.config['ffmpeg_path'],
+		]
+		if (
+				0 < end_ms
+				and start_ms < end_ms
+			):
+			start_s = start_ms / 1000
+			end_s = end_ms / 1000
+			ffmpeg_call += [
+				'-ss',
+				str(start_s),
+				'-i',
+				file_path,
+				'-t',
+				str(end_s - start_s)
+				#'-ss',
+				#str(end_s),
+			]
+		else:
+			ffmpeg_call += [
+				'-i',
+				file_path,
+			]
+		ffmpeg_call += [
+			'-vcodec',
+			'libvpx',
+			'-quality',
+			'good',
+			'-cpu-used',
+			'5',
+			'-vf',
+			'scale=' + str(resize_width) + ':' + str(resize_height),
+			'-y',
+		]
+		if muted:
+			ffmpeg_call += [
+				'-an'
+			]
+		if (
+				self.config['ffmpeg_thread_limit']
+				and isinstance(self.config['ffmpeg_thread_limit'], int)
+				and 0 < self.config['ffmpeg_thread_limit']
+			):
+			ffmpeg_call += [
+				'-threads',
+				str(self.config['ffmpeg_thread_limit']),
+			]
+		ffmpeg_call += [
+			output_path,
+		]
+		subprocess.run(ffmpeg_call)
+
+	def get_video_info(self, file_path):
+		import subprocess
+		import json
+
+		width = 0
+		height = 0
+		duration_s = 0
+		audio_codec = ''
+		video_codec = ''
+
+		probe_json = subprocess.getoutput([
+			self.config['ffprobe_path'],
+			'-v',
+			'quiet',
+			'-print_format',
+			'json',
+			'-show_streams',
+			'-i',
+			file_path,
+		])
+		probe = json.loads(probe_json)
+
+		if 'streams' in probe:
+			for stream in probe['streams']:
+				for key, value in stream.items():
+					if 'width' == key or 'coded_width' == key:
+						width = int(value)
+					elif 'height' == key or 'coded_height' == key:
+						height = int(value)
+					elif 'duration' == key:
+						duration_s = float(value)
+			if (
+					'codec_type' in stream
+					and 'codec_name' in stream
+				):
+				codec_name = stream['codec_name']
+				if 'audio' == stream['codec_type']:
+					audio_codec = codec_name
+				elif 'video' == stream['codec_type']:
+					video_codec = codec_name
+
+		# missing duration after streams probe, do packets probe
+		if not duration_s:
+			probe_json = subprocess.getoutput([
+				self.config['ffprobe_path'],
+				'-v',
+				'quiet',
+				'-print_format',
+				'json',
+				'-show_packets',
+				'-i',
+				file_path,
+			])
+			probe = json.loads(probe_json)
+
+			last_frame = probe['packets'].pop()
+			if 'dts_time' in last_frame:
+				duration_s = float(last_frame['dts_time'])
+			elif 'pts_time' in last_frame:
+				duration_s = float(last_frame['pts_time'])
+
+		# still missing duration after packets probe
+		if not duration_s:
+			#TODO attempt to estimate duration by seeking last keyframe from end
+			# and doing some math based on frame length
+			#try:
+			#	fh = fopen(file_path, 'rb')
+			#	fseek(fh, -4, SEEK_END)
+			#	r = unpack('N', fread(fh, 4))
+			#	last_tag_offset = r[1]
+			#	fseek(fh, -(last_tag_offset + 4), SEEK_END)
+			#	fseek(fh, 4, SEEK_CUR)
+			#	t0 = fread(fh, 3)
+			#	t1 = fread(fh, 1)
+			#	r = unpack('N', t1 . t0)
+			#	duration_ms = r[1]
+			#	duration_s = duration_ms / 1000
+			pass
+
+		return width, height, duration_s, audio_codec, video_codec
 
 	def generate_medium_summaries(self, medium):
 		self.remove_medium_summaries(medium)
@@ -663,190 +872,65 @@ class MediaArchive:
 							subprocess.run(ffmpeg_call)
 		elif 'video' == medium.category:
 			if self.config['ffprobe_path'] and self.config['ffmpeg_path']:
-				import subprocess
-				import json
-
-				width = 0
-				height = 0
-				duration_s = 0
-				audio_codec = ''
-				video_codec = ''
-
-				probe_json = subprocess.getoutput([
-					self.config['ffprobe_path'],
-					'-v',
-					'quiet',
-					'-print_format',
-					'json',
-					'-show_streams',
-					'-i',
-					file_path,
-				])
-				probe = json.loads(probe_json)
-
-				if 'streams' in probe:
-					for stream in probe['streams']:
-						for key, value in stream.items():
-							if 'width' == key or 'coded_width' == key:
-								width = int(value)
-							elif 'height' == key or 'coded_height' == key:
-								height = int(value)
-							elif 'duration' == key:
-								duration_s = float(value)
-					if (
-							'codec_type' in stream
-							and 'codec_name' in stream
-						):
-						codec_name = stream['codec_name']
-						if 'audio' == stream['codec_type']:
-							audio_codec = codec_name
-						elif 'video' == stream['codec_type']:
-							video_codec = codec_name
-
-				# missing duration after streams probe, do packets probe
-				if not duration_s:
-					probe_json = subprocess.getoutput([
-						self.config['ffprobe_path'],
-						'-v',
-						'quiet',
-						'-print_format',
-						'json',
-						'-show_packets',
-						'-i',
-						file_path,
-					])
-					probe = json.loads(probe_json)
-
-					last_frame = probe['packets'].pop()
-					if 'dts_time' in last_frame:
-						duration_s = float(last_frame['dts_time'])
-					elif 'pts_time' in last_frame:
-						duration_s = float(last_frame['pts_time'])
-
-				# still missing duration after packets probe
-				if not duration_s:
-					#TODO attempt to estimate duration by seeking last keyframe from end
-					# and doing some math based on frame length
-					#try:
-					#	fh = fopen(file_path, 'rb')
-					#	fseek(fh, -4, SEEK_END)
-					#	r = unpack('N', fread(fh, 4))
-					#	last_tag_offset = r[1]
-					#	fseek(fh, -(last_tag_offset + 4), SEEK_END)
-					#	fseek(fh, 4, SEEK_CUR)
-					#	t0 = fread(fh, 3)
-					#	t1 = fread(fh, 1)
-					#	r = unpack('N', t1 . t0)
-					#	duration_ms = r[1]
-					#	duration_s = duration_ms / 1000
-					pass
+				width, height, duration_s, audio_codec, video_codec = self.get_video_info(file_path)
 
 				if duration_s:
-					import uuid
 					import math
 
-					from PIL import Image
-
 					# duration ms
-					updates['data5'] = int(math.floor(duration_s * 1000))
+					duration_ms = int(math.floor(duration_s * 1000))
+					updates['data5'] = duration_ms
 
-					# space the snapshot intervals out with the intention to skip first and last
-					interval_s = math.floor(duration_s) / (self.config['video_snapshots'] + 2)
+					snapshots = self.generate_video_snapshots(file_path, duration_s)
 
-					snapshots = []
-					for i in range(1, self.config['video_snapshots']):
-						snapshot_path = os.path.join(__name__, 'tmp', 'temp_snapshot_' + str(uuid.uuid4()) + '.png')
+					# use snapshot dimensions if dimensions are missing
+					first_snapshot_path, first_snapshot = snapshots[0]
+					if not width:
+						width = first_snapshot.width
+					if not height:
+						height = first_snapshot.height
 
-						ffmpeg_call = [
-							self.config['ffmpeg_path'],
-							'-i',
-							file_path,
-							'-ss',
-							str(i * interval_s),
-							'-frames:v',
-							'1',
-						]
-						if (
-								self.config['ffmpeg_thread_limit']
-								and isinstance(self.config['ffmpeg_thread_limit'], int)
-								and 0 < self.config['ffmpeg_thread_limit']
-							):
-							ffmpeg_call += [
-								'-threads',
-								str(self.config['ffmpeg_thread_limit']),
-							]
-						ffmpeg_call += [
-							snapshot_path,
-						]
-						subprocess.run(ffmpeg_call)
+					# static summaries from first snapshot
+					self.summaries_from_image(first_snapshot, summary_path)
+					updates['data3'] = hsv_to_int(*hsv_average_from_image(first_snapshot))
 
-						img = Image.open(snapshot_path)
-
-						if 1 == i:
-							# use snapshot dimensions if dimensions are missing
-							if not width:
-								width = img.width
-							if not height:
-								height = img.height
-
-							self.summaries_from_image(img, summary_path)
-							updates['data3'] = hsv_to_int(*hsv_average_from_image(img))
-							#TODO for now only generate the one static summary, do slideshow later
-							os.remove(snapshot_path)
-							break
-
-						os.remove(snapshot_path)
-						#img.thumbnail(self.config['video_slideshow_edge'])
-						#snapshots.append(img)
 					#TODO create slideshow strip from snapshots
-					#TODO save slidedown with .slideshow.webp and .slideshow.png
-					pass
-				# reencode non-websafe video for the view page
-				if (
-						0 != self.config['video_reencode_edge']
-						and width
-						and height
-						and not is_websafe_video(medium.mime)
-					):
-					# using libvpx instead of libx264, so maybe the divisible by 2 requirement isn't needed?
-					#if 0 != self.config['video_reencode_edge'] % 2:
-						# libx264 requires sizes divisble by 2
-						#abort(500, 'invalid_video_reencode_edge')
-					if width < height:
-						resize_width = -1
-						#resize_width = 'trunc(oh*a/2)*2'
-						resize_height = self.config['video_reencode_edge']
-					else:
-						resize_width = self.config['video_reencode_edge']
-						resize_height = -1
-						#resize_height = 'trunc(ow/a/2)*2'
+					#for path, snapshot in snapshots
+						#snapshot.thumbnail(self.config['video_slideshow_edge'])
+					#TODO save slideshow strip with .slideshow.webp and .slideshow.png
+					#TODO remove snapshots
+					for snapshot_path, snapshot in snapshots:
+						snapshot.close()
+						os.remove(snapshot_path)
 
-					ffmpeg_call = [
-						self.config['ffmpeg_path'],
-						'-i',
+					if 0 < self.config['video_clip_duration_ms']:
+						if duration_ms <= self.config['video_clip_duration_ms']:
+							start_ms = 0
+							end_ms = duration_ms
+						else:
+							midpoint_ms = duration_ms / 2
+							half_video_clip_duration_ms = self.config['video_clip_duration_ms'] / 2
+							start_ms = midpoint_ms - half_video_clip_duration_ms
+							end_ms = start_ms + self.config['video_clip_duration_ms']
+						self.reencode_video(
+							file_path,
+							summary_path.format('clip.webm'),
+							width,
+							height,
+							self.config['video_clip_edge'],
+							start_ms=start_ms,
+							end_ms=end_ms,
+							muted=True
+						)
+				# reencode non-websafe video for the view page
+				if not is_websafe_video(medium.mime):
+					self.reencode_video(
 						file_path,
-						'-vcodec',
-						'libvpx',
-						'-quality',
-						'good',
-						'-cpu-used',
-						'5',
-						'-vf',
-						'scale=' + str(resize_width) + ':' + str(resize_height),
-					]
-					if (
-							self.config['ffmpeg_thread_limit']
-							and isinstance(self.config['ffmpeg_thread_limit'], int)
-							and 0 < self.config['ffmpeg_thread_limit']
-						):
-						ffmpeg_call += [
-							'-threads',
-							str(self.config['ffmpeg_thread_limit']),
-						]
-					ffmpeg_call += [
 						summary_path.format('reencoded.webm'),
-					]
-					subprocess.run(ffmpeg_call)
+						width,
+						height,
+						self.config['video_reencode_edge']
+					)
 				if width:
 					updates['data1'] = width
 				if height:

@@ -52,6 +52,7 @@ body,
 }
 audio {
 	display: block;
+	width: 100%;
 }
 .medium, .medium::before {
 	border-top-left-radius: 8px;

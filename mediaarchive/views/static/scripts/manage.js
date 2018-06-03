@@ -1,5 +1,7 @@
 'use strict';
 
+document.documentElement.classList.add('scripts_enabled');
+
 class Manage {
 	constructor(drawer) {
 		this.drawer = drawer;
@@ -11,7 +13,12 @@ class Manage {
 			select_all: 'a',
 			select_none: 'd',
 			remove: 'Delete',
+			select_add: 'Shift',
+			select_negate: 'Control',
 		};
+		this.select_add = false;
+		this.select_negate = false;
+
 		// move drawer into body
 		document.body.append(this.drawer);
 
@@ -20,6 +27,12 @@ class Manage {
 			if (this.keys.exit == e.key) {
 				this.exit();
 				return;
+			}
+			if (this.keys.select_add == e.key) {
+				this.select_add = true;
+			}
+			if (this.keys.select_negate == e.key) {
+				this.select_negate = true;
 			}
 			// ignore other management keys if in an input
 			if ('INPUT' == document.activeElement.tagName) {
@@ -42,6 +55,14 @@ class Manage {
 			}
 			else if (this.keys.remove == e.key) {
 				this.remove();
+			}
+		});
+		window.addEventListener('keyup', e => {
+			if (this.keys.select_add == e.key) {
+				this.select_add = false;
+			}
+			if (this.keys.select_negate == e.key) {
+				this.select_negate = false;
 			}
 		});
 		this.selection_total = this.drawer.querySelector('#selection_total');
@@ -86,10 +107,112 @@ class Manage {
 			});
 		}
 
+		// drag to select
+		this.drag_origin = {
+			x: 0,
+			y: 0,
+		};
+		this.blank = document.createElement('img');
+		this.blank.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+		this.blank.id = 'blank';
+		this.selection_box = document.createElement('span');
+		this.selection_box.id = 'selection_box';
+		this.hide_selection_box();
+		document.body.appendChild(this.blank);
+		document.body.appendChild(this.selection_box);
+		document.body.addEventListener('dragstart', (e) => {
+			if (!document.body.classList.contains('editing_media')) {
+				return;
+			}
+			this.show_selection_box();
+			e.dataTransfer.setDragImage(this.blank, 0, 0);
+			this.drag_origin.x = e.pageX;
+			this.drag_origin.y = e.pageY;
+		});
+		document.body.addEventListener('drag', (e) => {
+			this.update_selection_box(e.pageX, e.pageY);
+		});
+		document.body.addEventListener('dragend', (e) => {
+			e.preventDefault();
+			if (document.body.classList.contains('editing_media')) {
+				this.update_selection_box(e.pageX, e.pageY);
+				this.selection_from_drag();
+			}
+			this.hide_selection_box();
+		});
+
 		window.addEventListener('resize', () => {
 			this.calculate_drawer_spacing();
 		});
 		this.calculate_drawer_spacing();
+	}
+	hide_selection_box() {
+		let items = [
+			'blank',
+			'selection_box',
+		];
+		for (let i = 0; i < items.length; i++) {
+			let item = items[i];
+			this[item].style.display = 'none';
+			this[item].style.left = '0';
+			this[item].style.top = '0';
+			this[item].style.width = '0';
+			this[item].style.height = '0';
+		}
+	}
+	show_selection_box() {
+		this.blank.style.display = 'inline-block';
+		this.blank.style.width = '2px';
+		this.blank.style.height = '2px';
+		this.selection_box.style.display = 'inline-block';
+	}
+	update_selection_box(page_x, page_y) {
+		if (page_x < this.drag_origin.x) {
+			this.selection_box.style.left = page_x + 'px';
+			this.selection_box.style.width = this.drag_origin.x - page_x + 'px';
+		}
+		else {
+			this.selection_box.style.left = this.drag_origin.x + 'px';
+			this.selection_box.style.width = page_x - this.drag_origin.x + 'px';
+		}
+		if (page_y < this.drag_origin.y) {
+			this.selection_box.style.top = page_y + 'px';
+			this.selection_box.style.height = this.drag_origin.y - page_y + 'px';
+		}
+		else {
+			this.selection_box.style.top = this.drag_origin.y + 'px';
+			this.selection_box.style.height = page_y - this.drag_origin.y + 'px';
+		}
+	}
+	selection_from_drag() {
+		// replace
+		if (
+			!this.select_add
+			&& !this.select_negate
+		) {
+			this.select_none();
+		}
+		let r1 = this.selection_box.getBoundingClientRect();
+		for (let i = 0; i < this.thumbnails.length; i++) {
+			let thumbnail = this.thumbnails[i];
+			let r2 = thumbnail.getBoundingClientRect()
+			if (
+				!(
+					r2.left > r1.right
+					|| r2.right < r1.left
+					|| r2.top > r1.bottom
+					|| r2.bottom < r1.top
+				)
+			) {
+				if (this.select_negate) {
+					thumbnail.classList.remove('selected');
+				}
+				else {
+					thumbnail.classList.add('selected');
+				}
+			}
+		}
+		this.update_selection_total();
 	}
 	calculate_drawer_spacing() {
 		this.drawer.classList.remove('loaded');

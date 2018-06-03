@@ -25,6 +25,7 @@
 	margin: 0;
 	text-decoration: none;
 	border-left: 1px solid var(--background);
+	font-size: 0.9em;
 	cursor: pointer;
 }
 #selection_total {
@@ -60,15 +61,6 @@
 	border-left: 1px solid var(--background);
 	cursor: pointer;
 }
-/*editing mode selected overlay*/
-/*TODO make sure type-only thumbnails retain type placeholder and get additional selected overlay*/
-.editing_media .thumbnail.selected .summary::after {
-	display: inline-block!important;
-	background-image: url(selected.svg)!important;
-}
-.editing_media .thumbnail.selected:hover .summary::after {
-	display: inline-block!important;
-}
 /*editing mode thumbnail backgrounds*/
 .editing_media .thumbnail {
 	background-color: #4060c0;
@@ -87,6 +79,7 @@
 .editing_media .selected video {
 	border-width: 16px;
 }
+/*TODO type-only thumbnails should also shrink a bit when selected maybe?*/
 /*selected thumbnail background*/
 .editing_media .thumbnail.selected {
 	background-color: #ff00c0;
@@ -106,7 +99,35 @@
 :not([data-selection_total="1"]) #manage_drawer #manage_copy_tags {
 	display: none;
 }
+/*drag select*/
+.thumbnail {
+	user-select: none;
+}
+#blank, #selection_box {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+#blank {
+	z-index: 110;
+	cursor: none;
+	width: 2px;
+	height: 2px;
+}
+#selection_box {
+	border: 0.33em dashed var(--f_l);
+	border-radius: 0.5em;
+	z-index: 100;
+	background-color: rgba(0, 0, 0, 0.5);
+}
 /*smaller screens*/
+@media only screen and (max-width: 1280px)
+{
+	#manage_drawer a,
+	#selection_total {
+		font-size: 0.8em;
+	}
+}
 @media only screen and (max-width: 1024px)
 {
 	/*drawer icons*/

@@ -32,7 +32,7 @@ if (tags) {
 }
 let tags_editor = document.querySelector('.tags_editor');
 if (tags_editor) {
-	document.body.classList.add('scripts_enabled');
+	document.documentElement.classList.add('scripts_enabled');
 
 	// create tag editor
 	let strings = {

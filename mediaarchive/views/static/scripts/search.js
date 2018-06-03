@@ -4,7 +4,7 @@ import { fetch_tag_suggestions } from './tagfield.js';
 
 let target_input = document.getElementById('tags');
 if (target_input) {
-	document.body.classList.add('scripts_enabled');
+	document.documentElement.classList.add('scripts_enabled');
 
 	// create tag search
 	let strings = {

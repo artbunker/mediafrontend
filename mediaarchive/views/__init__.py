@@ -201,7 +201,7 @@ def search(current_endpoint, overrides={}, search_field=True, manage=False, omit
 		tags_query=tags_query,
 		search_field=search_field,
 		tag_suggestion_lists=tag_suggestion_lists,
-		tools=manage,
+		manage=manage,
 		tags_this_page=tags_this_page,
 		pagination=pagination,
 		total_media=total_media,

@@ -1,0 +1,132 @@
+/*management drawer*/
+#manage_drawer {
+	display: block;
+	width: 100%;
+	color: var(--f_h);
+	background-color: var(--b_h);
+	text-align: left;
+	border-top: 1px solid var(--background);
+	z-index: 1000;	
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	text-align: right;
+}
+#manage_drawer:not(.loaded) {
+	transition: none!important;
+}
+#manage_drawer a,
+#selection_total {
+	display: inline-block;
+	color: var(--f_h);
+	background-color: var(--b_h);
+	margin: 0.25em;
+	padding: 0.75em 1em;
+	margin: 0;
+	text-decoration: none;
+	border-left: 1px solid var(--background);
+	cursor: pointer;
+}
+#selection_total {
+	cursor: default;
+}
+/*transition times*/
+#topmenu,
+#topmenu a,
+#manage_drawer,
+#manage_drawer a,
+#selection_total,
+#tags_this_page .header,
+.thumbnail,
+.thumbnail::before {
+	transition: background-color 100ms, color 100ms, border-color 100ms, opacity 100ms, height 250ms;
+}
+/*editing mode main colors*/
+.editing_media #topmenu,
+.editing_media #topmenu a,
+.editing_media #manage_drawer,
+.editing_media #manage_drawer a,
+.editing_media #selection_total,
+.editing_media #tags_this_page .header {
+	color: #ffffff;
+	background-color: #4060c0;
+}
+.editing_media .thumbnail {
+	cursor: pointer;
+}
+#topmenu #top_manage {
+	float: right;
+	border-right: none;
+	border-left: 1px solid var(--background);
+	cursor: pointer;
+}
+/*editing mode selected overlay*/
+/*TODO make sure type-only thumbnails retain type placeholder and get additional selected overlay*/
+.editing_media .thumbnail.selected .summary::after {
+	display: inline-block!important;
+	background-image: url(selected.svg)!important;
+}
+.editing_media .thumbnail.selected:hover .summary::after {
+	display: inline-block!important;
+}
+/*editing mode thumbnail backgrounds*/
+.editing_media .thumbnail {
+	background-color: #4060c0;
+}
+.editing_media .thumbnail::before {
+	background-color: rgba(64, 96, 192, 0.80);
+}
+/*editing mode thumbnail selection transitions*/
+.editing_media picture,
+.editing_media video {
+	transition: border-width 100ms;
+	border: 0 solid transparent;
+	box-sizing: border-box;
+}
+.editing_media .selected picture,
+.editing_media .selected video {
+	border-width: 16px;
+}
+/*selected thumbnail background*/
+.editing_media .thumbnail.selected {
+	background-color: #ff00c0;
+}
+.editing_media .thumbnail.selected::before {
+	background-color: rgba(255, 0, 192, 0.80);
+}
+/*full view thumbnails on hover*/
+.editing_media .thumbnail:hover video,
+.editing_media .thumbnail:hover picture,
+.editing_media .thumbnail:hover picture img {
+	object-fit: contain;
+}
+/*conditional manage actions*/
+[data-selection_total="0"] #manage_drawer a:not(#manage_select_all),
+[data-selection_total="all"] #manage_drawer #manage_select_all,
+:not([data-selection_total="1"]) #manage_drawer #manage_copy_tags {
+	display: none;
+}
+/*smaller screens*/
+@media only screen and (max-width: 1024px)
+{
+	/*drawer icons*/
+	#manage_drawer {
+		font-size: 0;
+	}
+	#manage_drawer a {
+		width: 48px;
+		height: 48px;
+	}
+	#selection_total {
+		font-size: 12pt;
+		text-align: center;
+		width: 48px;
+		line-height: 48px;
+		vertical-align: bottom;
+		padding: 0;
+	}
+}
+@media only screen and (max-width: 600px)
+{
+	/*TODO at very narrow screens put drawer items under an overflow menu*/
+}

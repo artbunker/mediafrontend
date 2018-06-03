@@ -7,6 +7,9 @@
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/general.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/search.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/tags.css') }}">
+	{% if manage %}
+		<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/manage.css') }}">
+	{% endif %}
 {% endblock %}
 {% block content %}
 	{% if search_field %}
@@ -63,4 +66,34 @@
 			{{ pages_list(total_pages=total_pages, url=url_for(current_endpoint, page='PAGE', tags=tags_query, **kwargs).replace('page=PAGE', 'page={}'), current_page=pagination['page']) }}
 		{% endif %}
 	</div>
+	{% if manage %}
+		<div id="manage_drawer">
+			<div id="manage_panels">
+				{# management panels #}
+			</div>
+			<span id="manage_actions">
+				<a id="manage_owner" title="Change owner">Change Owner</a>
+				<a id="manage_creation" title="Change creation date">Change Creation Date</a>
+				<a id="manage_build" title="Rebuild summaries">Rebuild Summaries</a>
+				<a id="manage_remove" title="Remove">Remove</a>
+				<a id="manage_groups" title="Set groups">Set Groups</a>
+				<a id="manage_searchability" title="Set searchability">Set Searchability</a>
+				<a id="manage_protection" title="Set protection">Set Protection</a>
+				<a id="manage_generate_set" title="Generate set tag">Generate Set Tag</a>
+				<a id="manage_copy_tags" title="Copy tags">Copy Tags</a>
+				<a id="manage_add_tags" title="Add tags">Add Tags</a>
+				<a id="manage_remove_tags" title="Remove tags">Remove Tags</a>
+				<a id="manage_select_all" title="Select all">Select All</a>
+				<a id="manage_select_none" title="Select none">Select None</a>
+			</span>
+			<span id="selection_total" data-all="All">0</span>
+		</div>
+		<script type="module" src="{{ url_for('media_archive.static', filename='scripts/manage.js') }}"></script>
+	{% endif %}
 {% endblock %}
+{% if manage %}
+	{% block topmenu %}
+		<a id="top_manage">Manage</a>
+		{{ super() }}
+	{% endblock %}
+{% endif %}

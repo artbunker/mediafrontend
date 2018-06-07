@@ -371,7 +371,7 @@ class MediaArchive:
 			fetch_uri = self.config['api_uri'].format('fetch/{}')
 		else:
 			fetch_uri = url_for(
-				'media_archive.protected_medium_file',
+				'media_archive.api_fetch',
 				medium_filename='MEDIUM_FILENAME'
 			).replace('MEDIUM_FILENAME', '{}')
 

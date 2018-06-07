@@ -310,8 +310,11 @@ def manage_media():
 
 	return search('media_archive.manage_media', overrides={'filter': filter}, manage=True, omit_future=False)
 
-@media_archive.route('/fetch/<medium_filename>')
-def protected_medium_file(medium_filename):
+@media_archive.route('/api/fetch/<medium_filename>')
+def api_fetch(medium_filename):
+	#TODO check for json request field
+	g.json_request = True
+
 	import os
 
 	filename_pieces = medium_filename.split('.')

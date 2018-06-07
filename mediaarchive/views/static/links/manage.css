@@ -14,6 +14,7 @@
 }
 #manage_drawer:not(.loaded) {
 	transition: none!important;
+	opacity: 0;
 }
 #manage_drawer a,
 #selection_total {
@@ -89,6 +90,19 @@
 .managing_media .thumbnail.selected::before {
 	background-color: rgba(255, 0, 192, 0.80);
 }
+/*success and failure thumbnail background*/
+.managing_media .thumbnail.success {
+	background-color: #0080ff;
+}
+.managing_media .thumbnail.success::before {
+	background-color: rgba(0, 127, 255, 0.80);
+}
+.managing_media .thumbnail.failure {
+	background-color: #ff0000;
+}
+.managing_media .thumbnail.failure::before {
+	background-color: rgba(255, 0, 0, 0.80);
+}
 /*full view thumbnails on hover*/
 .managing_media .thumbnail:hover video,
 .managing_media .thumbnail:hover picture,
@@ -122,6 +136,10 @@ body:not([data-selection_total="1"]) #manage_drawer #manage_copy_tags {
 	z-index: 100;
 	background-color: rgba(0, 0, 0, 0.5);
 	box-sizing: border-box;
+}
+/*management panels*/
+#manage_panels {
+	display: none;
 }
 /*smaller screens*/
 @media only screen and (max-width: 1280px)

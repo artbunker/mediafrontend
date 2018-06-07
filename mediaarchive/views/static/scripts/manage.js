@@ -1,10 +1,12 @@
 'use strict';
 
+import { autocopy } from './autocopy.js';
+
 document.documentElement.classList.add('scripts_enabled');
 
 class Manage {
-	constructor(drawer) {
-		this.drawer = drawer;
+	constructor() {
+		this.drawer = document.querySelector('#manage_drawer');
 		this.keys = {
 			exit_management: 'Escape',
 			toggle_management: 'e',
@@ -18,9 +20,6 @@ class Manage {
 		};
 		this.select_add = false;
 		this.select_negate = false;
-
-		// move drawer into body
-		document.body.append(this.drawer);
 
 		// listener for shortcut keys
 		window.addEventListener('keydown', e => {
@@ -88,21 +87,45 @@ class Manage {
 			this.toggle_management();
 		});
 
+		//this.panels = document.querySelector('#manage_panels');
+		// manage panel buttons
+		this.panels = {
+			owner: null,
+			creation: null,
+			groups: null,
+			searchability: null,
+			protection: null,
+			tags: null,
+		};
+		for (let panel in this.panels) {
+			this.panels[panel] = document.querySelector('#manage_panel_' + panel);
+			//TODO add submit listener to panel form
+			this.panels[panel].querySelector('form').addEventListener('submit', (e) => {
+				e.preventDefault();
+				console.log('submit listener on ' + panel);
+			});
+		}
+		this.panels['tags'] = document.querySelector('#manage_panel_tags');
+		//TODO set up tags panel tag editor
 		// manage action buttons
 		let actions = [
+			'owner',
+			'creation',
 			'build',
 			'remove',
+			'groups',
+			'searchability',
+			'protection',
 			'generate_set',
 			'copy_tags',
+			'add_tags',
+			'remove_tags',
 			'select_all',
 			'select_none',
 		];
 		for (let i = 0; i < actions.length; i++) {
 			let action = actions[i];
 			this.drawer.querySelector('#manage_' + action).addEventListener('click', () => {
-				console.log(action);
-				console.log('context of:');
-				console.log(this);
 				this[action]();
 			});
 		}
@@ -140,6 +163,9 @@ class Manage {
 			}
 			this.hide_selection_box();
 		});
+
+		// move drawer into body and get initial size
+		document.body.append(this.drawer);
 
 		window.addEventListener('resize', () => {
 			this.calculate_drawer_spacing();
@@ -252,10 +278,124 @@ class Manage {
 		}
 	}
 	show_panel(panel) {
-		//TODO
+		this.panels[panel].classList.add('active');
+		console.log('show panel: ' + panel);
+	}
+	hide_panel(panel) {
+		this.panels[panel].classList.remove('active');
+		console.log('hide panel: ' + panel);
+	}
+	toggle_panel(panel) {
+		this.panels[panel].classList.toggle('active');
+		console.log('toggle panel: ' + panel);
+	}
+	lock_form(form) {
+		let elements = form.elements;
+		for (let i = 0; i < elements.length; i++) {
+			elements[i].readOnly = true;
+		}
+	}
+	unlock_form(form) {
+		let elements = form.elements;
+		for (let i = 0; i < elements.length; i++) {
+			elements[i].readOnly = false;
+		}
+	}
+	api_request(thumbnail, form) {
+		let fd = new FormData(form);
+		fd.append('medium_id', thumbnail.dataset.id);
+		let xhr = new XMLHttpRequest();
+		this.lock_form(form);
+		xhr.onreadystatechange = () => {
+			if (xhr.readyState == XMLHttpRequest.DONE) {
+				this.unlock_form(xhr.form);
+				if (200 == xhr.status) {
+					if (!xhr.response) {
+						return;
+					}
+					if (xhr.response.hasOwnProperty('remove')) {
+						xhr.thumbnail.parentNode.removeChild(xhr.thumbnail);
+						return;
+					}
+					if (xhr.response.hasOwnProperty('thumbnail')) {
+						//TODO replace thumbnail innerHTML with new thumbnail
+					}
+					if (xhr.response.hasOwnProperty('group_tiles')) {
+						//TODO replace group tiles with new group tiles
+					}
+					xhr.thumbnail.classList.add('success');
+					setTimeout((xhr) => {
+						xhr.thumbnail.classList.remove('success');
+					}, 500);
+				}
+				else {
+					xhr.thumbnail.classList.add('failure');
+					setTimeout((xhr) => {
+						xhr.thumbnail.classList.remove('failure');
+					}, 500);
+				}
+			}
+		};
+		let method = form.method.toUpperCase();
+		let action = form.action;
+		xhr.thumbnail = thumbnail;
+		xhr.form = form;
+		xhr.responseType = 'json';
+		xhr.open(method, action + (-1 != action.indexOf('?') ? '&' : '?') + '_' + new Date().getTime(), true);
+		xhr.withCredentials = true;
+		xhr.send(fd);
+	}
+	owner() {
+		//TODO submit array of selected media IDs to api/media/owner
+		console.log('owner');
+	}
+	creation() {
+		//TODO submit array of selected media IDs to api/media/creation
+		console.log('creation');
+	}
+	build() {
+		//TODO submit array of selected media IDs to api/media/build
+		console.log('build');
+	}
+	remove() {
+		//TODO submit each selected media IDs to api/media/remove
+		console.log('remove');
+	}
+	groups() {
+		this.toggle_panel('groups');
+	}
+	searchability() {
+		this.toggle_panel('searchability');
+	}
+	protection() {
+		this.toggle_panel('protection');
 	}
 	generate_set() {
-		//TODO
+		//TODO submit array of selected media IDs to api/media/generate_set
+		console.log('generate set');
+	}
+	copy_tags() {
+		let medium = document.querySelector('.selected');
+		if (!medium || !medium.title) {
+			alert(this.panels.tags.dataset.noTags);
+			return;
+		}
+		autocopy(
+			medium.title,
+			this.panels.tags.dataset.autocopyAlert,
+			this.panels.tags.dataset.copyAlert
+		);
+	}
+	add_tags() {
+		let form = this.panels.tags.querySelector('form');
+		form.action = form.dataset.actionAdd;
+		console.log('add tags');
+		this.toggle_panel('tags');
+	}
+	remove_tags() {
+		this.panels.tags.action = this.panels.tags.dataset.actionRemove;
+		console.log('remove tags');
+		this.toggle_panel('tags');
 	}
 	select_all() {
 		for (let i = 0; i < this.thumbnails.length; i++) {
@@ -283,4 +423,4 @@ class Manage {
 	}
 };
 
-let manage = new Manage(document.querySelector('#manage_drawer'));
+let manage = new Manage();

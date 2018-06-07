@@ -75,10 +75,37 @@
 {% endif %}
 {% if manage %}
 	{% block body %}
-		<div id="manage_drawer">
-			<div id="manage_panels">
-				{# management panels #}
+		<div id="manage_panels">
+			<div class="manage_panel" id="manage_panel_owner">
+				<form method="post">
+				</form>
 			</div>
+			<div class="manage_panel" id="manage_panel_creation">
+				<form method="post">
+				</form>
+			</div>
+			<div class="manage_panel" id="manage_panel_groups">
+				<form method="post">
+				</form>
+			</div>
+			<div class="manage_panel" id="manage_panel_searchability">
+				<form method="post">
+				</form>
+			</div>
+			<div class="manage_panel" id="manage_panel_protection">
+				<form method="post">
+				</form>
+			</div>
+			<div class="manage_panel" id="manage_panel_tags" data-no-tags="No tags to copy" {% include 'tag_editor_attributes.html' %}>
+				<form method="post" data-action-add="{{ 'api_uri/add' }}" data-action-remove="{{ 'api_uri/remove' }}">
+					<input type="text" name="tags">
+					<br>
+					<input type="submit" data-add-submit="Add Tags" data-remove-submit="Remove Tags">
+				</form>
+			</div>
+			{# management panels #}
+		</div>
+		<div id="manage_drawer">
 			<span id="manage_actions">
 				<a id="manage_owner" title="Change owner">Owner</a>
 				<a id="manage_creation" title="Change creation date">Creation</a>

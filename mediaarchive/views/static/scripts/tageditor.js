@@ -1,5 +1,6 @@
 'use strict';
 import { TagField } from './tagfield.js';
+import { autocopy } from './autocopy.js';
 
 export class TagEditor extends TagField {
 	constructor(target_input, strings) {
@@ -148,28 +149,7 @@ export class TagEditor extends TagField {
 	}
 	copy() {
 		let tag_string = this.to_string(this.tags_list).replace(' #', '#');
-		// autocopy to clipboard
-		try {
-			// create temp input
-			let temp_input = document.createElement('input');
-			temp_input.type = 'text';
-			temp_input.value = tag_string;
-			document.body.appendChild(temp_input);
-			temp_input.select();
-			if (document.execCommand('copy')) {
-				alert(this.strings.autocopy_alert);
-			}
-			else {
-				// fallback to prompt
-				prompt(this.strings.copy_alert, tag_string);
-			}
-			// destroy temp input
-			document.body.removeChild(temp_input);
-		}
-		catch (err) {
-			// fallback to prompt
-			prompt(this.strings.copy_alert, tag_string);
-		}
+		autocopy(tag_string, this.strings.autocopy_alert, this.strings.copy_alert);
 		this.input.focus();
 	}
 }

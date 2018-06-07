@@ -9,12 +9,16 @@
 	{% endif %}
 	<div 
 		class="thumbnail" 
+		title="{% if 0 < medium.tags|length %}#{% endif %}{{ medium.tags|join('#') }}" 
+		data-id="{{ medium.id }}" 
 		{% if thumb_medium.uris['reencoded']['clip'] %}
 			data-preview="{{ thumb_medium.uris['reencoded']['clip'] }}" 
 		{% elif thumb_medium.uris['reencoded'][256] %}
 			data-preview="{{ thumb_medium.uris['reencoded'][256] }}" 
 		{% endif %}
 		data-category="{{ medium.category }}" 
+		data-searchability="{{ medium.searchability|string|lower }}" 
+		data-protection="{{ medium.protection|string|lower }}" 
 		data-mime="{{ medium.mime }}" 
 		data-data1="{{ medium.data }}" 
 		data-data2="{{ medium.data2 }}" 
@@ -39,5 +43,6 @@
 				</a>
 			</div>
 		{% endif %}
+		{#TODO group tiles #}
 	</div>
 {% endif %}

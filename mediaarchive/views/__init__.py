@@ -353,6 +353,11 @@ def api_fetch(medium_filename):
 
 	return send_from_directory(media_path, medium_filename, mimetype=medium.mime, conditional=True)
 
+@media_archive.route('/api/edit/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>", methods=['GET', 'POST'])
+def api_edit_medium(medium_id):
+	g.json_request = True
+	return edit_medium(medium_id, True)
+
 @media_archive.route('/file/media/<medium_filename>')
 def medium_file(medium_filename):
 	import os
@@ -487,7 +492,7 @@ def view_medium(medium_id):
 	)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/edit", methods=['GET', 'POST'])
-def edit_medium(medium_id):
+def edit_medium(medium_id, api=False):
 	manager = False
 	contributors = []
 	if g.media_archive.accounts.has_global_group(g.media_archive.accounts.current_user, 'manager'):
@@ -535,6 +540,8 @@ def edit_medium(medium_id):
 
 	errors = []
 	if 'POST' != request.method:
+		if api:
+			abort(405)
 		return render_template(
 			'edit_medium.html',
 			errors=errors,
@@ -610,7 +617,13 @@ def edit_medium(medium_id):
 	#TODO replace medium
 
 	if 0 == len(errors):
+		if api:
+			from statuspages import success
+			return success({'medium': medium})
 		return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
+
+	if api:
+		abort(400, errors)
 
 	form_fields = [
 		'owner_id',

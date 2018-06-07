@@ -109,7 +109,7 @@
 					<meta name="tag_suggestion_list" value="{{ tag_suggestion_list }}">
 				{% endfor %}
 			{% endblock %}
-			<div class="tags_editor" data-show-link="Edit Tags" data-save-link="Save" data-discard-link="Discard" data-copy-link="Copy" data-copy-alert="Copy raw tags manually" data-autocopy-alert="Tags copied to clipboard" data-placeholder="Enter a tag to add, click a tag to remove" data-saving-placeholder="Saving..." data-saving-in-progress="Saving in progress" data-problem-saving="Problem saving tags" data-search-tag-title="Search for this tag" data-search-uri="{{ url_for(search_endpoint, tags='PLACEHOLDER').replace('PLACEHOLDER', '{}') }}">
+			<div class="tags_editor" data-show-link="Edit Tags" data-save-link="Save" data-discard-link="Discard" data-copy-link="Copy" data-search-tag-title="Search for this tag" data-search-uri="{{ url_for(search_endpoint, tags='PLACEHOLDER').replace('PLACEHOLDER', '{}') }}" {% include 'tag_editor_attributes.html' %}>
 				<form method="post">
 					<input type="text" name="tags"{% if 0 < medium.tags|length %} value="{{ medium.tags|join('#') }}"{% endif %}>
 					<br>

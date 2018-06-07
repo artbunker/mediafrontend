@@ -42,19 +42,19 @@
 #tags_this_page .header,
 .thumbnail,
 .thumbnail::before {
-	transition: background-color 100ms, color 100ms, border-color 100ms, opacity 100ms, height 250ms;
+	transition: background-color 100ms, color 100ms, border-color 100ms, height 250ms;
 }
-/*editing mode main colors*/
-.editing_media #topmenu,
-.editing_media #topmenu a,
-.editing_media #manage_drawer,
-.editing_media #manage_drawer a,
-.editing_media #selection_total,
-.editing_media #tags_this_page .header {
+/*management mode main colors*/
+.managing_media #topmenu,
+.managing_media #topmenu a,
+.managing_media #manage_drawer,
+.managing_media #manage_drawer a,
+.managing_media #selection_total,
+.managing_media #tags_this_page .header {
 	color: #ffffff;
 	background-color: #4060c0;
 }
-.editing_media .thumbnail {
+.managing_media .thumbnail {
 	cursor: pointer;
 }
 #topmenu #top_manage {
@@ -63,36 +63,36 @@
 	border-left: 1px solid var(--background);
 	cursor: pointer;
 }
-/*editing mode thumbnail backgrounds*/
-.editing_media .thumbnail {
+/*management mode thumbnail backgrounds*/
+.managing_media .thumbnail {
 	background-color: #4060c0;
 }
-.editing_media .thumbnail::before {
+.managing_media .thumbnail::before {
 	background-color: rgba(64, 96, 192, 0.80);
 }
-/*editing mode thumbnail selection transitions*/
-.editing_media picture,
-.editing_media video {
+/*managing mode thumbnail selection transitions*/
+.managing_media picture,
+.managing_media video {
 	transition: border-width 100ms;
 	border: 0 solid transparent;
 	box-sizing: border-box;
 }
-.editing_media .selected picture,
-.editing_media .selected video {
+.managing_media .selected picture,
+.managing_media .selected video {
 	border-width: 16px;
 }
 /*TODO type-only thumbnails should also shrink a bit when selected maybe?*/
 /*selected thumbnail background*/
-.editing_media .thumbnail.selected {
+.managing_media .thumbnail.selected {
 	background-color: #ff00c0;
 }
-.editing_media .thumbnail.selected::before {
+.managing_media .thumbnail.selected::before {
 	background-color: rgba(255, 0, 192, 0.80);
 }
 /*full view thumbnails on hover*/
-.editing_media .thumbnail:hover video,
-.editing_media .thumbnail:hover picture,
-.editing_media .thumbnail:hover picture img {
+.managing_media .thumbnail:hover video,
+.managing_media .thumbnail:hover picture,
+.managing_media .thumbnail:hover picture img {
 	object-fit: contain;
 }
 /*conditional manage actions*/
@@ -134,7 +134,7 @@ body:not([data-selection_total="1"]) #manage_drawer #manage_copy_tags {
 @media only screen and (max-width: 1024px)
 {
 	/*topmenu icons in manage mode*/
-	.editing_media #topmenu a::after {
+	.managing_media #topmenu a::after {
 		background-color: #ffffff;
 	}
 	/*drawer icons*/
@@ -159,7 +159,7 @@ body:not([data-selection_total="1"]) #manage_drawer #manage_copy_tags {
 		-webkit-mask-size: contain;
 		background-color: var(--background);
 	}
-	.editing_media #manage_drawer a::after {
+	.managing_media #manage_drawer a::after {
 		background-color: #ffffff;
 	}
 	#manage_select_all::after {

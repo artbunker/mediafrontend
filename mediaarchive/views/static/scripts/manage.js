@@ -6,8 +6,8 @@ class Manage {
 	constructor(drawer) {
 		this.drawer = drawer;
 		this.keys = {
-			exit: 'Escape',
-			toggle: 'e',
+			exit_management: 'Escape',
+			toggle_management: 'e',
 			add_tags: 't',
 			generate_set: 's',
 			select_all: 'a',
@@ -24,8 +24,8 @@ class Manage {
 
 		// listener for shortcut keys
 		window.addEventListener('keydown', e => {
-			if (this.keys.exit == e.key) {
-				this.exit();
+			if (this.keys.exit_management == e.key) {
+				this.exit_management();
 				return;
 			}
 			if (this.keys.select_add == e.key) {
@@ -38,8 +38,8 @@ class Manage {
 			if ('INPUT' == document.activeElement.tagName) {
 				return;
 			}
-			if (this.keys.toggle == e.key) {
-				this.toggle();
+			if (this.keys.toggle_management == e.key) {
+				this.toggle_management();
 			}
 			else if (this.keys.add_tags == e.key) {
 				this.show_panel('add_tags');
@@ -72,7 +72,7 @@ class Manage {
 		this.thumbnails = document.querySelectorAll('.thumbnail');
 		for (let i = 0; i < this.thumbnails.length; i++) {
 			this.thumbnails[i].addEventListener('click', (e) => {
-				if (!document.body.classList.contains('editing_media')) {
+				if (!document.body.classList.contains('managing_media')) {
 					return;
 				}
 				e.preventDefault();
@@ -85,7 +85,7 @@ class Manage {
 		// manage topmenu link listener
 		let manage_link = document.querySelector('#top_manage');
 		manage_link.addEventListener('click', () => {
-			this.toggle();
+			this.toggle_management();
 		});
 
 		// manage action buttons
@@ -121,7 +121,7 @@ class Manage {
 		document.body.appendChild(this.blank);
 		document.body.appendChild(this.selection_box);
 		document.body.addEventListener('dragstart', (e) => {
-			if (!document.body.classList.contains('editing_media')) {
+			if (!document.body.classList.contains('managing_media')) {
 				return;
 			}
 			this.show_selection_box();
@@ -134,7 +134,7 @@ class Manage {
 		});
 		document.body.addEventListener('dragend', (e) => {
 			e.preventDefault();
-			if (document.body.classList.contains('editing_media')) {
+			if (document.body.classList.contains('managing_media')) {
 				this.update_selection_box(e.pageX, e.pageY);
 				this.selection_from_drag();
 			}
@@ -225,30 +225,30 @@ class Manage {
 		this.set_drawer_height();
 	}
 	set_drawer_height() {
-		if (document.body.classList.contains('editing_media')) {
+		if (document.body.classList.contains('managing_media')) {
 			this.drawer.style.height = this.drawer.height;
 		}
 		else {
 			this.drawer.style.height = '0';
 		}
 	}
-	enter() {
+	enter_management() {
 		this.select_none();
-		document.body.classList.add('editing_media');
+		document.body.classList.add('managing_media');
 		this.set_drawer_height();
 	}
-	exit() {
-		document.body.classList.remove('editing_media');
+	exit_management() {
+		document.body.classList.remove('managing_media');
 		this.select_none();
 		this.set_drawer_height();
 	}
-	toggle() {
-		document.body.classList.toggle('editing_media');
-		if (document.body.classList.contains('editing_media')) {
-			this.enter();
+	toggle_management() {
+		document.body.classList.toggle('managing_media');
+		if (document.body.classList.contains('managing_media')) {
+			this.enter_management();
 		}
 		else {
-			this.exit();
+			this.exit_management();
 		}
 	}
 	show_panel(panel) {

@@ -2,6 +2,7 @@
 	{% from 'permissions.jinja' import group_display %}
 	<div id="groups">
 		<legend>Required Groups</legend>
+		<input type="hidden" name="groups" value="1">
 		{% for group in groups %}
 			{% set checked = '' %}
 			{% if group in fields['groups'] %}

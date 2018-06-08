@@ -591,17 +591,18 @@ def edit_medium(medium_id, api=False):
 		else:
 			updates['creation_time'] = creation_time.timestamp()
 
-	fields['groups'] = []
-	for group in g.media_archive.accounts.users.available_groups:
-		field = 'groups[' + group + ']'
-		if field in request.form:
-			fields['groups'].append(group)
-	updates['group_bits'] = 0
-	if 0 < len(fields['groups']):
-		updates['group_bits'] = int.from_bytes(
-			g.media_archive.accounts.users.combine_groups(names=fields['groups']),
-			'big'
-		)
+	if 'groups' in request.form:
+		fields['groups'] = []
+		for group in g.media_archive.accounts.users.available_groups:
+			field = 'groups[' + group + ']'
+			if field in request.form:
+				fields['groups'].append(group)
+		updates['group_bits'] = 0
+		if 0 < len(fields['groups']):
+			updates['group_bits'] = int.from_bytes(
+				g.media_archive.accounts.users.combine_groups(names=fields['groups']),
+				'big'
+			)
 
 	#TODO maybe compare updates['group_bits'] to medium.group_bits and remove it if they're the same
 	# otherwise this isn't necessary since it'll always have group_bits in update

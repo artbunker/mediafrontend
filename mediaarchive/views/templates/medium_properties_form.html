@@ -4,46 +4,9 @@
 		<input id="generate_summaries" name="generate_summaries" type="checkbox"{% if fields['generate_summaries'] %} checked{% endif %}>
 		<label for="generate_summaries">Create Summaries</label>
 		<br>
-		<label for="owner_id">Owner</label>
-		<select id="owner_id" name="owner_id">
-			{% from 'users.jinja' import user_display %}
-			{% for user in contributors %}
-				{% set selected = '' %}
-				{% if user.id == fields['owner_id'] %}
-					{% set selected = ' selected' %}
-				{% endif %}
-				<option value="{{ user.id }}"{{ selected }}>{{ user_display(user) }}</option>
-			{% endfor %}
-		</select><br>
+		{% include 'medium_owner_form.html' %}
 	{% endif %}
-	<label for="searchability">Searchability</label>
-	<select id="searchability" name="searchability">
-		{% from 'media.jinja' import searchabilities, searchability_display %}
-		{% for searchability in searchabilities %}
-			{% set selected = '' %}
-			{% if searchability == fields['searchability'] %}
-				{% set selected = ' selected' %}
-			{% endif %}
-			<option value="{{ searchability }}"{{ selected }}>
-				{{ searchability_display(searchability) }}
-			</option>
-		{% endfor %}
-	</select>
-	<br>
-	<label for="protection">Protection</label>
-	<select id="protection" name="protection">
-		{% from 'media.jinja' import protections, protection_display %}
-		{% for protection in protections %}
-			{% set selected = '' %}
-			{% if protection == fields['protection'] %}
-				{% set selected = ' selected' %}
-			{% endif %}
-			<option value="{{ protection }}"{{ selected }}>
-				{{ protection_display(protection) }}
-			</option>
-		{% endfor %}
-	</select>
-	<br>
-	<label for="creation_date">Creation Date</label>
-	<input id="creation_date" name="creation_date" type="text" value="{{ fields['creation_date'] }}" placeholder="Leave blank for current date">
+	{% include 'medium_searchability_form.html' %}
+	{% include 'medium_protection_form.html' %}
+	{% include 'medium_creation_date_form.html' %}
 </div>

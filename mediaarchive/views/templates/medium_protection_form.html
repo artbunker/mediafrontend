@@ -1,0 +1,14 @@
+<label for="protection">Protection</label>
+<select id="protection" name="protection">
+	{% from 'media.jinja' import protections, protection_display %}
+	{% for protection in protections %}
+		{% set selected = '' %}
+		{% if protection == fields['protection'] %}
+			{% set selected = ' selected' %}
+		{% endif %}
+		<option value="{{ protection }}"{{ selected }}>
+			{{ protection_display(protection) }}
+		</option>
+	{% endfor %}
+</select>
+<br>

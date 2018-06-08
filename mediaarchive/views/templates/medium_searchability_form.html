@@ -1,0 +1,14 @@
+<label for="searchability">Searchability</label>
+<select id="searchability" name="searchability">
+	{% from 'media.jinja' import searchabilities, searchability_display %}
+	{% for searchability in searchabilities %}
+		{% set selected = '' %}
+		{% if searchability == fields['searchability'] %}
+			{% set selected = ' selected' %}
+		{% endif %}
+		<option value="{{ searchability }}"{{ selected }}>
+			{{ searchability_display(searchability) }}
+		</option>
+	{% endfor %}
+</select>
+<br>

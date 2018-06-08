@@ -358,6 +358,20 @@ def api_edit_medium(medium_id):
 	g.json_request = True
 	return edit_medium(medium_id, True)
 
+@media_archive.route('/api/media/remove', methods=['GET', 'POST'])
+def api_remove_medium(medium_id):
+	g.json_request = True
+	if 'POST' != request.method:
+		abort(405)
+		return remove_medium(medium_id, True)
+
+@media_archive.route('/api/media/build', methods=['GET', 'POST'])
+def api_build_medium(medium_id):
+	g.json_request = True
+	if 'POST' != request.method:
+		abort(405)
+		return remove_medium(medium_id, True)
+
 @media_archive.route('/file/media/<medium_filename>')
 def medium_file(medium_filename):
 	import os
@@ -650,7 +664,7 @@ def edit_medium(medium_id, api=False):
 	)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/build")
-def generate_summaries(medium_id):
+def generate_summaries(medium_id, api=False):
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
 	if not g.media_archive.accounts.current_user_has_global_group('manager'):
@@ -660,6 +674,14 @@ def generate_summaries(medium_id):
 			abort(403)
 
 	g.media_archive.generate_medium_summaries(medium)
+
+	if api:
+		medium = g.media_archive.get_medium(medium.md5)
+
+		from statuspages import success
+		return success({
+			'thumbnail': render_template('thumbnail.html', medium=medium)
+		})
 
 	return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
 
@@ -692,15 +714,24 @@ def remove_file(medium_id):
 	return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/remove")
-def remove_medium(medium_id):
+def remove_medium(medium_id, api=False):
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
 	if not g.media_archive.accounts.current_user_has_global_group('manager'):
 		if MediumStatus.ALLOWED != medium.status:
-			abort(403)
+			#TODO log attempted non-allowed remove
+			abort(404, {'message': 'medium_not_found'})
 		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
+			#TODO log attempted non-owner remove
 			abort(403)
+
+	#TODO	if not api and 'confirm' not in request.args:
+	#TODO		return render_template('confirm.html')
 
 	g.media_archive.remove_medium(medium)
 
+	if api:
+		from statuspages import success
+		return success({'remove': True})
+		
 	return redirect(url_for('media_archive.manage_media'), 302)

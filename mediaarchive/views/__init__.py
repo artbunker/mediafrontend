@@ -319,10 +319,14 @@ def manage_media():
 
 	return search('media_archive.manage_media', overrides={'filter': filter}, manage=True, omit_future=False)
 
-@media_archive.route('/api/fetch/<medium_filename>')
-def api_fetch(medium_filename):
-	#TODO check for json request field
-	g.json_request = True
+@media_archive.route('/api/media/fetch/<medium_filename>', methods=['GET', 'POST'])
+def api_fetch_medium(medium_filename):
+	if (
+			'POST' == request.method
+			and 'response_type' in request.form
+			and 'json' == request.form['response_type']
+		):
+		g.json_request = True
 
 	import os
 

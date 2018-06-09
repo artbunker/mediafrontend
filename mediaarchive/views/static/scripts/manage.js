@@ -7,6 +7,9 @@ document.documentElement.classList.add('scripts_enabled');
 class Manage {
 	constructor() {
 		this.drawer = document.querySelector('#manage_drawer');
+		this.panels = document.querySelector('#manage_panels');
+		this.active_panel = document.querySelector('#manage_active_panel');
+		this.form = document.querySelector('#manage_form');
 		this.keys = {
 			exit_management: 'Escape',
 			toggle_management: 'e',
@@ -68,9 +71,9 @@ class Manage {
 		this.selection_total.dataset.count = 0;
 
 		// select/deselect listeners to thumbnails
-		this.thumbnails = document.querySelectorAll('.thumbnail');
-		for (let i = 0; i < this.thumbnails.length; i++) {
-			this.thumbnails[i].addEventListener('click', (e) => {
+		let thumbnails = document.querySelectorAll('.thumbnail');
+		this.iterate_thumbnails(thumbnails, (thumbnail) => {
+			thumbnail.addEventListener('click', (e) => {
 				if (!document.body.classList.contains('managing_media')) {
 					return;
 				}
@@ -79,7 +82,7 @@ class Manage {
 				e.currentTarget.classList.toggle('selected');
 				this.update_selection_total();
 			});
-		}
+		});
 
 		// manage topmenu link listener
 		let manage_link = document.querySelector('#top_manage');
@@ -87,24 +90,6 @@ class Manage {
 			this.toggle_management();
 		});
 
-		//this.panels = document.querySelector('#manage_panels');
-		// manage panel buttons
-		this.panels = {
-			owner: null,
-			creation: null,
-			groups: null,
-			searchability: null,
-			protection: null,
-			tags: null,
-		};
-		for (let panel in this.panels) {
-			this.panels[panel] = document.querySelector('#manage_panel_' + panel);
-			//TODO add submit listener to panel form
-			this.panels[panel].querySelector('form').addEventListener('submit', (e) => {
-				e.preventDefault();
-				console.log('submit listener on ' + panel);
-			});
-		}
 		this.panels['tags'] = document.querySelector('#manage_panel_tags');
 		//TODO set up tags panel tag editor
 		// manage action buttons
@@ -164,6 +149,19 @@ class Manage {
 			this.hide_selection_box();
 		});
 
+		this.form.addEventListener('submit', (e) => {
+			e.preventDefault();
+			//TODO if tags input convert tag editor current tags list to string
+			//TODO and set tags input value to it
+			this.api_request(
+				'POST',
+				this.form.action,
+				new FormData(this.form),
+				document.querySelectorAll('.selected')
+			);
+			this.hide_panels();
+		});
+
 		// move drawer into body and get initial size
 		document.body.append(this.drawer);
 
@@ -219,8 +217,8 @@ class Manage {
 			this.select_none();
 		}
 		let r1 = this.selection_box.getBoundingClientRect();
-		for (let i = 0; i < this.thumbnails.length; i++) {
-			let thumbnail = this.thumbnails[i];
+		let thumbnails = document.querySelectorAll('.thumbnail');
+		this.iterate_thumbnails(thumbnails, (thumbnail) => {
 			let r2 = thumbnail.getBoundingClientRect()
 			if (
 				!(
@@ -237,7 +235,7 @@ class Manage {
 					thumbnail.classList.add('selected');
 				}
 			}
-		}
+		})
 		this.update_selection_total();
 	}
 	calculate_drawer_spacing() {
@@ -278,17 +276,25 @@ class Manage {
 		}
 	}
 	show_panel(panel) {
-		this.panels[panel].classList.add('active');
-		console.log('show panel: ' + panel);
+		this.hide_panels();
+		this.form.appendChild(this.panels.querySelector('#manage_panel_' + panel));
+		this.active_panel.classList.add('active');
 	}
-	hide_panel(panel) {
-		this.panels[panel].classList.remove('active');
-		console.log('hide panel: ' + panel);
+	hide_panels() {
+		this.active_panel.classList.remove('active');
+		let panels = this.active_panel.querySelectorAll('.manage_panel');
+		for (let i = panels.length - 1; 0 <= i; i--) {
+			this.panels.appendChild(panels[i]);
+		}
 	}
 	toggle_panel(panel) {
-		this.panels[panel].classList.toggle('active');
-		console.log('toggle panel: ' + panel);
+		if (this.panels.querySelector('#manage_panel_' + panel)) {
+			this.show_panel(panel);
+			return;
+		}
+		this.hide_panels();
 	}
+	/** /
 	lock_form(form) {
 		let elements = form.elements;
 		for (let i = 0; i < elements.length; i++) {
@@ -301,118 +307,186 @@ class Manage {
 			elements[i].readOnly = false;
 		}
 	}
-	api_request(thumbnail, form) {
-		let fd = new FormData(form);
-		fd.append('medium_id', thumbnail.dataset.id);
+	batch_finished(left_in_batch, cb) {
+		//TODO locking and unlocking form for batches maybe?
+		left_in_batch--;
+		if (0 == left_in_batch) {
+			cb();
+		}
+	}
+	/**/
+	iterate_thumbnails(thumbnails, cb) {
+		let reversed_array = [];
+		for (let i = thumbnails.length - 1; 0 <= i; i--) {
+			reversed_array.push(thumbnails[i]);
+		}
+		reversed_array = reversed_array.reverse();
+		for (let i = 0; i < reversed_array.length; i++) {
+			cb(reversed_array[i]);
+		}
+	}
+	api_request(method, action, fd, thumbnails) {
+		console.log(thumbnails);
 		let xhr = new XMLHttpRequest();
-		this.lock_form(form);
+		if (1 == thumbnails.length) {
+			fd.append('medium_id', thumbnails[0].dataset.id);
+		}
+		else {
+			let medium_ids = [];
+			this.iterate_thumbnails(thumbnails, (thumbnail) => {
+				medium_ids.push(thumbnail.dataset.id);
+			});
+			fd.append('medium_ids', medium_ids);
+		}
+		xhr.thumbnails = thumbnails;
+		fd.append('response_type', 'json');
+		xhr.responseType = 'json';
 		xhr.onreadystatechange = () => {
 			if (xhr.readyState == XMLHttpRequest.DONE) {
-				this.unlock_form(xhr.form);
+				this.iterate_thumbnails(xhr.thumbnails, (thumbnail) => {
+					thumbnail.classList.remove('processing');
+				});
+				//TODO check for batch finished?
+				//TODO e.g. all add/remove tags finished
+				//TODO to make additional call to rebuild tags
 				if (200 == xhr.status) {
 					if (!xhr.response) {
 						return;
 					}
 					if (xhr.response.hasOwnProperty('remove')) {
-						xhr.thumbnail.parentNode.removeChild(xhr.thumbnail);
+						this.iterate_thumbnails(xhr.thumbnails, (thumbnail) => {
+							thumbnail.parentNode.removeChild(thumbnail);
+						});
 						return;
 					}
 					if (xhr.response.hasOwnProperty('thumbnail')) {
-						//TODO replace thumbnail innerHTML with new thumbnail
+						// replace thumbnail innerHTML with response thumbnail innerHTML
+						// to retain listeners
+						let temp = document.createElement('div');
+						temp.innerHTML = xhr.response.thumbnail;
+						xhr.thumbnails[0].innerHTML = temp.querySelector('.thumbnail').innerHTML;
 					}
 					if (xhr.response.hasOwnProperty('group_tiles')) {
 						//TODO replace group tiles with new group tiles
 					}
-					xhr.thumbnail.classList.add('success');
-					setTimeout((xhr) => {
-						xhr.thumbnail.classList.remove('success');
-					}, 500);
+					this.iterate_thumbnails(xhr.thumbnails, (thumbnail) => {
+						thumbnail.classList.add('success');
+						setTimeout(() => {
+							thumbnail.classList.remove('success');
+						}, 2000);
+					});
 				}
 				else {
-					xhr.thumbnail.classList.add('failure');
-					setTimeout((xhr) => {
-						xhr.thumbnail.classList.remove('failure');
-					}, 500);
+					this.iterate_thumbnails(xhr.thumbnails, (thumbnail) => {
+						thumbnail.classList.add('failure');
+						setTimeout(() => {
+							thumbnail.classList.remove('failure');
+						}, 2000);
+					});
 				}
 			}
 		};
-		let method = form.method.toUpperCase();
-		let action = form.action;
-		xhr.thumbnail = thumbnail;
-		xhr.form = form;
-		xhr.responseType = 'json';
-		xhr.open(method, action + (-1 != action.indexOf('?') ? '&' : '?') + '_' + new Date().getTime(), true);
+		this.iterate_thumbnails(xhr.thumbnails, (thumbnail) => {
+			thumbnail.classList.add('processing');
+		});
+		xhr.open(
+			method,
+			action + (-1 != action.indexOf('?') ? '&' : '?') + '_' + new Date().getTime(),
+			true
+		);
 		xhr.withCredentials = true;
 		xhr.send(fd);
 	}
 	owner() {
-		//TODO submit array of selected media IDs to api/media/owner
-		console.log('owner');
+		this.form.action = this.panels.dataset.actionEdit;
+		this.toggle_panel('owner');
 	}
 	creation() {
-		//TODO submit array of selected media IDs to api/media/creation
-		console.log('creation');
+		this.form.action = this.panels.dataset.actionEdit;
+		this.toggle_panel('creation');
 	}
 	build() {
-		//TODO submit array of selected media IDs to api/media/build
-		console.log('build');
+		this.hide_panels();
+		this.api_request(
+			'POST',
+			this.panels.dataset.actionBuild,
+			new FormData(),
+			document.querySelectorAll('.selected')
+		);
 	}
 	remove() {
-		//TODO submit each selected media IDs to api/media/remove
-		console.log('remove');
+		console.log('removing');
+		this.hide_panels();
+		this.api_request(
+			'POST',
+			this.panels.dataset.actionRemove,
+			new FormData(),
+			document.querySelectorAll('.selected')
+		);
 	}
 	groups() {
+		this.form.action = this.panels.dataset.actionRemove;
 		this.toggle_panel('groups');
 	}
 	searchability() {
+		this.form.action = this.panels.dataset.actionEdit;
 		this.toggle_panel('searchability');
 	}
 	protection() {
+		this.form.action = this.panels.dataset.actionEdit;
 		this.toggle_panel('protection');
 	}
 	generate_set() {
-		//TODO submit array of selected media IDs to api/media/generate_set
-		console.log('generate set');
+		this.api_request(
+			'POST',
+			this.panels.dataset.actionGenerateSet,
+			new FormData(),
+			document.querySelectorAll('.selected')
+		);
 	}
 	copy_tags() {
+		this.hide_panels();
+		//TODO allow copying aggregate of all tags from multiple selected media?
 		let medium = document.querySelector('.selected');
+		let tags_panel = this.panels.querySelector('#manage_panel_tags');
 		if (!medium || !medium.title) {
-			alert(this.panels.tags.dataset.noTags);
+			alert(tags_panel.dataset.noTags);
 			return;
 		}
 		autocopy(
 			medium.title,
-			this.panels.tags.dataset.autocopyAlert,
-			this.panels.tags.dataset.copyAlert
+			tags_panel.dataset.autocopyAlert,
+			tags_panel.dataset.copyAlert
 		);
 	}
 	add_tags() {
-		let form = this.panels.tags.querySelector('form');
-		form.action = form.dataset.actionAdd;
+		this.form.action = this.form.dataset.actionAdd;
 		console.log('add tags');
-		this.toggle_panel('tags');
+		//this.toggle_panel('tags');
 	}
 	remove_tags() {
-		this.panels.tags.action = this.panels.tags.dataset.actionRemove;
+		this.form.action = this.form.dataset.actionRemove;
 		console.log('remove tags');
-		this.toggle_panel('tags');
+		//this.toggle_panel('tags');
 	}
 	select_all() {
-		for (let i = 0; i < this.thumbnails.length; i++) {
-			this.thumbnails[i].classList.add('selected');
-		}
+		let thumbnails = document.querySelectorAll('.thumbnail');
+		this.iterate_thumbnails(thumbnails, (thumbnail) => {
+			thumbnail.classList.add('selected');
+		});
 		this.update_selection_total();
 	}
 	select_none() {
 		let selected = document.querySelectorAll('.selected');
-		for (let i = selected.length - 1; i >= 0; i--) {
-			selected[i].classList.remove('selected');
-		}
+		this.iterate_thumbnails(selected, (thumbnail) => {
+			thumbnail.classList.remove('selected');
+		});
 		this.update_selection_total();
 	}
 	update_selection_total() {
 		let selected = document.querySelectorAll('.selected');
-		if (selected.length == this.thumbnails.length) {
+		let thumbnails = document.querySelectorAll('.thumbnails');
+		if (selected.length == thumbnails.length) {
 			document.body.dataset.selection_total = 'all';
 			this.selection_total.innerText = this.selection_total.dataset.all;
 		}

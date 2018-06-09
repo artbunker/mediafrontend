@@ -369,24 +369,41 @@ def api_fetch_medium(medium_filename):
 
 	return send_from_directory(media_path, medium_filename, mimetype=medium.mime, conditional=True)
 
-@media_archive.route('/api/edit/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>", methods=['GET', 'POST'])
-def api_edit_medium(medium_id):
+@media_archive.route('/api/media/edit', methods=['POST'])
+def api_edit_medium():
+	if 'medium_id' not in request.form:
+		abort(400)
 	g.json_request = True
-	return edit_medium(medium_id, True)
+	return edit_medium(request.form['medium_id'], True)
 
-@media_archive.route('/api/media/remove', methods=['GET', 'POST'])
-def api_remove_medium(medium_id):
+@media_archive.route('/api/media/remove', methods=['POST'])
+def api_remove_medium():
+	if 'medium_id' not in request.form:
+		abort(400)
 	g.json_request = True
-	if 'POST' != request.method:
-		abort(405)
-		return remove_medium(medium_id, True)
+	return remove_medium(request.form['medium_id'], True)
 
-@media_archive.route('/api/media/build', methods=['GET', 'POST'])
-def api_build_medium(medium_id):
+@media_archive.route('/api/media/build', methods=['POST'])
+def api_build_medium():
+	if 'medium_id' not in request.form:
+		abort(400)
 	g.json_request = True
-	if 'POST' != request.method:
-		abort(405)
-		return remove_medium(medium_id, True)
+	return generate_summaries(request.form['medium_id'], True)
+
+@media_archive.route('/api/media/set', methods=['POST'])
+def api_generate_set():
+	#TODO
+	pass
+
+@media_archive.route('/api/tags/add', methods=['POST'])
+def api_add_tags():
+	#TODO
+	pass
+
+@media_archive.route('/api/tags/remove', methods=['POST'])
+def api_remove_tags():
+	#TODO
+	pass
 
 @media_archive.route('/file/media/<medium_filename>')
 def medium_file(medium_filename):

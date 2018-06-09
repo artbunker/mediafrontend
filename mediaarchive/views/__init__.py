@@ -165,8 +165,14 @@ def search(current_endpoint, overrides={}, search_field=True, manage=False, omit
 	media = g.media_archive.search_media(filter=filter, **pagination)
 	total_media = g.media_archive.media.count_media(filter=filter)
 
+	contributors = []
+	api_uris = {}
+	if manage:
+		contributors = g.media_archive.get_contributors()
+		api_uris = g.media_archive.get_api_uris()
+
 	# strip medium ids from protected media if not managing
-	if not manage:
+	else:
 		for medium in media:
 			if (
 					(
@@ -207,6 +213,9 @@ def search(current_endpoint, overrides={}, search_field=True, manage=False, omit
 		total_media=total_media,
 		total_pages=math.ceil(total_media / pagination['perpage']),
 		current_endpoint=current_endpoint,
+		groups=g.media_archive.config['requirable_groups'],
+		contributors=contributors,
+		api_uris=api_uris,
 		kwargs=kwargs,
 		re=re,
 	)
@@ -511,15 +520,7 @@ def edit_medium(medium_id, api=False):
 	contributors = []
 	if g.media_archive.accounts.has_global_group(g.media_archive.accounts.current_user, 'manager'):
 		manager = True
-		contributor_bit = g.media_archive.accounts.users.group_name_to_bit('contributor')
-		permissions = g.media_archive.accounts.search_permissions(filter={
-			'permissions': {
-				'global': contributor_bit,
-				'media': contributor_bit,
-			}
-		})
-		for permission in permissions:
-			contributors.append(permission.user)
+		contributors = g.media_archive.get_contributors()
 
 	medium = g.media_archive.get_medium(id_to_md5(medium_id))
 

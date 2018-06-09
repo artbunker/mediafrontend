@@ -1404,3 +1404,33 @@ class MediaArchive:
 
 		return errors, medium
 
+	def get_contributors(self):
+		contributors = []
+		contributor_bit = self.accounts.users.group_name_to_bit('contributor')
+		permissions = self.accounts.search_permissions(filter={
+			'permissions': {
+				'global': contributor_bit,
+				'media': contributor_bit,
+			}
+		})
+		for permission in permissions:
+			contributors.append(permission.user)
+		return contributors
+
+	def get_api_uris(self):
+		api_uris = {}
+		if self.config['api_uri']:
+			api_uris['edit'] = self.config['api_uri'].format('media/edit')
+			api_uris['remove'] = self.config['api_uri'].format('media/edit')
+			api_uris['build'] = self.config['api_uri'].format('media/edit')
+			api_uris['generate_set'] = self.config['api_uri'].format('media/set')
+			api_uris['add_tags'] = self.config['api_uri'].format('tags/add')
+			api_uris['remove_tags'] = self.config['api_uri'].format('tags/remove')
+		else:
+			api_uris['edit'] = url_for('media_archive.api_edit_medium')
+			api_uris['remove'] = url_for('media_archive.api_remove_medium')
+			api_uris['build'] = url_for('media_archive.api_build_medium')
+			api_uris['generate_set'] = url_for('media_archive.api_generate_set')
+			api_uris['add_tags'] = url_for('media_archive.api_add_tags')
+			api_uris['remove_tags'] = url_for('media_archive.api_remove_tags')
+		return api_uris

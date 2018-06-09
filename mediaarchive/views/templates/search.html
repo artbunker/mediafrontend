@@ -75,35 +75,42 @@
 {% endif %}
 {% if manage %}
 	{% block body %}
-		<div id="manage_panels">
+		<div id="manage_active_panel">
+			<form method="post" id="manage_form"></form>
+		</div>
+		<div 
+			id="manage_panels"
+			data-action-edit="{{ api_uris['edit'] }}" 
+			data-action-remove="{{ api_uris['remove'] }}" 
+			data-action-build="{{ api_uris['build'] }}" 
+			data-action-generate-set="{{ api_uris['generate_set'] }}" 
+			data-action-add-tags="{{ api_uris['add_tags'] }}" 
+			data-action-remove-tags="{{ api_uris['remove_tags'] }}">
+			{% set fields = {} %}
 			<div class="manage_panel" id="manage_panel_owner">
-				<form method="post">
-				</form>
+				{% include 'medium_owner_form.html' %}
 			</div>
 			<div class="manage_panel" id="manage_panel_creation">
-				<form method="post">
-				</form>
+				{% include 'medium_creation_date_form.html' %}
 			</div>
 			<div class="manage_panel" id="manage_panel_groups">
-				<form method="post">
-				</form>
+				{% include 'medium_groups_form.html' %}
 			</div>
 			<div class="manage_panel" id="manage_panel_searchability">
-				<form method="post">
-				</form>
+				{% include 'medium_searchability_form.html' %}
 			</div>
 			<div class="manage_panel" id="manage_panel_protection">
-				<form method="post">
-				</form>
+				{% include 'medium_protection_form.html' %}
 			</div>
-			<div class="manage_panel" id="manage_panel_tags" data-no-tags="No tags to copy" {% include 'tag_editor_attributes.html' %}>
-				<form method="post" data-action-add="{{ 'api_uri/add' }}" data-action-remove="{{ 'api_uri/remove' }}">
-					<input type="text" name="tags">
-					<br>
-					<input type="submit" data-add-submit="Add Tags" data-remove-submit="Remove Tags">
-				</form>
+			<div 
+				class="manage_panel" 
+				id="manage_panel_tags" 
+				data-add-tags="Add Tags" 
+				data-remove-tags="Remove Tags" 
+				data-no-tags="No tags to copy" {% include 'tag_editor_attributes.html' %}>
+				<input type="text" name="tags">
+				<br>
 			</div>
-			{# management panels #}
 		</div>
 		<div id="manage_drawer">
 			<span id="manage_actions">

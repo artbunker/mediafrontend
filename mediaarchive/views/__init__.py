@@ -10,7 +10,7 @@ media_archive = Blueprint(
 	__name__,
 	template_folder='templates',
 	static_folder='static',
-	static_url_path='/media'
+	static_url_path='/static'
 )
 
 @media_archive.route('/upload', methods=['GET', 'POST'])

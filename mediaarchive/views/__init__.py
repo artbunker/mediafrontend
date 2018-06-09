@@ -332,6 +332,7 @@ def api_fetch_medium(medium_filename):
 
 	filename_pieces = medium_filename.split('.')
 	if 2 > len(filename_pieces):
+		#TODO maybe actually feed 404 image fetch svg back?
 		abort(404, {'message': 'medium_not_found'})
 
 	medium_id = filename_pieces[0]
@@ -339,6 +340,7 @@ def api_fetch_medium(medium_filename):
 
 	# trying to access nonprotected medium through protected medium path
 	if MediumProtection.NONE == medium.protection:
+		#TODO maybe actually feed 400 image fetch svg back?
 		abort(400)
 
 	if 2 == len(filename_pieces):
@@ -358,6 +360,7 @@ def api_fetch_medium(medium_filename):
 	g.media_archive.require_access(medium)
 
 	if not os.path.exists(os.path.join(media_path, medium_filename)):
+		#TODO maybe actually feed 404 image fetch svg back?
 		abort(404, {'message': 'medium_not_found'})
 
 	g.no_store = True

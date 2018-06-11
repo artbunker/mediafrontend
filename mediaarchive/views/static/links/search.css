@@ -88,14 +88,6 @@
 #tags_this_page.closed>div {
 	display: none;
 }
-/*js thumbnail hover previews*/
-.thumbnail.hover picture,
-.thumbnail .preview {
-	display: none;
-}
-.thumbnail.hover .preview {
-	display: block;
-}
 
 @media only screen and (max-width: 1024px) {
 	#results {

@@ -45,6 +45,12 @@
 .thumbnail::before {
 	transition: background-color 100ms, color 100ms, border-color 100ms, height 250ms;
 }
+.summary.nofile::before {
+	transition: width 250ms, height 250ms, top 250ms, left 250ms;
+}
+.summary::after {
+	transition: border-radius 250ms;
+}
 /*management mode main colors*/
 .managing_media #topmenu,
 .managing_media #topmenu a,
@@ -64,6 +70,17 @@
 	border-left: 1px solid var(--background);
 	cursor: pointer;
 }
+/*management mode thumbnail saturation* /
+.managing_media picture,
+.managing_media video {
+	filter: brightness(35%);
+}
+.managing_media picture:hover,
+.managing_media video:hover,
+.managing_media .selected picture,
+.managing_media .selected video {
+	filter: brightness(100%);
+}
 /*management mode thumbnail backgrounds*/
 .managing_media .thumbnail {
 	background-color: #4060c0;
@@ -82,37 +99,62 @@
 .managing_media .selected video {
 	border-width: 16px;
 }
-/*TODO type-only thumbnails should also shrink a bit when selected maybe?*/
 /*selected thumbnail background*/
 .managing_media .thumbnail.selected {
 	background-color: #ff00c0;
+	z-index: 990;
 }
 .managing_media .thumbnail.selected::before {
 	background-color: rgba(255, 0, 192, 0.80);
 }
-/*success and failure thumbnail background*/
-.managing_media .thumbnail.success {
-	background-color: #0080ff;
+.managing_media .thumbnail.selected .summary.nofile::before {
+	/** /
+	width: 64%;
+	height: 64%;
+	top: 18%;
+	left: 18%;
+	/**/
 }
-.managing_media .thumbnail.success::before {
-	background-color: rgba(0, 127, 255, 0.80);
+/*processing/success/failure thumbnails*/
+@keyframes spin {
+	0% {
+		-webkit-transform: rotate(0deg);
+	}
+	100% {
+		-webkit-transform: rotate(359deg);
+	}
 }
-.managing_media .thumbnail.failure {
+.thumbnail.processing .summary::after {
+	border-radius: 50%;
+	background-image: url(processing.svg)!important;
+	-webkit-animation: spin 1s ease infinite;
+	-moz-animation: spin 1s ease infinite;
+	-ms-animation: spin 1s ease infinite;
+	-o-animation: spin 1s ease infinite;
+	animation: spin 1s ease infinite;
+	/*TODO rotate processing spinner*/
+	display: inline-block;
+}
+.thumbnail.success .summary::after {
+	border-radius: 50%;
+	background-image: url(success.svg)!important;
+	display: inline-block;
+}
+.thumbnail.failure {
 	background-color: #ff0000;
 }
-.managing_media .thumbnail.failure::before {
+.thumbnail.failure::before {
 	background-color: rgba(255, 0, 0, 0.80);
 }
 /*full view thumbnails on hover*/
-.managing_media .thumbnail:hover video,
-.managing_media .thumbnail:hover picture,
-.managing_media .thumbnail:hover picture img {
+.managing_media:not(.active_panel) .thumbnail:hover video,
+.managing_media:not(.active_panel) .thumbnail:hover picture,
+.managing_media:not(.active_panel) .thumbnail:hover picture img {
 	object-fit: contain;
 }
 /*conditional manage actions*/
 [data-selection_total="0"] #manage_drawer a:not(#manage_select_all),
-[data-selection_total="all"] #manage_drawer #manage_select_all,
-body:not([data-selection_total="1"]) #manage_drawer #manage_copy_tags {
+[data-selection_total="all"] #manage_drawer #manage_select_all {
 	display: none;
 }
 /*drag select*/
@@ -133,13 +175,47 @@ body:not([data-selection_total="1"]) #manage_drawer #manage_copy_tags {
 #selection_box {
 	border: 0.33em dashed var(--f_l);
 	border-radius: 0.5em;
-	z-index: 100;
+	z-index: 1020;
 	background-color: rgba(0, 0, 0, 0.5);
 	box-sizing: border-box;
 }
 /*management panels*/
 #manage_panels {
 	display: none;
+}
+#manage_active_panel {
+	display: none;
+}
+.active_panel #manage_active_panel {
+	display: block;
+	width: 50%;
+	position: fixed;
+	bottom: 0;
+	right: 1.5em;
+	z-index: 1010;
+}
+#manage_active_panel form {
+	background-color: var(--background);
+	border: solid 1px var(--background);
+	border-radius: 1em 1em 0.5em 0.5em;
+	overflow: hidden
+}
+#dim {
+	display: none;
+}
+.active_panel #manage_active_panel + #dim {
+	display: block;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 980;
+	background-color: #000000;
+	opacity: 0.66;
+}
+.active_panel .thumbnail a {
+	cursor: default;
 }
 /*smaller screens*/
 @media only screen and (max-width: 1280px)

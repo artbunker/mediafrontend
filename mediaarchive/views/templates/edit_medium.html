@@ -11,7 +11,7 @@
 {% endblock %}
 {% block content %}
 	<div id="edit_medium">
-		{% include 'thumbnail.html' %}
+		<div id="preview">{% include 'thumbnail.html' %}</div>
 		<script type="module" src="{{ url_for('media_archive.static', filename='scripts/edit.js') }}"></script>
 		{% include 'info.html' %}
 		<table>

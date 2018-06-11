@@ -76,8 +76,11 @@
 {% if manage %}
 	{% block body %}
 		<div id="manage_active_panel">
-			<form method="post" id="manage_form"></form>
+			<form method="post" id="manage_form">
+				<input type="submit" value="Submit">
+			</form>
 		</div>
+		<div id="dim"></div>
 		<div 
 			id="manage_panels"
 			data-action-edit="{{ api_uris['edit'] }}" 
@@ -85,31 +88,37 @@
 			data-action-build="{{ api_uris['build'] }}" 
 			data-action-generate-set="{{ api_uris['generate_set'] }}" 
 			data-action-add-tags="{{ api_uris['add_tags'] }}" 
-			data-action-remove-tags="{{ api_uris['remove_tags'] }}">
+			data-action-remove-tags="{{ api_uris['remove_tags'] }}" 
+			data-confirm-remove="This will permanently remove selected media, are you sure?" 
+			data-confirm-generate-set="This will generate a random set tag and apply it to all selected media, are you sure?" 
+			data-no-tags="No tags to copy" {% include 'tag_editor_attributes.html' %}>
 			{% set fields = {} %}
 			<div class="manage_panel" id="manage_panel_owner">
+				<legend>Change Owner</legend>
 				{% include 'medium_owner_form.html' %}
 			</div>
 			<div class="manage_panel" id="manage_panel_creation">
+				<legend>Change Creation Date</legend>
 				{% include 'medium_creation_date_form.html' %}
 			</div>
 			<div class="manage_panel" id="manage_panel_groups">
 				{% include 'medium_groups_form.html' %}
 			</div>
 			<div class="manage_panel" id="manage_panel_searchability">
+				<legend>Change Searchability</legend>
 				{% include 'medium_searchability_form.html' %}
 			</div>
 			<div class="manage_panel" id="manage_panel_protection">
+				<legend>Change Protection</legend>
 				{% include 'medium_protection_form.html' %}
 			</div>
-			<div 
-				class="manage_panel" 
-				id="manage_panel_tags" 
-				data-add-tags="Add Tags" 
-				data-remove-tags="Remove Tags" 
-				data-no-tags="No tags to copy" {% include 'tag_editor_attributes.html' %}>
-				<input type="text" name="tags">
-				<br>
+			<div class="manage_panel" id="manage_panel_add_tags">
+				<legend>Add Tags</legend>
+				<input type="hidden" name="tags">
+			</div>
+			<div class="manage_panel" id="manage_panel_remove_tags">
+				<legend>Remove Tags</legend>
+				<input type="hidden" name="tags">
 			</div>
 		</div>
 		<div id="manage_drawer">

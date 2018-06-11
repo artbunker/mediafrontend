@@ -1,6 +1,7 @@
 'use strict';
 
 import { autocopy } from './autocopy.js';
+import { add_hover_preview } from './add_hover_preview.js';
 
 document.documentElement.classList.add('scripts_enabled');
 
@@ -14,7 +15,8 @@ class Manage {
 			exit_management: 'Escape',
 			toggle_management: 'e',
 			add_tags: 't',
-			generate_set: 's',
+			searchability: 'v',
+			generate_set: 'g',
 			select_all: 'a',
 			select_none: 'd',
 			remove: 'Delete',
@@ -45,6 +47,9 @@ class Manage {
 			}
 			else if (this.keys.add_tags == e.key) {
 				this.show_panel('add_tags');
+			}
+			else if (this.keys.searchability == e.key) {
+				this.show_panel('searchability');
 			}
 			else if (this.keys.generate_set == e.key) {
 				this.generate_set();
@@ -79,7 +84,11 @@ class Manage {
 				}
 				e.preventDefault();
 				e.stopPropagation();
-				e.currentTarget.classList.toggle('selected');
+				if (document.body.classList.contains('active_panel')) {
+					this.hide_panels();
+					return;
+				}
+				this.toggle_select(e.currentTarget)
 				this.update_selection_total();
 			});
 		});
@@ -90,8 +99,7 @@ class Manage {
 			this.toggle_management();
 		});
 
-		this.panels['tags'] = document.querySelector('#manage_panel_tags');
-		//TODO set up tags panel tag editor
+		//TODO set up tag editor
 		// manage action buttons
 		let actions = [
 			'owner',
@@ -110,10 +118,17 @@ class Manage {
 		];
 		for (let i = 0; i < actions.length; i++) {
 			let action = actions[i];
-			this.drawer.querySelector('#manage_' + action).addEventListener('click', () => {
+			let action_button = this.drawer.querySelector('#manage_' + action);
+			if (!action_button) {
+				continue;
+			}
+			action_button.addEventListener('click', () => {
 				this[action]();
 			});
 		}
+		document.querySelector('#dim').addEventListener('click', (e) => {
+			this.hide_panels();
+		});
 
 		// drag to select
 		this.drag_origin = {
@@ -121,6 +136,7 @@ class Manage {
 			y: 0,
 		};
 		this.blank = document.createElement('img');
+		// transparent pixel to hide generated ghost while dragging
 		this.blank.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 		this.blank.id = 'blank';
 		this.selection_box = document.createElement('span');
@@ -129,7 +145,10 @@ class Manage {
 		document.body.appendChild(this.blank);
 		document.body.appendChild(this.selection_box);
 		document.body.addEventListener('dragstart', (e) => {
-			if (!document.body.classList.contains('managing_media')) {
+			if (
+				!document.body.classList.contains('managing_media')
+				|| document.body.classList.contains('active_panel')
+			) {
 				return;
 			}
 			this.show_selection_box();
@@ -138,10 +157,16 @@ class Manage {
 			this.drag_origin.y = e.pageY;
 		});
 		document.body.addEventListener('drag', (e) => {
+			if (document.body.classList.contains('active_panel')) {
+				return;
+			}
 			this.update_selection_box(e.pageX, e.pageY);
 		});
 		document.body.addEventListener('dragend', (e) => {
 			e.preventDefault();
+			if (document.body.classList.contains('active_panel')) {
+				return;
+			}
 			if (document.body.classList.contains('managing_media')) {
 				this.update_selection_box(e.pageX, e.pageY);
 				this.selection_from_drag();
@@ -151,8 +176,12 @@ class Manage {
 
 		this.form.addEventListener('submit', (e) => {
 			e.preventDefault();
-			//TODO if tags input convert tag editor current tags list to string
-			//TODO and set tags input value to it
+			let tags_input = this.form.querySelector('input[name="tags"]');
+			if (tags_input) {
+				//TODO convert tag editor current tags list to string
+				let tags_string = '';
+				tags_input.value = tags_string;
+			}
 			this.api_request(
 				'POST',
 				this.form.action,
@@ -169,6 +198,22 @@ class Manage {
 			this.calculate_drawer_spacing();
 		});
 		this.calculate_drawer_spacing();
+	}
+	clear_result(thumbnail) {
+		thumbnail.classList.remove('success');
+		thumbnail.classList.remove('failure');
+	}
+	toggle_select(thumbnail) {
+		this.clear_result(thumbnail);
+		thumbnail.classList.toggle('selected');
+	}
+	select(thumbnail) {
+		this.clear_result(thumbnail);
+		thumbnail.classList.add('selected');
+	}
+	deselect(thumbnail) {
+		this.clear_result(thumbnail);
+		thumbnail.classList.remove('selected');
 	}
 	hide_selection_box() {
 		let items = [
@@ -229,10 +274,10 @@ class Manage {
 				)
 			) {
 				if (this.select_negate) {
-					thumbnail.classList.remove('selected');
+					this.deselect(thumbnail);
 				}
 				else {
-					thumbnail.classList.add('selected');
+					this.select(thumbnail);
 				}
 			}
 		})
@@ -245,6 +290,7 @@ class Manage {
 		let content = document.querySelector('#content');
 		content.style.paddingBottom = 'calc(1em + ' + rect.height + 'px)';
 		this.drawer.height = rect.height + 'px';
+		this.active_panel.style.bottom = 'calc(1.5em + ' + rect.height + 'px)';
 		this.drawer.classList.add('loaded');
 		this.set_drawer_height();
 	}
@@ -258,12 +304,14 @@ class Manage {
 	}
 	enter_management() {
 		this.select_none();
+		this.hide_panels();
 		document.body.classList.add('managing_media');
 		this.set_drawer_height();
 	}
 	exit_management() {
 		document.body.classList.remove('managing_media');
 		this.select_none();
+		this.hide_panels();
 		this.set_drawer_height();
 	}
 	toggle_management() {
@@ -277,11 +325,15 @@ class Manage {
 	}
 	show_panel(panel) {
 		this.hide_panels();
-		this.form.appendChild(this.panels.querySelector('#manage_panel_' + panel));
-		this.active_panel.classList.add('active');
+		let panel_el = this.panels.querySelector('#manage_panel_' + panel);
+		if (!panel_el) {
+			return;
+		}
+		this.form.insertBefore(panel_el, this.form.firstChild);
+		document.body.classList.add('active_panel');
 	}
 	hide_panels() {
-		this.active_panel.classList.remove('active');
+		document.body.classList.remove('active_panel');
 		let panels = this.active_panel.querySelectorAll('.manage_panel');
 		for (let i = panels.length - 1; 0 <= i; i--) {
 			this.panels.appendChild(panels[i]);
@@ -294,27 +346,6 @@ class Manage {
 		}
 		this.hide_panels();
 	}
-	/** /
-	lock_form(form) {
-		let elements = form.elements;
-		for (let i = 0; i < elements.length; i++) {
-			elements[i].readOnly = true;
-		}
-	}
-	unlock_form(form) {
-		let elements = form.elements;
-		for (let i = 0; i < elements.length; i++) {
-			elements[i].readOnly = false;
-		}
-	}
-	batch_finished(left_in_batch, cb) {
-		//TODO locking and unlocking form for batches maybe?
-		left_in_batch--;
-		if (0 == left_in_batch) {
-			cb();
-		}
-	}
-	/**/
 	iterate_thumbnails(thumbnails, cb) {
 		let reversed_array = [];
 		for (let i = thumbnails.length - 1; 0 <= i; i--) {
@@ -325,8 +356,7 @@ class Manage {
 			cb(reversed_array[i]);
 		}
 	}
-	api_request(method, action, fd, thumbnails) {
-		console.log(thumbnails);
+	api_request(method, action, fd, thumbnails, cb) {
 		let xhr = new XMLHttpRequest();
 		if (1 == thumbnails.length) {
 			fd.append('medium_id', thumbnails[0].dataset.id);
@@ -339,6 +369,7 @@ class Manage {
 			fd.append('medium_ids', medium_ids);
 		}
 		xhr.thumbnails = thumbnails;
+		xhr.cb = cb;
 		fd.append('response_type', 'json');
 		xhr.responseType = 'json';
 		xhr.onreadystatechange = () => {
@@ -346,6 +377,9 @@ class Manage {
 				this.iterate_thumbnails(xhr.thumbnails, (thumbnail) => {
 					thumbnail.classList.remove('processing');
 				});
+				if (xhr.cb) {
+					xhr.cb();
+				}
 				//TODO check for batch finished?
 				//TODO e.g. all add/remove tags finished
 				//TODO to make additional call to rebuild tags
@@ -362,31 +396,43 @@ class Manage {
 					if (xhr.response.hasOwnProperty('thumbnail')) {
 						// replace thumbnail innerHTML with response thumbnail innerHTML
 						// to retain listeners
+						let thumbnail = xhr.thumbnails[0];
 						let temp = document.createElement('div');
 						temp.innerHTML = xhr.response.thumbnail;
-						xhr.thumbnails[0].innerHTML = temp.querySelector('.thumbnail').innerHTML;
+						thumbnail.innerHTML = temp.querySelector('.thumbnail').innerHTML;
+						// if replacement thumbnail has preview then add hover preview listener
+						if (thumbnail.dataset.hasOwnProperty('preview')) {
+							add_hover_preview(thumbnail);
+						}
+					}
+					if (xhr.response.hasOwnProperty('inner_thumbnail')) {
+						//TODO replace just inner thumbnail
 					}
 					if (xhr.response.hasOwnProperty('group_tiles')) {
-						//TODO replace group tiles with new group tiles
+						//TODO replace just group tiles
+					}
+					if (xhr.response.hasOwnProperty('tags')) {
+						//TODO replace just tags
+					}
+					if (xhr.response.hasOwnProperty('sets')) {
+						//TODO replace just sets
 					}
 					this.iterate_thumbnails(xhr.thumbnails, (thumbnail) => {
 						thumbnail.classList.add('success');
 						setTimeout(() => {
-							thumbnail.classList.remove('success');
+								thumbnail.classList.remove('success');
 						}, 2000);
 					});
 				}
 				else {
 					this.iterate_thumbnails(xhr.thumbnails, (thumbnail) => {
 						thumbnail.classList.add('failure');
-						setTimeout(() => {
-							thumbnail.classList.remove('failure');
-						}, 2000);
 					});
 				}
 			}
 		};
 		this.iterate_thumbnails(xhr.thumbnails, (thumbnail) => {
+			thumbnail.classList.remove('failure');
 			thumbnail.classList.add('processing');
 		});
 		xhr.open(
@@ -407,22 +453,30 @@ class Manage {
 	}
 	build() {
 		this.hide_panels();
-		this.api_request(
-			'POST',
-			this.panels.dataset.actionBuild,
-			new FormData(),
-			document.querySelectorAll('.selected')
-		);
+		let selected = document.querySelectorAll('.selected');
+		this.iterate_thumbnails(selected, (thumbnail) => {
+			this.api_request(
+				'POST',
+				this.panels.dataset.actionBuild,
+				new FormData(),
+				[thumbnail]
+			);
+		});
 	}
 	remove() {
-		console.log('removing');
+		if (!confirm(this.panels.dataset.confirmRemove)) {
+			return;
+		}
 		this.hide_panels();
-		this.api_request(
-			'POST',
-			this.panels.dataset.actionRemove,
-			new FormData(),
-			document.querySelectorAll('.selected')
-		);
+		let selected = document.querySelectorAll('.selected');
+		this.iterate_thumbnails(selected, (thumbnail) => {
+			this.api_request(
+				'POST',
+				this.panels.dataset.actionRemove,
+				new FormData(),
+				[thumbnail]
+			);
+		});
 	}
 	groups() {
 		this.form.action = this.panels.dataset.actionRemove;
@@ -437,6 +491,9 @@ class Manage {
 		this.toggle_panel('protection');
 	}
 	generate_set() {
+		if (!confirm(this.panels.dataset.confirmGenerateSet)) {
+			return;
+		}
 		this.api_request(
 			'POST',
 			this.panels.dataset.actionGenerateSet,
@@ -446,46 +503,60 @@ class Manage {
 	}
 	copy_tags() {
 		this.hide_panels();
-		//TODO allow copying aggregate of all tags from multiple selected media?
-		let medium = document.querySelector('.selected');
-		let tags_panel = this.panels.querySelector('#manage_panel_tags');
-		if (!medium || !medium.title) {
-			alert(tags_panel.dataset.noTags);
+		let selected = document.querySelectorAll('.selected');
+		let tags = [];
+		this.iterate_thumbnails(selected, (thumbnail) => {
+			if (!thumbnail.title) {
+				return;
+			}
+			let current_tags = thumbnail.title.split('#');
+			for (let i = 0; i < current_tags.length; i++) {
+				let current_tag = current_tags[i];
+				if (!current_tag || -1 != tags.indexOf(current_tag)) {
+					continue;
+				}
+				tags.push(current_tag);
+			}
+		});
+		if (0 == tags.length) {
+			alert(this.panels.dataset.noTags);
 			return;
 		}
+		tags.sort();
+		let tags_string = '#' + tags.join('#');
 		autocopy(
-			medium.title,
-			tags_panel.dataset.autocopyAlert,
-			tags_panel.dataset.copyAlert
+			tags_string,
+			this.panels.dataset.autocopyAlert,
+			this.panels.dataset.copyAlert
 		);
 	}
 	add_tags() {
-		this.form.action = this.form.dataset.actionAdd;
-		console.log('add tags');
-		//this.toggle_panel('tags');
+		this.form.action = this.panels.dataset.actionAddTags;
+		//TODO move tag editor into add_tags form
+		this.toggle_panel('add_tags');
 	}
 	remove_tags() {
-		this.form.action = this.form.dataset.actionRemove;
-		console.log('remove tags');
-		//this.toggle_panel('tags');
+		this.form.action = this.panels.dataset.actionRemoveTags;
+		//TODO move tag editor into remove_tags form
+		this.toggle_panel('remove_tags');
 	}
 	select_all() {
 		let thumbnails = document.querySelectorAll('.thumbnail');
 		this.iterate_thumbnails(thumbnails, (thumbnail) => {
-			thumbnail.classList.add('selected');
+			this.select(thumbnail);
 		});
 		this.update_selection_total();
 	}
 	select_none() {
 		let selected = document.querySelectorAll('.selected');
 		this.iterate_thumbnails(selected, (thumbnail) => {
-			thumbnail.classList.remove('selected');
+			this.deselect(thumbnail);
 		});
 		this.update_selection_total();
 	}
 	update_selection_total() {
 		let selected = document.querySelectorAll('.selected');
-		let thumbnails = document.querySelectorAll('.thumbnails');
+		let thumbnails = document.querySelectorAll('.thumbnail');
 		if (selected.length == thumbnails.length) {
 			document.body.dataset.selection_total = 'all';
 			this.selection_total.innerText = this.selection_total.dataset.all;

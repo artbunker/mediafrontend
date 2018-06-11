@@ -34,7 +34,7 @@
 		<div class="medium" data-id="{{ medium.id }}" data-upload-time="{{ (medium.upload_time.timestamp() * 1000)|int }}" data-creation-time="{{ (medium.creation_time.timestamp() * 1000)|int }}" data-category="{{ medium.category }}" data-mime="{{ medium.mime }}" data-size="{{ medium.size }}" data-data1="{{ medium.data1 }}" data-data2="{{ medium.data2 }}" data-data3="{{ medium.data3 }}" data-data4="{{ medium.data4 }}" data-data5="{{ medium.data5 }}" data-data6="{{ medium.data6 }}"{% include 'rgb.html' %}>
 			{% if medium.uris['original'] %}
 				{% if 'application/x-shockwave-flash' == medium.mime %}
-					<div class="summary view">
+					<div class="summary">
 						{% set dimensions = '' %}
 						{% if medium.data1 and medium.data2 %}
 							{% set dimensions = [' width="', medium.data1, '" height="', medium.data2, '"']|join('') %}

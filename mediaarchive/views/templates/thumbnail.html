@@ -27,7 +27,7 @@
 		data-data5="{{ medium.data5 }}" 
 		data-data6="{{ medium.data6 }}"{% include 'rgb.html' %}>
 		{% if thumb_medium.uris['static'][256] and thumb_medium.uris['fallback'][256] %}
-			<div class="summary thumb">
+			<div class="summary">
 				<a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">
 					<picture>
 						<source srcset="{{ thumb_medium.uris['static'][256] }}" type="image/webp">

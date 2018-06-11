@@ -26,8 +26,13 @@ if (target_input) {
 
 	// listener for search key
 	window.addEventListener('keydown', e => {
+		if ('INPUT' == document.activeElement.tagName) {
+			return;
+		}
 		if ('s' == e.key) {
-			search.input.focus();
+			setTimeout(() => {
+				search.input.focus();
+			}, 1);
 		}
 	});
 	// listeners for add and remove tags on tags this page actions

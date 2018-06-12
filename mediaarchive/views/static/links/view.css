@@ -99,28 +99,31 @@ audio {
 .editing_tags .info .show_tag_editor {
 	display: none;
 }
-/*js tag editor toggle*/
-.tags .tags_preview,
-.tags input[type=text],
-.editing_tags .inner_tags,
-.scripts_enabled .tags_editor,
-.scripts_enabled .tags_editor form {
+/*js tags editor*/
+.scripts_enabled .tags_editor input[name="tags"],
+.scripts_enabled .tags_editor input[type="submit"],
+.tags_preview_wrapper,
+.tags_preview_wrapper + input,
+.editing_tags .tags {
 	display: none;
 }
-.editing_tags .tags .tags_preview,
-.editing_tags .tags input[type=text],
-.editing_tags .tags[data-visible-tags="0"] {
+.editing_tags .tags_preview_wrapper,
+.editing_tags .tags_preview_wrapper + input {
 	display: block;
 }
-/*js tag editor input*/
-.tags input[type=text] {
-	width: 100%;
-	margin-top: 0;
-	outline: none;
-}
-/*js tag editor preview*/
-.tags .tags_preview {
+.tags_preview_wrapper {
 	font-size: 0;
+	text-align: left;
+	background-color: #ffffff;
+	padding-left: 1px;
+	padding-bottom: 1px;
+}
+.tags_preview_wrapper + input {
+	outline: none;
+	width: 100%;
+	border-bottom-left-radius: 0.25em;
+	border-bottom-right-radius: 0.25em;
+	margin-top: 0;
 }
 .tags_preview .tag {
 	cursor: pointer;

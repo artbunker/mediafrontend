@@ -197,9 +197,28 @@
 #manage_active_panel form {
 	background-color: var(--background);
 	border: solid 1px var(--background);
-	border-radius: 1em 1em 0.5em 0.5em;
 	overflow: hidden
 }
+/*remove top margin from active panel form elements*/
+#manage_active_panel input:first-child,
+#manage_active_panel select:first-child,
+#manage_active_panel label:first-child,
+#manage_active_panel *:first-child + input,
+#manage_active_panel *:first-child + select,
+#manage_active_panel *:first-child + label,
+#manage_active_panel legend:first-child + * + input,
+#manage_active_panel legend:first-child + * + select,
+#manage_active_panel legend:first-child + * + label {
+	margin-top: 0;
+}
+/*hide built in legends from panels*/
+#manage_active_panel legend {
+	display: none;
+}
+#manage_panel_groups input[type="submit"] {
+	margin-top: 1px;
+}
+/*dim background of active panels*/
 #dim {
 	display: none;
 }
@@ -216,6 +235,15 @@
 }
 .active_panel .thumbnail a {
 	cursor: default;
+}
+/*tag editor*/
+.manage_panel .tags_preview_wrapper {
+	padding: 0 0 1px 1px;
+}
+.tags_preview_wrapper + input {
+	margin-top: 0;
+	outline: none;
+	width: 100%;
 }
 /*smaller screens*/
 @media only screen and (max-width: 1280px)

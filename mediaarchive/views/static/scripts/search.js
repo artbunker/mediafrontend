@@ -1,29 +1,48 @@
 'use strict';
-import { TagSearch } from './tagsearch.js';
-import { fetch_tag_suggestions } from './tagfield.js';
+
+import { TagsField } from './tagsfield.js';
 import { add_hover_preview } from './add_hover_preview.js';
+
+document.documentElement.classList.add('scripts_enabled');
 
 let target_input = document.getElementById('tags');
 if (target_input) {
-	document.documentElement.classList.add('scripts_enabled');
-
-	// create tag search
-	let strings = {
-		'placeholder': target_input.dataset.placeholder,
-		'remove_tag': target_input.dataset.removeTag,
-	};
-	let search = new TagSearch(target_input, strings);
-
-	// add classes to editor components
-	search.preview.classList.add('tags_preview');
-
-	// add tag editor components to search form
+	let target_form = target_input.parentNode;
+	let disallowed_search_tag_prefixes = [];
+	// create tags field
+	let tags_field = new TagsField(
+		disallowed_search_tag_prefixes,
+		target_input.dataset.placeholder,
+		target_input.dataset.removeTag,
+		target_input.value
+	);
+	// add classes to tags field components
+	tags_field.preview.classList.add('tags_preview');
+	// wrap tags field preview
 	let preview_wrapper = document.createElement('div');
 	preview_wrapper.classList.add('tags_preview_wrapper');
-	preview_wrapper.append(search.preview);
-	search.target_form.insertBefore(preview_wrapper, search.target_input);
-	search.target_form.insertBefore(search.input, search.target_input);
-
+	preview_wrapper.append(tags_field.preview);
+	// add tags field components to target form
+	target_form.insertBefore(preview_wrapper, target_input);
+	target_form.insertBefore(tags_field.input, target_input);
+	// add submit listener to target form
+	target_form.addEventListener('submit', e => {
+		if (tags_field.input.value) {
+			// commit any tag still in input
+			tags_field.add_tags(tags_field.to_list(tags_field.input.value));
+			tags_field.clear_input();
+		}
+		target_input.value = tags_field.to_string(tags_field.tags_list);
+	});
+	// add listener to swap negation and regular tags
+	tags_field.input.addEventListener('added', e => {
+		if ('-' == e.detail.tag[0]) {
+			tags_field.remove_tag(e.detail.tag.substring(1));
+		}
+		else {
+			tags_field.remove_tag('-' + e.detail.tag);
+		}
+	});
 	// listener for search key
 	window.addEventListener('keydown', e => {
 		if ('INPUT' == document.activeElement.tagName) {
@@ -31,7 +50,7 @@ if (target_input) {
 		}
 		if ('s' == e.key) {
 			setTimeout(() => {
-				search.input.focus();
+				tags_field.input.focus();
 			}, 1);
 		}
 	});
@@ -42,14 +61,15 @@ if (target_input) {
 		actions[i].addEventListener('click', e => {
 			e.preventDefault();
 			if (actions[i].classList.contains('add')) {
-				search.add_tag(e.currentTarget.parentNode.dataset.tag);
+				tags_field.add_tag(e.currentTarget.parentNode.dataset.tag);
 			}
 			else if (actions[i].classList.contains('remove')) {
-				search.add_tag('-' + e.currentTarget.parentNode.dataset.tag);
+				tags_field.add_tag('-' + e.currentTarget.parentNode.dataset.tag);
 			}
 		});
 	}
-	fetch_tag_suggestions();
+	// fetch suggestions
+	tags_field.fetch_suggestions();
 }
 let tags_this_page = document.querySelector('#tags_this_page');
 if (tags_this_page) {

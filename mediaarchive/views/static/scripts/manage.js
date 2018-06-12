@@ -1,5 +1,7 @@
 'use strict';
 
+import { TagsField } from './tagsfield.js';
+import { disallowed_edit_tag_prefixes } from './disallowed_edit_tag_prefixes.js';
 import { autocopy } from './autocopy.js';
 import { add_hover_preview } from './add_hover_preview.js';
 
@@ -29,6 +31,10 @@ class Manage {
 		// listener for shortcut keys
 		window.addEventListener('keydown', e => {
 			if (this.keys.exit_management == e.key) {
+				if (document.body.classList.contains('active_panel')) {
+					this.hide_panels();
+					return;
+				}
 				this.exit_management();
 				return;
 			}
@@ -44,21 +50,32 @@ class Manage {
 			}
 			if (this.keys.toggle_management == e.key) {
 				this.toggle_management();
+				return;
 			}
-			else if (this.keys.add_tags == e.key) {
-				this.show_panel('add_tags');
+			// ignore following shortcut keys if not in management mode
+			if (!document.body.classList.contains('managing_media')) {
+				return;
+			}
+			if (this.keys.select_all == e.key) {
+				this.select_all();
+				return;
+			}
+			if (this.keys.select_none == e.key) {
+				this.select_none();
+				return;
+			}
+			// ignore following shortcut keys if no media are selected
+			if (0 == document.body.dataset.selection_total) {
+				return;
+			}
+			if (this.keys.add_tags == e.key) {
+				this.add_tags();
 			}
 			else if (this.keys.searchability == e.key) {
-				this.show_panel('searchability');
+				this.searchability();
 			}
 			else if (this.keys.generate_set == e.key) {
 				this.generate_set();
-			}
-			else if (this.keys.select_all == e.key) {
-				this.select_all();
-			}
-			else if (this.keys.select_none == e.key) {
-				this.select_none();
 			}
 			else if (this.keys.remove == e.key) {
 				this.remove();
@@ -99,7 +116,31 @@ class Manage {
 			this.toggle_management();
 		});
 
-		//TODO set up tag editor
+		// create tags field
+		this.tags_field = new TagsField(
+			disallowed_edit_tag_prefixes,
+			this.panels.dataset.placeholder,
+			this.panels.dataset.removeTag
+		);
+		// add classes to tags field components
+		this.tags_field.preview.classList.add('tags_preview');
+		// wrap tags field preview
+		this.tags_field.preview_wrapper = document.createElement('div');
+		this.tags_field.preview_wrapper.classList.add('tags_preview_wrapper');
+		this.tags_field.preview_wrapper.append(this.tags_field.preview);
+		// store reference to management in tags field
+		this.tags_field.manage = this;
+		// save handler
+		this.tags_field.save = function() {
+			if (this.input.value) {
+				// commit any tag still in input
+				this.add_tags(this.to_list(this.input.value));
+				this.clear_input();
+			}
+			// current tags in current form tags input
+			this.input.parentNode.querySelector('[name="tags"]').value = this.to_string(this.tags_list);
+		}.bind(this.tags_field);
+
 		// manage action buttons
 		let actions = [
 			'owner',
@@ -178,16 +219,17 @@ class Manage {
 			e.preventDefault();
 			let tags_input = this.form.querySelector('input[name="tags"]');
 			if (tags_input) {
-				//TODO convert tag editor current tags list to string
-				let tags_string = '';
-				tags_input.value = tags_string;
+				this.tags_field.save();
 			}
-			this.api_request(
-				'POST',
-				this.form.action,
-				new FormData(this.form),
-				document.querySelectorAll('.selected')
-			);
+			let selected = document.querySelectorAll('.selected');
+			this.iterate_thumbnails(selected, (thumbnail) => {
+				this.api_request(
+					'POST',
+					this.form.action,
+					new FormData(this.form),
+					thumbnail
+				);
+			});
 			this.hide_panels();
 		});
 
@@ -198,6 +240,14 @@ class Manage {
 			this.calculate_drawer_spacing();
 		});
 		this.calculate_drawer_spacing();
+
+		// add listener for leaving page to check if any requests are still processing
+		window.addEventListener('beforeunload', e => {
+			if (document.querySelector('.processing')) {
+				(e || window.event).returnValue = true;
+				return true;
+			}
+		});
 	}
 	clear_result(thumbnail) {
 		thumbnail.classList.remove('success');
@@ -358,6 +408,9 @@ class Manage {
 	}
 	api_request(method, action, fd, thumbnails, cb) {
 		let xhr = new XMLHttpRequest();
+		if (Array !== thumbnails.constructor) {
+			thumbnails = [thumbnails];
+		}
 		if (1 == thumbnails.length) {
 			fd.append('medium_id', thumbnails[0].dataset.id);
 		}
@@ -459,7 +512,7 @@ class Manage {
 				'POST',
 				this.panels.dataset.actionBuild,
 				new FormData(),
-				[thumbnail]
+				thumbnail
 			);
 		});
 	}
@@ -474,12 +527,12 @@ class Manage {
 				'POST',
 				this.panels.dataset.actionRemove,
 				new FormData(),
-				[thumbnail]
+				thumbnail
 			);
 		});
 	}
 	groups() {
-		this.form.action = this.panels.dataset.actionRemove;
+		this.form.action = this.panels.dataset.actionEdit;
 		this.toggle_panel('groups');
 	}
 	searchability() {
@@ -494,6 +547,7 @@ class Manage {
 		if (!confirm(this.panels.dataset.confirmGenerateSet)) {
 			return;
 		}
+		this.hide_panels();
 		this.api_request(
 			'POST',
 			this.panels.dataset.actionGenerateSet,
@@ -532,13 +586,22 @@ class Manage {
 	}
 	add_tags() {
 		this.form.action = this.panels.dataset.actionAddTags;
-		//TODO move tag editor into add_tags form
+		this.move_tags_field('add');
 		this.toggle_panel('add_tags');
 	}
 	remove_tags() {
 		this.form.action = this.panels.dataset.actionRemoveTags;
-		//TODO move tag editor into remove_tags form
+		this.move_tags_field('remove');
 		this.toggle_panel('remove_tags');
+	}
+	move_tags_field(mode) {
+		this.tags_field.clear();
+		let tags_panel = this.panels.querySelector('#manage_panel_' + mode + '_tags')
+		tags_panel.insertBefore(this.tags_field.input, tags_panel.firstChild);
+		tags_panel.insertBefore(this.tags_field.preview_wrapper, tags_panel.firstChild);
+		setTimeout(() => {
+			this.tags_field.input.focus();
+		}, 1);
 	}
 	select_all() {
 		let thumbnails = document.querySelectorAll('.thumbnail');

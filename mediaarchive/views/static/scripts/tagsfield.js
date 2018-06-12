@@ -1,24 +1,21 @@
 'use strict';
-export class TagField {
-	constructor(strings) {
+
+export class TagsField {
+	constructor(disallowed_tag_prefixes, placeholder, remove_tag_title, initial_tags) {
 		this.tags_list = [];
-		// strings
-		this.strings = {};
-		if ('undefined' == typeof strings) {
-			strings = {};
+		this.disallowed_tag_prefixes = disallowed_tag_prefixes;
+		if ('undefined' == typeof placeholder) {
+			placeholder = 'Enter a tag to add, click a tag to remove';
 		}
-		if (!strings.hasOwnProperty('placeholder')) {
-			strings.placeholder = 'Enter a tag to add, click a tag to remove';
+		if ('undefined' == typeof remove_tag_title) {
+			remove_tag_title = 'Remove this tag';
 		}
-		if (!strings.hasOwnProperty('remove_tag_title')) {
-			strings.remove_tag_title = 'Remove this tag';
-		}
-		this.strings.placeholder = strings.placeholder;
-		this.strings.remove_tag_title = strings.remove_tag_title;
+		this.placeholder = placeholder;
+		this.remove_tag_title = remove_tag_title;
 		// create field input
 		this.input = document.createElement('input');
 		this.input.type = 'text';
-		this.input.placeholder = this.strings.placeholder;
+		this.input.placeholder = this.placeholder;
 		// listener for input finish
 		this.debounce = null;
 		this.input.addEventListener('keydown', e => {
@@ -40,6 +37,9 @@ export class TagField {
 				);
 				return;
 			}
+			// prevent form submit in case we're inside of a form
+			e.preventDefault();
+			e.stopPropagation();
 			this.add_tags(this.to_list(this.input.value));
 			setTimeout(() => {
 				this.clear_input();
@@ -61,6 +61,14 @@ export class TagField {
 		// add reference to this tag editor on its preview and input
 		this.input.tag_editor = this;
 		this.preview.tag_editor = this;
+		// add initial tags
+		if ('undefined' != typeof initial_tags) {
+			this.clear();
+			if ('string' == typeof initial_tags) {
+				initial_tags = this.to_list(initial_tags);
+			}
+			this.add_tags(initial_tags);
+		}
 	}
 	show_suggestions() {
 		let tag_suggestions = document.querySelector('#tag_suggestions');
@@ -103,7 +111,6 @@ export class TagField {
 		//TODO firefox doesn't show the dropdown automatically for some reason
 	}
 	hide_suggestions() {
-		console.log('hiding suggestions');
 		this.input.setAttribute('list', this.tag_suggestions_empty.id);
 	}
 	clear() {
@@ -154,18 +161,30 @@ export class TagField {
 		el.appendChild(inner_el);
 		return el;
 	}
+	is_disallowed(tag) {
+		for (let i = 0; i < this.disallowed_tag_prefixes.length; i++) {
+			let tag_prefix = this.disallowed_tag_prefixes[i];
+			if (tag_prefix == tag.substring(0, tag_prefix.length)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	add_tag(tag) {
 		this.add_tags([tag]);
 	}
 	add_tags(tags_list) {
 		for (let i = 0; i < tags_list.length; i++) {
 			let tag = tags_list[i];
-			if (-1 != this.tags_list.indexOf(tag)) {
+			if (
+				-1 != this.tags_list.indexOf(tag)
+				|| this.is_disallowed(tag)
+			) {
 				continue;
 			}
 			this.tags_list.push(tag);
 			let el = this.create_tag_element(tag)
-			el.title = this.strings.remove_tag_title;
+			el.title = this.remove_tag_title;
 			el.addEventListener('click', e => {
 				this.remove_tag(e.currentTarget.dataset.tag);
 			});
@@ -217,6 +236,9 @@ export class TagField {
 	to_string(tags_list) {
 		tags_list.sort();
 		return tags_list.join('#');
+	}
+	fetch_suggestions() {
+		fetch_tag_suggestions();
 	}
 }
 

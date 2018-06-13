@@ -737,13 +737,15 @@ def edit_medium(medium_id, api=False):
 	if 0 < len(updates):
 		g.media_archive.media.update_medium(medium, **updates)
 
-	medium = g.media_archive.get_medium(medium.md5)
-
 	if place_files:
 		g.media_archive.place_medium_file(medium)
 		g.media_archive.place_medium_summaries(medium)
 
+	replace_medium = False
 	#TODO replace medium
+
+	if 0 < len(updates) or place_files or replace_medium:
+		medium = g.media_archive.get_medium(medium.md5)
 
 	if 0 == len(errors):
 		if api:

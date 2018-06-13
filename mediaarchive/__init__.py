@@ -459,12 +459,12 @@ class MediaArchive:
 		return medium
 
 	def search_media(self, **kwargs):
-		if 'ids' in kwargs:
-			if 'md5s' not in kwargs:
-				kwargs['md5s'] = []
-			for id in kwargs['ids']:
-				kwargs['md5s'].append(id_to_md5(id))
-			del kwargs['ids']
+		if 'filter' in kwargs and 'ids' in kwargs['filter']:
+			if 'md5s' not in kwargs['filter']:
+				kwargs['filter']['md5s'] = []
+			for id in kwargs['filter']['ids']:
+				kwargs['filter']['md5s'].append(id_to_md5(id))
+			del kwargs['filter']['ids']
 		media = self.media.search_media(**kwargs)
 		for medium in media:
 			self.populate_medium_properties(medium)

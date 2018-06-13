@@ -154,6 +154,8 @@
 }
 /*conditional manage actions*/
 [data-selection_total="0"] #manage_drawer a:not(#manage_select_all),
+body[data-selection_total="0"] #manage_drawer #manage_generate_set,
+body[data-selection_total="1"] #manage_drawer #manage_generate_set,
 [data-selection_total="all"] #manage_drawer #manage_select_all {
 	display: none;
 }

@@ -319,6 +319,14 @@ def manage_media():
 
 	return search('media_archive.manage_media', overrides={'filter': filter}, manage=True, omit_future=False)
 
+def api_medium_ids_to_list():
+	if 'medium_ids' not in request.form:
+		abort(400)
+	medium_ids = request.form['medium_ids'].split(',')
+	if not medium_ids:
+		abort(400)
+	return medium_ids
+
 @media_archive.route('/api/media/fetch/<medium_filename>', methods=['GET', 'POST'])
 def api_fetch_medium(medium_filename):
 	if (

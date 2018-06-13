@@ -141,6 +141,15 @@ div[data-mime="application/x-shockwave-flash"] .summary::after {
 	object-fit: cover;
 	object-position: center center;
 }
+/*limited visibility*/
+.thumbnail[data-searchability="hidden"] .summary,
+.thumbnail[data-protection="private"] .summary {
+	opacity: 0.5;
+}
+.thumbnail[data-searchability="hidden"]:hover .summary,
+.thumbnail[data-protection="private"]:hover .summary {
+	opacity: 1;
+}
 /*js thumbnail hover previews*/
 .thumbnail.hover picture,
 .thumbnail .preview {

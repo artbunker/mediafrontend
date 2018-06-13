@@ -54,15 +54,15 @@
 	font-size: 0;
 }
 /*omit some rendering tags from tags_this_page to reduce clutter*/
-.tag[data-tag^="filename:"],
-.tag[data-tag^="set:"],
-.tag[data-tag^="cover:"],
-.tag[data-tag^="mirror:"],
-.tag[data-tag^="superior of:"],
-.tag[data-tag^="inferior of:"],
-.tag[data-tag^="next:"],
-.tag[data-tag^="prev:"],
-.tag[data-tag^="suppress:"] {
+#tags_this_page .tag[data-tag^="filename:"],
+#tags_this_page .tag[data-tag^="set:"],
+#tags_this_page .tag[data-tag^="cover:"],
+#tags_this_page .tag[data-tag^="mirror:"],
+#tags_this_page .tag[data-tag^="superior of:"],
+#tags_this_page .tag[data-tag^="inferior of:"],
+#tags_this_page .tag[data-tag^="next:"],
+#tags_this_page .tag[data-tag^="prev:"],
+#tags_this_page .tag[data-tag^="suppress:"] {
 	display: none;
 }
 /*js search box*/

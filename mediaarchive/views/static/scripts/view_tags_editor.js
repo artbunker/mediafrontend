@@ -37,6 +37,7 @@ if (target_input) {
 		plain_tags_editor.dataset.placeholder,
 		plain_tags_editor.dataset.removeTag
 	);
+	tags_field.target_input = target_input;
 	// add classes to tags field components
 	tags_field.preview.classList.add('tags_preview');
 	// wrap tags field preview

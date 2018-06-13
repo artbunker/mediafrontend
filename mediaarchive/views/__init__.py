@@ -237,7 +237,7 @@ def manage_tags():
 			.replace('-', '\-')
 	)
 	if search['tag']:
-		filter['tags'] = '%' + escape(search['tag']) + '%'
+		filter['with_tags_like'] = '%' + escape(search['tag']) + '%'
 
 	pagination = pagination_from_request('count', 'desc', 0, 32)
 

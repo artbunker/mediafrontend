@@ -442,15 +442,57 @@ def api_generate_set():
 		'media': rendered
 	})
 
+def api_modify_tags(mode):
+	g.json_request = True
+	g.media_archive.accounts.require_sign_in();
+	medium_ids = api_medium_ids_to_list()
+	media = g.media_archive.search_media(filter={'ids': medium_ids})
+
+	if not g.media_archive.accounts.current_user_has_global_group('manager'):
+		for medium in media:
+			if medium.owner_id != g.media_archive.accounts.current_user.id:
+				abort(403)
+
+	tags_list = g.media_archive.tag_string_to_list(request.form['tags'])
+	if 'add' == mode:
+		g.media_archive.media.add_tags(media, tags_list)
+	elif 'remove' == mode:
+		g.media_archive.media.remove_tags(media, tags_list)
+	elif 'set' == mode:
+		g.media_archive.media.remove_tags(media)
+		g.media_archive.media.add_tags(media, tags_list)
+	else:
+		abort(400)
+
+	#TODO the media module should modify media in place so another fetch isn't necessary
+	media = g.media_archive.search_media(filter={'ids': medium_ids})
+	rendered = {}
+	for medium in media:
+		tags_string = '#'.join(medium.tags)
+		if tags_string:
+			tags_string = '#' + tags_string
+		rendered[medium.id] = {
+			'tags': tags_string
+		}
+
+	g.media_archive.build_tag_suggestion_lists()
+
+	from statuspages import success
+	return success({
+		'media': rendered
+	})
+
 @media_archive.route('/api/tags/add', methods=['POST'])
 def api_add_tags():
-	#TODO
-	pass
+	return api_modify_tags('add')
 
 @media_archive.route('/api/tags/remove', methods=['POST'])
 def api_remove_tags():
-	#TODO
-	pass
+	return api_modify_tags('remove')
+
+@media_archive.route('/api/tags/set', methods=['POST'])
+def api_set_tags():
+	return api_modify_tags('set')
 
 @media_archive.route('/file/media/<medium_filename>')
 def medium_file(medium_filename):

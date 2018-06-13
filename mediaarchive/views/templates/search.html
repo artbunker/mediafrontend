@@ -59,6 +59,7 @@
 		{% else %}
 			<div id="results">
 				{% for medium in media %}
+					{% set tiles = True %}
 					{% include 'thumbnail.html' %}
 				{% endfor %}
 			</div>

@@ -43,7 +43,9 @@
 				</a>
 			</div>
 		{% endif %}
-		{% include 'set_tiles.html' %}
-		{% include 'group_tiles.html' %}
+		{% if tiles %}
+			{% include 'set_tiles.html' %}
+			{% include 'group_tiles.html' %}
+		{% endif %}
 	</div>
 {% endif %}

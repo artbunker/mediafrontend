@@ -71,6 +71,9 @@ audio {
 	margin-top: 0;
 	width: 100%;
 }
+.tags_editor br {
+	display: none;
+}
 /*omit some rendering tags from visible tags list to reduce clutter*/
 .inner_tags .tag[data-tag^="filename:"],
 .inner_tags .tag[data-tag^="set:"],
@@ -83,6 +86,18 @@ audio {
 .inner_tags .tag[data-tag^="suppress:"] {
 	display: none;
 }
+/*sets*/
+.set {
+	text-align: left;
+	margin-top: 1em;
+}
+.set .thumbnail {
+	max-width: 64px;
+	max-height: 64px;
+	margin-right: 1px;
+	margin-bottom: 1px;
+}
+
 /*js tag editor controls*/
 .info .tag_editor_control {
 	margin-left: 0.75em;
@@ -104,9 +119,11 @@ audio {
 .scripts_enabled .tags_editor input[type="submit"],
 .tags_preview_wrapper,
 .tags_preview_wrapper + input,
-.editing_tags .tags {
+.editing_tags .tags,
+.tags_editor {
 	display: none;
 }
+.editing_tags .tags_editor,
 .editing_tags .tags_preview_wrapper,
 .editing_tags .tags_preview_wrapper + input {
 	display: block;

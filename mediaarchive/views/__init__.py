@@ -600,8 +600,15 @@ def view_medium(medium_id):
 			302
 		)
 
+	sets = {}
 	visible_tags = 0
 	for tag in medium.tags:
+		if 'set:' == tag[:4]:
+			set_name = tag[4:]
+			colon_pos = set_name.find(':')
+			if 0 < colon_pos:
+				set_name = set_name[:colon_pos]
+			sets[set_name] = []
 		if (
 				'filename:' == tag[:9]
 				or 'set:' == tag[:4]
@@ -615,6 +622,48 @@ def view_medium(medium_id):
 			):
 			continue
 		visible_tags += 1
+
+	# get set media
+	if sets:
+		escape = lambda value: (
+			value
+				.replace('\\', '\\\\')
+				.replace('_', '\_')
+				.replace('%', '\%')
+				.replace('-', '\-')
+		)
+		for set_name in sets:
+			media = g.media_archive.search_media(
+				filter={
+					'with_tags_like': 'set:' + escape(set_name) + '%',
+				},
+				sort='creation_time',
+				order='asc',
+			)
+			unordered = []
+			ordered = {}
+			for set_medium in media:
+				for tag in set_medium.tags:
+					if 'set:' != tag[:4]:
+						continue
+					current_set_name = tag[4:]
+					colon_pos = current_set_name.find(':')
+					order = None
+					if 0 < colon_pos:
+						current_set_name = current_set_name[:colon_pos]
+						order = int(current_set_name[colon_pos:])
+					if set_name != current_set_name:
+						continue
+					if None == order:
+						unordered.append(set_medium)
+					else:
+						ordered[order] = set_medium
+					break
+			sorted_ordered = []
+			for key, value in sorted(ordered.items()):
+				sorted_ordered.append(value)
+			sets[set_name] = sorted_ordered + unordered
+		medium.sets = sets
 
 	return render_template(
 		'view_medium.html',

@@ -1,0 +1,13 @@
+{% set original_medium = medium %}
+{% for set in original_medium.sets %}
+	<div class="set">
+		{% for medium in original_medium.sets[set] %}
+			{% set tiles = False %}
+			{% if medium.id == original_medium.id %}
+				<span class="current">{% include 'thumbnail.html' %}</span>
+			{% else %}
+				{% include 'thumbnail.html' %}
+			{% endif %}
+		{% endfor %}
+	</div>
+{% endfor %}

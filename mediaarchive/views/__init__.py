@@ -379,24 +379,27 @@ def api_fetch_medium(medium_filename):
 
 @media_archive.route('/api/media/edit', methods=['POST'])
 def api_edit_medium():
-	if 'medium_id' not in request.form:
-		abort(400)
 	g.json_request = True
-	return edit_medium(request.form['medium_id'], True)
+	medium_ids = api_medium_ids_to_list()
+	if 1 < len(medium_ids):
+		abort(400)
+	return edit_medium(medium_ids[0], True)
 
 @media_archive.route('/api/media/remove', methods=['POST'])
 def api_remove_medium():
-	if 'medium_id' not in request.form:
-		abort(400)
 	g.json_request = True
-	return remove_medium(request.form['medium_id'], True)
+	medium_ids = api_medium_ids_to_list()
+	if 1 < len(medium_ids):
+		abort(400)
+	return remove_medium(medium_ids[0], True)
 
 @media_archive.route('/api/media/build', methods=['POST'])
 def api_build_medium():
-	if 'medium_id' not in request.form:
-		abort(400)
 	g.json_request = True
-	return generate_summaries(request.form['medium_id'], True)
+	medium_ids = api_medium_ids_to_list()
+	if 1 < len(medium_ids):
+		abort(400)
+	return generate_summaries(medium_ids[0], True)
 
 @media_archive.route('/api/media/set', methods=['POST'])
 def api_generate_set():

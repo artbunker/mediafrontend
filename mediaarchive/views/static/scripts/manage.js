@@ -408,19 +408,14 @@ class Manage {
 	}
 	api_request(method, action, fd, thumbnails, cb) {
 		let xhr = new XMLHttpRequest();
-		if (Array !== thumbnails.constructor) {
+		if (NodeList !== thumbnails.constructor) {
 			thumbnails = [thumbnails];
 		}
-		if (1 == thumbnails.length) {
-			fd.append('medium_id', thumbnails[0].dataset.id);
-		}
-		else {
-			let medium_ids = [];
-			this.iterate_thumbnails(thumbnails, (thumbnail) => {
-				medium_ids.push(thumbnail.dataset.id);
-			});
-			fd.append('medium_ids', medium_ids);
-		}
+		let medium_ids = [];
+		this.iterate_thumbnails(thumbnails, (thumbnail) => {
+			medium_ids.push(thumbnail.dataset.id);
+		});
+		fd.append('medium_ids', medium_ids);
 		xhr.thumbnails = thumbnails;
 		xhr.cb = cb;
 		fd.append('response_type', 'json');
@@ -433,42 +428,60 @@ class Manage {
 				if (xhr.cb) {
 					xhr.cb();
 				}
-				//TODO check for batch finished?
-				//TODO e.g. all add/remove tags finished
-				//TODO to make additional call to rebuild tags
 				if (200 == xhr.status) {
 					if (!xhr.response) {
 						return;
 					}
-					if (xhr.response.hasOwnProperty('remove')) {
-						this.iterate_thumbnails(xhr.thumbnails, (thumbnail) => {
-							thumbnail.parentNode.removeChild(thumbnail);
-						});
-						return;
-					}
-					if (xhr.response.hasOwnProperty('thumbnail')) {
-						// replace thumbnail innerHTML with response thumbnail innerHTML
-						// to retain listeners
-						let thumbnail = xhr.thumbnails[0];
-						let temp = document.createElement('div');
-						temp.innerHTML = xhr.response.thumbnail;
-						thumbnail.innerHTML = temp.querySelector('.thumbnail').innerHTML;
-						// if replacement thumbnail has preview then add hover preview listener
-						if (thumbnail.dataset.hasOwnProperty('preview')) {
-							add_hover_preview(thumbnail);
+					if (xhr.response.hasOwnProperty('media')) {
+						for (let medium_id in xhr.response.media) {
+							let thumbnail = document.querySelector('[data-id="' + medium_id + '"]');
+							if (!thumbnail) {
+								continue;
+							}
+							let response_medium = xhr.response.media[medium_id];
+							if (response_medium.hasOwnProperty('failure')) {
+								thumbnail.classList.add('failure');
+								continue;
+							}
+							if (response_medium.hasOwnProperty('remove')) {
+								thumbnail.parentNode.removeChild(thumbnail);
+								continue;
+							}
+							if (response_medium.hasOwnProperty('thumbnail')) {
+								// replace thumbnail innerHTML with response thumbnail innerHTML
+								// to retain listeners
+								let temp = document.createElement('div');
+								temp.innerHTML = response_medium.thumbnail;
+								//TODO set thumbnail class title style and all data attributes
+								thumbnail.innerHTML = temp.querySelector('.thumbnail').innerHTML;
+								// if thumbnail has preview then add hover preview listener
+								if (thumbnail.dataset.hasOwnProperty('preview')) {
+									add_hover_preview(thumbnail);
+								}
+								continue;
+							}
+							if (response_medium.hasOwnProperty('summary')) {
+								let temp = document.createElement('div');
+								temp.innerHTML = response_medium.summary;
+								let summary = thumbnail.querySelector('.summary');
+								thumbnail.insertAfter(temp.querySelector('.summary'), summary);
+								thumbnail.removeChild(summary);
+								// if thumbnail has preview then add hover preview listener
+								if (thumbnail.dataset.hasOwnProperty('preview')) {
+									add_hover_preview(thumbnail);
+								}
+							}
+							if (response_medium.hasOwnProperty('tags')) {
+								thumbnail.title = response_medium.tags;
+								//TODO modify tags this page to reflect overall tags on all thumbnails
+							}
+							if (response_medium.hasOwnProperty('set_tiles')) {
+								//TODO replace just sets
+							}
+							if (response_medium.hasOwnProperty('group_tiles')) {
+								//TODO replace just group tiles
+							}
 						}
-					}
-					if (xhr.response.hasOwnProperty('inner_thumbnail')) {
-						//TODO replace just inner thumbnail
-					}
-					if (xhr.response.hasOwnProperty('group_tiles')) {
-						//TODO replace just group tiles
-					}
-					if (xhr.response.hasOwnProperty('tags')) {
-						//TODO replace just tags
-					}
-					if (xhr.response.hasOwnProperty('sets')) {
-						//TODO replace just sets
 					}
 					this.iterate_thumbnails(xhr.thumbnails, (thumbnail) => {
 						thumbnail.classList.add('success');

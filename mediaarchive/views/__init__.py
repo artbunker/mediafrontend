@@ -750,14 +750,19 @@ def edit_medium(medium_id, api=False):
 	if 0 == len(errors):
 		if api:
 			from statuspages import success
+			#TODO return only renders of changed data?
 			return success({
-				'thumbnail': (
-					render_template('thumbnail.html', medium=medium)
-					.replace('\n', '')
-					.replace('\r', '')
-					.replace('\t', '')
-				)
-				#'group_tiles': render_template('group_tiles.html', groups=fields['groups'])
+				'media': {
+					medium.id: {
+						'thumbnail': (
+							render_template('thumbnail.html', medium=medium)
+							.replace('\n', '')
+							.replace('\r', '')
+							.replace('\t', '')
+						),
+						#'group_tiles': render_template('group_tiles.html', groups=fields['groups'])
+					}
+				}
 			})
 
 		return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
@@ -805,12 +810,16 @@ def generate_summaries(medium_id, api=False):
 
 		from statuspages import success
 		return success({
-			'thumbnail': (
-				render_template('thumbnail.html', medium=medium)
-				.replace('\n', '')
-				.replace('\r', '')
-				.replace('\t', '')
-			)
+			'media': {
+				medium.id: {
+					'thumbnail': (
+						render_template('thumbnail.html', medium=medium)
+						.replace('\n', '')
+						.replace('\r', '')
+						.replace('\t', '')
+					),
+				}
+			}
 		})
 
 	return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)

@@ -403,8 +403,44 @@ def api_build_medium():
 
 @media_archive.route('/api/media/set', methods=['POST'])
 def api_generate_set():
-	#TODO
-	pass
+	g.json_request = True
+	g.media_archive.accounts.require_sign_in();
+	medium_ids = api_medium_ids_to_list()
+	media = g.media_archive.search_media(filter={'ids': medium_ids})
+
+	if not g.media_archive.accounts.current_user_has_global_group('manager'):
+		for medium in media:
+			if medium.owner_id != g.media_archive.accounts.current_user.id:
+				abort(403)
+
+	import uuid
+	from .. import uuid_to_id
+
+	set_tag = 'set:' + uuid_to_id(uuid.uuid4())
+
+	g.media_archive.media.add_tags(media, set_tag)
+
+	#TODO the media module should modify media in place so another fetch isn't necessary
+	media = g.media_archive.search_media(filter={'ids': medium_ids})
+	rendered = {}
+	for medium in media:
+		tags_string = '#'.join(medium.tags)
+		if tags_string:
+			tags_string = '#' + tags_string
+		rendered[medium.id] = {
+			'set_tiles': (
+				render_template('set_tiles.html', medium=medium)
+				.replace('\n', '')
+				.replace('\r', '')
+				.replace('\t', '')
+			),
+			'tags': tags_string,
+		}
+
+	from statuspages import success
+	return success({
+		'media': rendered
+	})
 
 @media_archive.route('/api/tags/add', methods=['POST'])
 def api_add_tags():

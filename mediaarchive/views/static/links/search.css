@@ -65,6 +65,26 @@
 #tags_this_page .tag[data-tag^="suppress:"] {
 	display: none;
 }
+/*set tiles*/
+.set {
+	display: inline-block;
+	position: absolute;
+	top: 0.5rem;
+	left: 0.5rem;
+	z-index: 10;
+	width: 12%;
+	height: 12%;
+	background-color: rgba(0, 0, 0, 0.5);
+	background-image: url(set.svg);
+	border-radius: 0.25rem;
+	overflow: hidden;
+	background-size: contain;
+}
+.set + .set {
+	display: none;
+}
+/*group tiles*/
+
 /*js search box*/
 .scripts_enabled #tags {
 	display: none;

@@ -1,1 +1,3 @@
-{#TODO set tiles#}
+{% for tag in medium.tags if 'set:' == tag[:4] %}
+	<div class="set"></div>
+{% endfor %}

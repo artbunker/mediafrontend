@@ -956,6 +956,12 @@ def remove_medium(medium_id, api=False):
 
 	if api:
 		from statuspages import success
-		return success({'remove': True})
+		return success({
+			'media': {
+				medium.id: {
+					'remove': True,
+				}
+			},
+		})
 		
 	return redirect(url_for('media_archive.manage_media'), 302)

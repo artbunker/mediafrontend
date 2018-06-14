@@ -132,7 +132,6 @@
 	-ms-animation: spin 1s ease infinite;
 	-o-animation: spin 1s ease infinite;
 	animation: spin 1s ease infinite;
-	/*TODO rotate processing spinner*/
 	display: inline-block;
 }
 .thumbnail.success .summary::after {
@@ -248,14 +247,10 @@ body[data-selection_total="1"] #manage_drawer #manage_generate_set,
 	width: 100%;
 }
 /*smaller screens*/
-@media only screen and (max-width: 1280px)
+@media only screen and (max-width: 1366px)
 {
-	#manage_drawer a,
-	#selection_total {
-		font-size: 0.8em;
-	}
 }
-@media only screen and (max-width: 1024px)
+@media only screen and (max-width: 1280px)
 {
 	/*topmenu icons in manage mode*/
 	.managing_media #topmenu a::after {
@@ -347,7 +342,7 @@ body[data-selection_total="1"] #manage_drawer #manage_generate_set,
 		padding: 0;
 	}
 }
-@media only screen and (max-width: 600px)
+@media only screen and (max-width: 800px)
 {
 	/*TODO at very narrow screens put drawer items under an overflow menu*/
 }

@@ -40,7 +40,7 @@
 			<span class="header">Tags this page</span>
 			<div>
 				{% for tag in tags_this_page %}
-					{% set clear_query = re.sub('#+', '#', re.sub('(^|#)\-?' + tag + '(#|$)', '#', tags_query + '#')) %}
+					{% set clear_query = re.sub('#+', '#', re.sub('(^|#)\-?' + tag.replace('\\', '\\\\') + '(#|$)', '#', tags_query + '#')).replace('\\\\', '\\') %}
 					{% if '#' == clear_query[0] %}
 						{% set clear_query = clear_query[1:] %}
 					{% endif %}

@@ -89,15 +89,31 @@ audio {
 /*sets*/
 .set {
 	text-align: left;
-	margin-top: 1em;
+	margin-top: 1rem;
+	border-radius: 0.25rem;
+	overflow: hidden;
+	font-size: 0;
+	padding-top: 1px;
+	padding-left: 1px;
+	background-color: var(--b_h);
+	color: var(--f_h);
 }
 .set .thumbnail {
 	max-width: 64px;
 	max-height: 64px;
 	margin-right: 1px;
 	margin-bottom: 1px;
+	border-radius: 0.25rem;
+	opacity: 0.5;
 }
-
+.set .current .thumbnail,
+.set .thumbnail:hover {
+	opacity: 1;
+}
+.set .current,
+.set .current a {
+	cursor: default;
+}
 /*js tag editor controls*/
 .info .tag_editor_control {
 	margin-left: 0.75em;

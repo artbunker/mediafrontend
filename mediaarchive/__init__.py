@@ -1426,6 +1426,7 @@ class MediaArchive:
 	def get_api_uris(self):
 		api_uris = {}
 		if self.config['api_uri']:
+			api_uris['upload'] = self.config['api_uri'].format('media/upload')
 			api_uris['edit'] = self.config['api_uri'].format('media/edit')
 			api_uris['remove'] = self.config['api_uri'].format('media/edit')
 			api_uris['build'] = self.config['api_uri'].format('media/edit')
@@ -1433,6 +1434,7 @@ class MediaArchive:
 			api_uris['add_tags'] = self.config['api_uri'].format('tags/add')
 			api_uris['remove_tags'] = self.config['api_uri'].format('tags/remove')
 		else:
+			api_uris['upload'] = url_for('media_archive.api_upload_medium')
 			api_uris['edit'] = url_for('media_archive.api_edit_medium')
 			api_uris['remove'] = url_for('media_archive.api_remove_medium')
 			api_uris['build'] = url_for('media_archive.api_build_medium')

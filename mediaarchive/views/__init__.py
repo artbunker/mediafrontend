@@ -14,22 +14,16 @@ media_archive = Blueprint(
 )
 
 @media_archive.route('/upload', methods=['GET', 'POST'])
-def upload():
+def upload(api=False):
 	g.media_archive.accounts.require_global_group('contributor')
 
 	manager = False
 	contributors = []
+	api_uris = {}
 	if g.media_archive.accounts.has_global_group(g.media_archive.accounts.current_user, 'manager'):
 		manager = True
-		contributor_bit = g.media_archive.accounts.users.group_name_to_bit('contributor')
-		permissions = g.media_archive.accounts.search_permissions(filter={
-			'permissions': {
-				'global': contributor_bit,
-				'media': contributor_bit,
-			}
-		})
-		for permission in permissions:
-			contributors.append(permission.user)
+		contributors = g.media_archive.get_contributors()
+		api_uris = g.media_archive.get_api_uris()
 
 	fields = {
 		'groups': [],
@@ -49,11 +43,14 @@ def upload():
 
 	errors = []
 	if 'POST' != request.method:
+		if api:
+			abort(405)
 		return render_template(
 			'upload.html',
 			errors=errors,
 			manager=manager,
 			contributors=contributors,
+			api_uris=api_uris,
 			fields=fields,
 			groups=g.media_archive.config['requirable_groups'],
 			medium=None,
@@ -62,7 +59,35 @@ def upload():
 	errors, medium = g.media_archive.upload_from_request()
 
 	if 0 == len(errors):
+		if api:
+			# delay and re-fetch to get accurate thumbnail
+			import time
+			time.sleep(1)
+			medium = g.media_archive.get_medium(medium.md5)
+
+			from statuspages import success
+			return success({
+				'id': medium.id,
+				'view_uri': url_for('media_archive.view_medium', medium_id=medium.id, _external=True),
+				'thumbnail': (
+					render_template('thumbnail.html', medium=medium)
+					.replace('\n', '')
+					.replace('\r', '')
+					.replace('\t', '')
+				),
+			})
+
 		return redirect(url_for('media_archive.view_medium', medium_id=medium.id), 302)
+
+	if api:
+		if 'medium_already_exists' in errors:
+			abort(409, {
+				'errors': errors,
+				'view_uri': url_for('media_archive.view_medium', medium_id=medium.id, _external=True),
+			})
+		abort(400, {
+			'errors': errors,
+		})
 
 	for field in ['generate_summaries', 'author_tag', 'filename_tag']:
 		fields[field] = (field in request.form)
@@ -89,6 +114,7 @@ def upload():
 		errors=errors,
 		manager=manager,
 		contributors=contributors,
+		api_uris=api_uris,
 		fields=fields,
 		groups=g.media_archive.config['requirable_groups'],
 		medium=medium,
@@ -494,6 +520,11 @@ def api_remove_tags():
 def api_set_tags():
 	return api_modify_tags('set')
 
+@media_archive.route('/api/media/upload', methods=['POST'])
+def api_upload_medium():
+	g.json_request = True
+	return upload(True)
+
 @media_archive.route('/file/media/<medium_filename>')
 def medium_file(medium_filename):
 	import os
@@ -798,6 +829,11 @@ def edit_medium(medium_id, api=False):
 
 	if 0 == len(errors):
 		if api:
+			# delay and re-fetch to get accurate thumbnail
+			import time
+			time.sleep(1)
+			medium = g.media_archive.get_medium(medium.md5)
+
 			from statuspages import success
 			#TODO return only renders of changed data?
 			return success({

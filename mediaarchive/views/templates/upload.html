@@ -9,7 +9,7 @@
 {% block content %}
 	<div id="upload">
 		{% include 'medium_form_errors.html' %}
-		<form method="post" enctype="multipart/form-data" novalidate>
+		<form method="post" enctype="multipart/form-data" data-action-upload="{{ api_uris['upload'] }}" data-advanced="Advanced options" novalidate>
 			{% include 'medium_groups_form.html' %}
 			{% include 'medium_properties_form.html' %}
 			<div id="tagging">
@@ -26,14 +26,15 @@
 			<div id="creation">
 				<span class="form_file">
 					<label for="file_upload">File by Upload</label>
-					<input id="file_upload" name="file_upload" type="file" required>
+					<input id="file_upload" name="file_upload" type="file" data-maximum-upload-filesize="{{ g.media_archive.config['maximum_upload_filesize'] }}" data-file-too-large="File Too Large" required>
 					<span class="file_selection" data-file-selected="File selected" data-file-not-selected="No file selected"></span>
 				</span>
 				<br>
 				<label for="file_uri">File by URI</label>
 				<input id="file_uri" name="file_uri" type="text" value="{{ fields['file_uri'] }}" placeholder="Enter URI of remote file">
 			</div>
-			<input type="submit" value="Create Medium">
+			<input type="submit" value="Create">
 		</form>
+		<script type="module" src="{{ url_for('media_archive.static', filename='scripts/upload.js' ) }}"></script>
 	</div>
 {% endblock %}

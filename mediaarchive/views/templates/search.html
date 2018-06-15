@@ -68,14 +68,14 @@
 		{% endif %}
 	</div>
 {% endblock %}
-{% if manage %}
-	{% block topmenu %}
+{% block topmenu %}
+	{% if manage %}
 		<a id="top_manage">Manage</a>
-		{{ super() }}
-	{% endblock %}
-{% endif %}
-{% if manage %}
-	{% block body %}
+	{% endif %}
+	{{ super() }}
+{% endblock %}
+{% block body %}
+	{% if manage %}
 		<div id="manage_active_panel">
 			<form method="post" id="manage_form">
 			</form>
@@ -141,6 +141,6 @@
 			<span id="selection_total" data-all="All">0</span>
 		</div>
 		<script type="module" src="{{ url_for('media_archive.static', filename='scripts/manage.js') }}"></script>
-		{{ super() }}
-	{% endblock %}
-{% endif %}
+	{% endif %}
+	{{ super() }}
+{% endblock %}

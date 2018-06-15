@@ -1017,7 +1017,7 @@ class MediaArchive:
 					sort = 'creation_time'
 				elif 'upload' == sort:
 					sort = 'upload_time'
-				filter['sort'] = tag[5:]
+				filter['sort'] = sort
 			elif 'order:' == tag[:6]:
 				if 'desc' != tag[6:]:
 					filter['order'] = 'asc'

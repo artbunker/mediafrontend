@@ -18,8 +18,41 @@ class Upload {
 		});
 		this.form.parentNode.insertBefore(this.advanced, this.form);
 
-		//TODO preset saved settings
-		//TODO listeners to save settings presets
+		// checkbox preferences
+		let checkboxes = this.form.querySelectorAll('input[type=checkbox]');
+		for (let i = 0; i < checkboxes.length; i++) {
+			let checkbox = checkboxes[i];
+			checkbox.checked = false;
+			let checkbox_preference = localStorage.getItem(checkbox.id);
+			if (checkbox_preference) {
+				checkbox.checked = true;
+			}
+			checkbox.addEventListener('change', e => {
+				if (e.currentTarget.checked) {
+					localStorage.setItem(e.currentTarget.id, true);
+				}
+				else {
+					localStorage.removeItem(e.currentTarget.id);
+				}
+			});
+		}
+		// select preferences
+		let select_ids = ['searchability', 'protection'];
+		for (let i = 0; i < select_ids.length; i++) {
+			let select_id = select_ids[i];
+			let select = document.querySelector('#' + select_id);
+			if (!select) {
+				continue;
+			}
+			let select_preference = localStorage.getItem(select.id);
+			if (select_preference) {
+				select.value = select_preference;
+			}
+			select.addEventListener('change', e => {
+				let select_value = e.currentTarget.options[e.currentTarget.selectedIndex].value;
+				localStorage.setItem(e.currentTarget.id, select_value);
+			});
+		}
 
 		// previews
 		this.previews = document.createElement('div');

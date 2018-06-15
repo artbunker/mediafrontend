@@ -18,6 +18,9 @@ class Upload {
 		});
 		this.form.parentNode.insertBefore(this.advanced, this.form);
 
+		//TODO preset saved settings
+		//TODO listeners to save settings presets
+
 		// previews
 		this.previews = document.createElement('div');
 		this.previews.id = 'previews';
@@ -81,26 +84,28 @@ class Upload {
 		preview.classList.add('uploading');
 		let xhr = new XMLHttpRequest();
 		xhr.preview = preview;
+		xhr.uploaded_timeout = null;
 		xhr.onreadystatechange = () => {
 			if (xhr.readyState == XMLHttpRequest.DONE) {
+				if (xhr.uploaded_timeout) {
+					clearTimeout(xhr.uploaded_timeout);
+					if (xhr.preview.progress && xhr.preview.progress.parentNode == xhr.preview) {
+						xhr.preview.removeChild(xhr.preview.progress);
+					}
+					xhr.preview.classList.remove('uploading');
+				}
+				xhr.preview.classList.add('complete');
+				xhr.preview.classList.remove('processing');
 				if (200 == xhr.status) {
-					// add link around placeholder
-					//let link = document.createElement('a');
-					//link.href = xhr.response.view_uri;
-					//xhr.preview.appendChild(link);
-					//link.appendChild(xhr.preview.placeholder);
 					// add thumbnail in placeholder
 					xhr.preview.placeholder.innerHTML = xhr.response.thumbnail;
-					xhr.preview.classList.remove('processing');
-					xhr.preview.classList.add('complete');
+					// wait for complete animation
 					setTimeout(() => {
-						xhr.preview.classList.remove('complete');
 						xhr.preview.classList.add('success');
-					}, 500);
+						xhr.preview.classList.remove('complete');
+					}, 250);
 					return;
 				}
-				xhr.preview.classList.remove('processing');
-				xhr.preview.classList.add('failure');
 				// duplicate
 				if (409 == xhr.status) {
 					// create view link around placeholder
@@ -126,21 +131,33 @@ class Upload {
 						xhr.preview.placeholder.appendChild(error);
 					}
 				}
+				// wait for complete animation
+				setTimeout(() => {
+					xhr.preview.classList.add('failure');
+					xhr.preview.classList.remove('complete');
+				}, 250);
 			}
 		};
 		if (xhr.upload) {
+			xhr.preview.progress = document.createElement('div');
+			xhr.preview.progress.classList.add('progress');
+			xhr.preview.progress.style.width = '0px';
+			xhr.preview.appendChild(preview.progress);
 			xhr.upload.addEventListener('progress', e => {
 				if (e.lengthComputable) {
 					let progress = Math.floor((e.loaded / e.total) * 100);
-					console.log('progress: ' + progress);
-					xhr.preview.placeholder.style.width = progress + '%';
-					if (100 <= progress) {
-						xhr.preview.placeholder.style.width = '';
-						xhr.preview.classList.remove('uploading');
-						setTimeout(() => {
-							xhr.preview.classList.add('processing');
-						}, 250);
+					//console.log('progress: ' + progress);
+					if (100 > progress) {
+						xhr.preview.progress.style.width = progress + '%';
+						return;
 					}
+					xhr.preview.progress.style.width = '100%';
+					xhr.uploaded_timeout = setTimeout(() => {
+						xhr.uploaded_timeout = null;
+						xhr.preview.removeChild(xhr.preview.progress);
+						xhr.preview.classList.remove('uploading');
+						xhr.preview.classList.add('processing');
+					}, 250);
 				}
 			});
 		}
@@ -153,10 +170,3 @@ class Upload {
 };
 
 let upload = new Upload();
-
-//TODO hide groups/props/tagging under advanced toggle?
-
-//TODO preset saved settings
-//TODO listeners to save settings presets
-
-

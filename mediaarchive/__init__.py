@@ -1205,6 +1205,10 @@ class MediaArchive:
 		mimes = self.media.get_mimes()
 		for mime in mimes:
 			suggestions.append('mimetype:' + mime)
+		suggestions.append('sort:creation');
+		suggestions.append('sort:upload');
+		suggestions.append('sort:color');
+		suggestions.append('sort:random');
 
 		f = open(os.path.join(self.config['tags_path'], 'search.json'), 'w')
 		f.write(json.dumps(suggestions))

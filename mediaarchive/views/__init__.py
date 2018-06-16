@@ -887,6 +887,8 @@ def generate_summaries(medium_id, api=False):
 		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
 			abort(403)
 
+	#TODO confirmation?
+
 	g.media_archive.generate_medium_summaries(medium)
 
 	if api:
@@ -918,6 +920,10 @@ def remove_summaries(medium_id):
 		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
 			abort(403)
 
+	#TODO confirmation
+	#TODO	if 'confirm' not in request.args:
+	#TODO		return render_template('confirm_remove_summaries.html')
+
 	g.media_archive.remove_medium_summaries(medium)
 
 	return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
@@ -931,6 +937,10 @@ def remove_file(medium_id):
 			abort(403)
 		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
 			abort(403)
+
+	#TODO confirmation
+	#TODO	if 'confirm' not in request.args:
+	#TODO		return render_template('confirm_remove_file.html')
 
 	g.media_archive.remove_medium_file(medium)
 
@@ -949,7 +959,7 @@ def remove_medium(medium_id, api=False):
 			abort(403)
 
 	#TODO	if not api and 'confirm' not in request.args:
-	#TODO		return render_template('confirm.html')
+	#TODO		return render_template('confirm_remove_medium.html')
 
 	g.media_archive.remove_medium(medium)
 

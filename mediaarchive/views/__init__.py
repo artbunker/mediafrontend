@@ -124,7 +124,15 @@ def upload(api=False):
 def help():
 	return render_template('help.html')
 
-def search(current_endpoint, overrides={}, search_field=True, manage=False, omit_future=True, **kwargs):
+def search(
+		current_endpoint,
+		overrides={},
+		search_field=True,
+		manage=False,
+		omit_future=True,
+		medium_id=None,
+		slideshow_endpoint=None,
+	):
 	tags_query = ''
 	if 'tags' in request.args:
 		tags_query = request.args['tags']
@@ -188,6 +196,14 @@ def search(current_endpoint, overrides={}, search_field=True, manage=False, omit
 		for key, value in overrides['filter'].items():
 			filter[key] = value
 
+	# slideshow mode for this search
+	if not slideshow_endpoint:
+		slideshow_endpoint = current_endpoint
+	if medium_id:
+		#TODO get adjacent media
+		adjacent_media = ('prev', 'next', slideshow_endpoint)
+		return view_medium(medium_id, adjacent_media)
+
 	media = g.media_archive.search_media(filter=filter, **pagination)
 	total_media = g.media_archive.media.count_media(filter=filter)
 
@@ -239,6 +255,7 @@ def search(current_endpoint, overrides={}, search_field=True, manage=False, omit
 		total_media=total_media,
 		total_pages=math.ceil(total_media / pagination['perpage']),
 		current_endpoint=current_endpoint,
+		slideshow_endpoint=slideshow_endpoint,
 		groups=g.media_archive.config['requirable_groups'],
 		contributors=contributors,
 		api_uris=api_uris,
@@ -575,7 +592,7 @@ def tags_file(tags_filename):
 	)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>", methods=['GET', 'POST'])
-def view_medium(medium_id):
+def view_medium(medium_id, slideshow=None):
 	from statuspages import PaymentRequired
 
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
@@ -583,7 +600,6 @@ def view_medium(medium_id):
 	try:
 		g.media_archive.require_access(medium)
 	except PaymentRequired as e:
-		slideshow = g.media_archive.get_slideshow(medium)
 		groups = []
 		if 'groups' in e.description:
 			groups = e.description['groups']
@@ -630,9 +646,17 @@ def view_medium(medium_id):
 			302
 		)
 
+	next_medium_id = ''
+	prev_medium_id = ''
 	sets = {}
 	visible_tags = 0
 	for tag in medium.tags:
+		if 'next:' == tag[:5]:
+			next_medium_id = tag[5:]
+			continue
+		if 'prev:' == tag[:5]:
+			prev_medium_id = tag[5:]
+			continue
 		if 'set:' == tag[:4]:
 			set_name = tag[4:]
 			colon_pos = set_name.find(':')
@@ -695,15 +719,21 @@ def view_medium(medium_id):
 			sets[set_name] = sorted_ordered + unordered
 		medium.sets = sets
 
+	navigation_endpoint = 'media_archive.view_medium'
+	if slideshow:
+		prev_medium_id, next_medium_id, navigation_endpoint = slideshow
+
 	return render_template(
 		'view_medium.html',
 		medium=medium,
 		edit_medium=edit_medium,
 		edit_tags=edit_tags,
 		tag_suggestion_lists=tag_suggestion_lists,
-		slideshow=g.media_archive.get_slideshow(medium),
 		search_endpoint=g.media_archive.config['search_endpoint'],
 		visible_tags=visible_tags,
+		next_medium_id=next_medium_id,
+		prev_medium_id=prev_medium_id,
+		navigation_endpoint=navigation_endpoint,
 	)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/edit", methods=['GET', 'POST'])

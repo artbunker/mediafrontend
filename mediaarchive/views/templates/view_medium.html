@@ -6,6 +6,7 @@
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/general.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/view.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/tags.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/navigation.css') }}">
 {% endblock %}
 {% set view_medium = medium %}
 {% if medium.cover %}
@@ -93,6 +94,7 @@
 				<div class="summary view nofile">No original file</div>
 			{% endif %}
 		</div>
+		{% include 'media_navigation.html' %}
 		{% include 'info.html' %}
 		{% include 'fuzzy_time.html' %}
 		<div class="tags" data-visible-tags="{{ visible_tags }}">

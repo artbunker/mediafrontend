@@ -31,7 +31,11 @@
 	<div class="menu">
 		{% if 0 < media|length %}
 			<span id="total_media">{{ total_media }} media</span>
-			<a href="{{ url_for('media_archive.view_medium', medium_id=media[0].id, tags=tags_query) }}">Slideshow</a>
+			{% set request_args = {} %}
+			{% if tags_query %}
+				{% set request_args = {'tags': tags_query} %}
+			{% endif %}
+			<a href="{{ url_for(slideshow_endpoint, medium_id=media[0].id, **request_args) }}">Slideshow</a>
 		{% endif %}
 		<a href="{{ url_for('media_archive.help') }}">Help</a>
 	</div>

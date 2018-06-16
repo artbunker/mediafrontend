@@ -2,6 +2,7 @@
 {% block title %}Premium{% endblock %}
 {% block style %}
 	{{ super() }}
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/navigation.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/premium.css') }}">
 {% endblock %}
 {% block content %}
@@ -28,8 +29,6 @@
 				{% endfor %}
 			</div>
 		{% endif %}
-		{% if slideshow %}
-			{# slideshow nav and js here #}
-		{% endif %}
+		{% include 'media_navigation.html' %}
 	</div>
 {% endblock %}

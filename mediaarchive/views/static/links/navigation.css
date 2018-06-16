@@ -1,0 +1,30 @@
+#navigation {
+	margin-top: 1px;
+	margin-bottom: 1px;
+}
+/** /
+#navigation {
+	margin-top: 1em;
+	border-radius: 0.25em;
+	overflow: hidden;
+}
+/**/
+#navigation a {
+	color: var(--f_m);
+	background-color: var(--b_m);
+	display: inline-block;
+	width: 50%;
+	/** /line-height: 1.5em;/**/
+	line-height: 2.5em;
+	text-decoration: none;
+}
+#navigation a:first-child:last-child {
+	width: 100%;
+}
+#navigation a:first-child:not(:last-child) {
+	width: calc(50% - 1px);
+	margin-right: 1px;
+}
+#navigation #prev + #next {
+	width: 50%;
+}

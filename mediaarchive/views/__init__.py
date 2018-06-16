@@ -142,7 +142,7 @@ def search(current_endpoint, overrides={}, search_field=True, manage=False, omit
 		import random, string
 		seed = ''.join(random.choices(string.ascii_letters + string.digits, k=6)).upper()
 		tags.append('sort:random:' + seed)
-		return redirect(url_for(current_endpoint, tags='#'.join(tags), **kwargs), 302)
+		return redirect(url_for(current_endpoint, tags='#'.join(tags)), 302)
 
 	if 0 < len(overrides):
 		if 'tags' in overrides:
@@ -242,7 +242,6 @@ def search(current_endpoint, overrides={}, search_field=True, manage=False, omit
 		groups=g.media_archive.config['requirable_groups'],
 		contributors=contributors,
 		api_uris=api_uris,
-		kwargs=kwargs,
 		re=re,
 	)
 

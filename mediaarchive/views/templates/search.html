@@ -45,9 +45,9 @@
 						{% set clear_query = clear_query[1:] %}
 					{% endif %}
 					<span class="tag" data-tag="{{ tag }}">
-						<a href="{{ url_for(current_endpoint, tags=tag, **kwargs) }}" title="Search this tag">{{ tag }}</a>
-						<a class="action add" href="{{ url_for(current_endpoint, tags=clear_query + tag, **kwargs) }}" title="Add this tag to current search">+</a>
-						<a class="action remove" href="{{ url_for(current_endpoint, tags=clear_query + '-' + tag,**kwargs) }}" title="Remove this tag from current search">-</a>
+						<a href="{{ url_for(current_endpoint, tags=tag) }}" title="Search this tag">{{ tag }}</a>
+						<a class="action add" href="{{ url_for(current_endpoint, tags=clear_query + tag) }}" title="Add this tag to current search">+</a>
+						<a class="action remove" href="{{ url_for(current_endpoint, tags=clear_query + '-' + tag) }}" title="Remove this tag from current search">-</a>
 					</span>
 				{% endfor %}
 			</div>
@@ -64,7 +64,7 @@
 				{% endfor %}
 			</div>
 			{% from 'pages_list.jinja' import pages_list %}
-			{{ pages_list(total_pages=total_pages, url=url_for(current_endpoint, page='PAGE', tags=tags_query, **kwargs).replace('page=PAGE', 'page={}'), current_page=pagination['page']) }}
+			{{ pages_list(total_pages=total_pages, url=url_for(current_endpoint, page='PAGE', tags=tags_query).replace('page=PAGE', 'page={}'), current_page=pagination['page']) }}
 		{% endif %}
 	</div>
 {% endblock %}

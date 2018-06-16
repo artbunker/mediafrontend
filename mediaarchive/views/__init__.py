@@ -62,7 +62,7 @@ def upload(api=False):
 		if api:
 			# delay and re-fetch to get accurate thumbnail
 			import time
-			time.sleep(1)
+			time.sleep(0.5)
 			medium = g.media_archive.get_medium(medium.md5)
 
 			from statuspages import success
@@ -830,7 +830,7 @@ def edit_medium(medium_id, api=False):
 		if api:
 			# delay and re-fetch to get accurate thumbnail
 			import time
-			time.sleep(1)
+			time.sleep(0.5)
 			medium = g.media_archive.get_medium(medium.md5)
 
 			from statuspages import success

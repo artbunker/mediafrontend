@@ -845,16 +845,48 @@ def edit_medium(medium_id, api=False):
 	# otherwise this isn't necessary since it'll always have group_bits in update
 	if 0 < len(updates):
 		g.media_archive.media.update_medium(medium, **updates)
+		#TODO update medium values in-place to avoid extra fetch
+		medium = g.media_archive.get_medium(medium.md5)
 
 	if place_files:
 		g.media_archive.place_medium_file(medium)
 		g.media_archive.place_medium_summaries(medium)
-
-	replace_medium = False
-	#TODO replace medium
-
-	if 0 < len(updates) or place_files or replace_medium:
+		#TODO update medium uris in-place to avoid extra fetch
 		medium = g.media_archive.get_medium(medium.md5)
+
+	if (
+			'file_upload' in request.files
+			or (
+				'file_uri' in request.form
+				and request.form['file_uri']
+			)
+		):
+		errors, new_medium = g.media_archive.upload_from_request()
+		if errors:
+			#TODO display replacement failed message?
+			pass
+		else:
+			#TODO check if old medium had summaries before attempting to generate summaries
+			g.media_archive.generate_medium_summaries(new_medium)
+			# move tags to new medium
+			g.media_archive.media.move_tags(medium, new_medium)
+			print('old medium searchability')
+			print(medium.searchability)
+			g.media_archive.media.update_medium(
+				new_medium,
+				owner_uuid=medium.owner_uuid,
+				status=medium.status,
+				searchability=medium.searchability,
+				protection=medium.protection,
+				group_bits=medium.group_bits
+			)
+			# remove old medium
+			g.media_archive.remove_medium(medium)
+			# place replacement medium files
+			g.media_archive.place_medium_file(new_medium)
+			g.media_archive.place_medium_summaries(new_medium)
+			# fetch fresh replacement medium
+			medium = g.media_archive.get_medium(new_medium.md5)
 
 	if 0 == len(errors):
 		if api:

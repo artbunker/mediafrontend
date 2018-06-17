@@ -1,10 +1,13 @@
 from flask import Blueprint, render_template, abort, request, redirect, url_for, g
 
-from .. import populate_id, id_to_uuid, id_to_md5
+from .. import MediaArchive, populate_id, id_to_uuid, id_to_md5
 from pagination_from_request import pagination_from_request
 from regex_converter import RegexConverter
 from media import MediumStatus, MediumSearchability, MediumProtection
 from accounts.views import require_sign_in, require_global_group
+
+def initialize(config, media, accounts, access_log):
+	g.media_archive = MediaArchive(config, media, accounts, access_log)
 
 media_archive = Blueprint(
 	'media_archive',

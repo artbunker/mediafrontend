@@ -744,6 +744,7 @@ def view_medium(medium_id, slideshow=None):
 	)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/edit", methods=['GET', 'POST'])
+@require_sign_in
 def edit_medium(medium_id, api=False):
 	manager = False
 	contributors = []
@@ -943,6 +944,7 @@ def edit_medium(medium_id, api=False):
 	)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/build")
+@require_sign_in
 def generate_summaries(medium_id, api=False):
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
@@ -976,6 +978,7 @@ def generate_summaries(medium_id, api=False):
 	return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/remove/summaries")
+@require_sign_in
 def remove_summaries(medium_id):
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
@@ -994,6 +997,7 @@ def remove_summaries(medium_id):
 	return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/remove/original")
+@require_sign_in
 def remove_file(medium_id):
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
@@ -1012,6 +1016,7 @@ def remove_file(medium_id):
 	return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/remove")
+@require_sign_in
 def remove_medium(medium_id, api=False):
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 

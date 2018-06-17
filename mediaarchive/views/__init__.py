@@ -4,6 +4,7 @@ from .. import populate_id, id_to_uuid, id_to_md5
 from pagination_from_request import pagination_from_request
 from regex_converter import RegexConverter
 from media import MediumStatus, MediumSearchability, MediumProtection
+from accounts.views import require_sign_in, require_global_group
 
 media_archive = Blueprint(
 	'media_archive',
@@ -14,9 +15,8 @@ media_archive = Blueprint(
 )
 
 @media_archive.route('/upload', methods=['GET', 'POST'])
+@require_global_group('contributor')
 def upload(api=False):
-	g.media_archive.accounts.require_global_group('contributor')
-
 	manager = False
 	contributors = []
 	api_uris = {}

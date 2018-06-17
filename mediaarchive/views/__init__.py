@@ -200,8 +200,15 @@ def search(
 	if not slideshow_endpoint:
 		slideshow_endpoint = current_endpoint
 	if medium_id:
-		#TODO get adjacent media
-		adjacent_media = ('prev', 'next', slideshow_endpoint)
+		# make sure specified medium is real
+		medium = g.media_archive.require_medium(id_to_md5(medium_id))
+		# get adjacent media
+		prev_medium_id, next_medium_id = g.media_archive.get_adjacent_media(
+			medium,
+			filter=filter,
+			sort=pagination['sort']
+		)
+		adjacent_media = (prev_medium_id, next_medium_id, slideshow_endpoint)
 		return view_medium(medium_id, adjacent_media)
 
 	media = g.media_archive.search_media(filter=filter, **pagination)
@@ -841,8 +848,6 @@ def edit_medium(medium_id, api=False):
 				'big'
 			)
 
-	#TODO maybe compare updates['group_bits'] to medium.group_bits and remove it if they're the same
-	# otherwise this isn't necessary since it'll always have group_bits in update
 	if 0 < len(updates):
 		g.media_archive.media.update_medium(medium, **updates)
 		#TODO update medium values in-place to avoid extra fetch
@@ -870,8 +875,6 @@ def edit_medium(medium_id, api=False):
 			g.media_archive.generate_medium_summaries(new_medium)
 			# move tags to new medium
 			g.media_archive.media.move_tags(medium, new_medium)
-			print('old medium searchability')
-			print(medium.searchability)
 			g.media_archive.media.update_medium(
 				new_medium,
 				owner_uuid=medium.owner_uuid,

@@ -472,6 +472,22 @@ class MediaArchive:
 		self.media.populate_media_tags(media_dictionary)
 		return media
 
+	def get_adjacent_media(self, medium, filter={}, sort=''):
+		prev_medium, next_medium = self.media.get_adjacent_media(medium, filter, sort)
+
+		prev_medium_id = ''
+		next_medium_id = ''
+
+		if prev_medium:
+			self.populate_medium_properties(prev_medium)
+			prev_medium_id = prev_medium.id
+
+		if next_medium:
+			self.populate_medium_properties(next_medium)
+			next_medium_id = next_medium.id
+
+		return prev_medium_id, next_medium_id
+
 	def require_medium(self, medium_md5):
 		medium = self.get_medium(medium_md5)
 		if not medium:

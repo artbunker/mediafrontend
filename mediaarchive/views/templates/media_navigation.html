@@ -1,8 +1,8 @@
 {% if prev_medium_id or next_medium_id %}
 	<div id="navigation">
 		{% set request_args = {} %}
-		{% if 'tags' in request_args %}
-			{% set request_args = {'tags': request_args['tags']} %}
+		{% if 'tags' in request.args %}
+			{% set request_args = {'tags': request.args['tags']} %}
 		{% endif %}
 		{% if prev_medium_id %}
 			<a 

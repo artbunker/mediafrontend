@@ -25,3 +25,19 @@
 		{{ protection }}
 	{% endif %}
 {% endmacro %}
+
+{% macro filesize(bytesize) %}
+	{% set size = bytesize %}
+	{% set suffix = 'b' %}
+	{% if bytesize > 1073741824 %}
+		{% set size = size / 1073741824 %}
+		{% set suffix = 'GB' %}
+	{% elif bytesize > 1048576 %}
+		{% set size = size / 1048576 %}
+		{% set suffix = 'MB' %}
+	{% elif bytesize > 1024 %}
+		{% set size = size / 1024 %}
+		{% set suffix = 'KB' %}
+	{% endif %}
+	{{ '%.2f'|format(size) }} {{ suffix }}
+{% endmacro %}

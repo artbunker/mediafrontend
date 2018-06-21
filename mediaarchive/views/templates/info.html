@@ -4,7 +4,8 @@
 			<a href="{{ url_for('media_archive.edit_medium', medium_id=medium.id) }}">Edit Medium</a>
 		</span>
 	{% endif %}
-	<span class="size">{{ medium.size }} bytes</span>
+	{% from 'media.jinja' import filesize %}
+	<span class="size">{{ filesize(medium.size) }}</span>
 	<span class="creation_date" data-timestamp="{{ medium.creation_time.timestamp() }}">{{ medium.creation_time.strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}</span>
 	{% if 0 < medium.data1 and 0 < medium.data2 %}
 		<span class="dimensions">

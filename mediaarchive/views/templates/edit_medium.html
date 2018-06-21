@@ -20,6 +20,15 @@
 				<td data-timestamp="{{ medium.upload_time.timestamp() }}">{{ medium.upload_time.strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}</td>
 			</tr>
 			<tr>
+				<td>Uploaded by user</td>
+				{% from 'users.jinja' import edit_user_link %}
+				<td>{{ edit_user_link(medium.uploader) }}</td>
+			</tr>
+			<tr>
+				<td>Uploader by origin</td>
+				<td>{{ medium.uploader_remote_origin.exploded }}</td>
+			</tr>
+			<tr>
 				<td>Mimetype</td>
 				<td>{{ medium.mime }}</td>
 			</tr>

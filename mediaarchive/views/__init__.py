@@ -779,6 +779,11 @@ def edit_medium(medium_id, api=False):
 		'file_uri': '',
 	}
 
+	# populate uploader
+	if medium.uploader_uuid:
+		medium.uploader = g.media_archive.accounts.get_user(medium.uploader_uuid)
+		print(medium.uploader)
+
 	for group in g.media_archive.accounts.users.available_groups:
 		if g.media_archive.accounts.users.contains_all_group_bits(
 				medium.group_bits,

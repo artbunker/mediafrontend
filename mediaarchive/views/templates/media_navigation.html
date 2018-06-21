@@ -6,17 +6,22 @@
 		{% endif %}
 		{% if prev_medium_id %}
 			<a 
-				id="prev" 
+				id="medium_prev" 
 				href="{{ url_for(navigation_endpoint, medium_id=prev_medium_id, **request_args) }}">
 				Prev
 			</a>
 		{% endif %}
 		{% if next_medium_id %}
 			<a 
-				id="next" 
+				id="medium_next" 
 				href="{{ url_for(navigation_endpoint, medium_id=next_medium_id, **request_args) }}">
 				Next
 			</a>
 		{% endif %}
 	</div>
+	<script type="module">
+		'use strict';
+		import { SequenceNavigation } from '{{ url_for('static', filename='scripts/sequencenavigation.js') }}';
+		new SequenceNavigation(document.querySelector('#medium_prev'), document.querySelector('#medium_next'));
+	</script>
 {% endif %}

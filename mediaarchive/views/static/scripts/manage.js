@@ -13,14 +13,15 @@ class Manage {
 		this.panels = document.querySelector('#manage_panels');
 		this.active_panel = document.querySelector('#manage_active_panel');
 		this.form = document.querySelector('#manage_form');
+		//TODO use modifiers for keys so that select all/none can be ctrl+a and ctrl+d
 		this.keys = {
 			exit_management: 'Escape',
 			toggle_management: 'e',
 			add_tags: 't',
 			searchability: 'v',
 			generate_set: 'g',
-			select_all: 'a',
-			select_none: 'd',
+			select_all: '=',
+			select_none: '-',
 			remove: 'Delete',
 			select_add: 'Shift',
 			select_negate: 'Control',

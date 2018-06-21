@@ -350,6 +350,13 @@ class MediaArchive:
 
 		self.accounts.users.populate_groups()
 
+		self.callbacks = {}
+
+	def add_callback(self, event, f):
+		if event not in self.callbacks:
+			self.callbacks[event] = []
+		self.callbacks[event].append(f)
+
 	def add_log(self, scope, subject_uuid=None, object_uuid=None):
 		if not self.access_log:
 			return
@@ -1167,6 +1174,9 @@ class MediaArchive:
 		return filter
 
 	def remove_medium(self, medium):
+		if 'remove_medium' in self.callbacks:
+			for f in self.callbacks['remove_medium']:
+				f(medium)
 		self.remove_medium_file(medium)
 		self.remove_medium_summaries(medium)
 		self.media.remove_tags(medium)

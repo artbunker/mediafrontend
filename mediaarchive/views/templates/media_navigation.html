@@ -1,20 +1,16 @@
 {% if prev_medium_id or next_medium_id %}
 	<div id="navigation">
-		{% set request_args = {} %}
-		{% if 'tags' in request.args %}
-			{% set request_args = {'tags': request.args['tags']} %}
-		{% endif %}
 		{% if prev_medium_id %}
 			<a 
 				id="medium_prev" 
-				href="{{ url_for(navigation_endpoint, medium_id=prev_medium_id, **request_args) }}">
+				href="{{ url_for(navigation_endpoint, medium_id=prev_medium_id, **kwargs) }}">
 				Prev
 			</a>
 		{% endif %}
 		{% if next_medium_id %}
 			<a 
 				id="medium_next" 
-				href="{{ url_for(navigation_endpoint, medium_id=next_medium_id, **request_args) }}">
+				href="{{ url_for(navigation_endpoint, medium_id=next_medium_id, **kwargs) }}">
 				Next
 			</a>
 		{% endif %}

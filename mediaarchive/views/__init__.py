@@ -135,6 +135,7 @@ def search(
 		omit_future=True,
 		medium_id=None,
 		slideshow_endpoint=None,
+		**kwargs,
 	):
 	tags_query = ''
 	if 'tags' in request.args:
@@ -212,7 +213,7 @@ def search(
 			sort=pagination['sort']
 		)
 		adjacent_media = (prev_medium_id, next_medium_id, slideshow_endpoint)
-		return view_medium(medium_id, adjacent_media)
+		return view_medium(medium_id, adjacent_media, **kwargs)
 
 	media = g.media_archive.search_media(filter=filter, **pagination)
 	total_media = g.media_archive.media.count_media(filter=filter)
@@ -270,6 +271,7 @@ def search(
 		contributors=contributors,
 		api_uris=api_uris,
 		re=re,
+		kwargs=kwargs,
 	)
 
 @media_archive.route('/tags')
@@ -602,7 +604,7 @@ def tags_file(tags_filename):
 	)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>", methods=['GET', 'POST'])
-def view_medium(medium_id, slideshow=None):
+def view_medium(medium_id, slideshow=None, **kwargs):
 	from statuspages import PaymentRequired
 
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
@@ -744,6 +746,7 @@ def view_medium(medium_id, slideshow=None):
 		next_medium_id=next_medium_id,
 		prev_medium_id=prev_medium_id,
 		navigation_endpoint=navigation_endpoint,
+		kwargs=kwargs,
 	)
 
 @media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>/edit", methods=['GET', 'POST'])

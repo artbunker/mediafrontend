@@ -373,6 +373,140 @@ def manage_media():
 
 	return search('media_archive.manage_media', overrides={'filter': filter}, manage=True, omit_future=False)
 
+@media_archive.route('/backup', methods=['GET', 'POST'])
+@require_sign_in
+def backup(tags=None):
+	filter = {}
+
+	#if tags:
+		#TODO allow customized backup filter by tag search
+		#TODO maybe not from the backup page directly, but as a link from management search page
+
+	if not g.media_archive.accounts.current_user_has_global_group('manager'):
+		g.media_archive.accounts.require_global_group('contributor')
+		filter['owner_uuids'] = g.media_archive.accounts.current_user.uuid
+
+	total_media = g.media_archive.media.count_media(filter=filter)
+	bytesize = g.media_archive.media.media_size(filter=filter)
+
+	if 'POST' == request.method:
+		if 'confirm' not in request.args:
+			return render_template('confirm_backup.html', total_media=total_media, bytesize=bytesize)
+
+		import json
+
+		from .. import mime_to_extension
+
+		data = []
+		files = []
+		media = g.media_archive.search_media(filter=filter, sort='upload_time')
+		for medium in media:
+			data.append({
+				'md5': str(medium.md5),
+				'id': str(medium.id),
+				'uploader_remote_origin': str(medium.uploader_remote_origin.exploded),
+				'upload_time': int(medium.upload_time.timestamp()),
+				'creation_time': int(medium.creation_time.timestamp()),
+				'uploader_uuid': str(medium.uploader_uuid),
+				'owner_uuid': str(medium.owner_uuid),
+				'status': str(medium.status),
+				'protection': str(medium.protection),
+				'searchability': str(medium.searchability),
+				'group_bits': int.from_bytes(medium.group_bits, 'big'),
+				'mime': medium.mime,
+				'size': medium.size,
+				'data1': medium.data1,
+				'data2': medium.data2,
+				'data3': medium.data3,
+				'data4': medium.data4,
+				'data5': medium.data5,
+				'data6': medium.data6,
+				'tags': medium.tags,
+				'filename': medium.id + '.' + mime_to_extension(medium.mime),
+			})
+			medium_file_path = g.media_archive.get_medium_file_path(medium)
+			if medium_file_path:
+				files.append(medium_file_path)
+		#TODO generate backup archive from files and data
+		#if 'backup' in g.media_archive.callbacks:
+			#for f in g.media_archive.callbacks['backup']:
+				#TODO add result of callback (filename, data) to backup archive
+				#f(media)
+
+	return render_template('backup.html', total_media=total_media, bytesize=bytesize)
+
+@media_archive.route('/restore', methods=['GET', 'POST'])
+@require_sign_in
+def restore():
+	if not g.media_archive.accounts.current_user_has_global_group('manager'):
+		abort(403, {'message': 'restore_requires_manager'})
+
+	if 'POST' == request.method:
+		#temp path = os.path.join('__name__, 'tmp', 'restore_' + str(uuid.uuid4()))
+		#os.mkdir(temp_path)
+		#TODO decompress uploaded backup archive to temp path
+		#TODO parse data
+		#with open(os.path.join(temp_path, 'data.json')) as f:
+			#data = json.load(f)
+		#if 'confirm' not in request.args:
+			#TODO display list of media in backup archive for review with confirmation button
+			#md5s = []
+			#media = []
+			#for medium in data:
+				#md5s.append(medium.md5)
+				#current_medium = Medium(
+				#	id_to_md5(medium.id),
+				#	medium.uploader_remote_origin,
+				#	medium.upload_time,
+				#	medium.creation_time,
+				#	medium.uploader_uuid,
+				#	medium.owner_uuid,
+				#	medium.status,
+				#	medium.protection,
+				#	medium.searchability,
+				#	medium.group_bits,
+				#	medium.mime,
+				#	medium.size,
+				#	medium.data1,
+				#	medium.data2,
+				#	medium.data3,
+				#	medium.data4,
+				#	medium.data5,
+				#	medium.data6,
+				#)
+				#TODO populate id and uploader user and owner user
+				#TODO if id exists
+				#media.append(current_medium)
+			#existing_media = g.media_archive.search_media(filter={'md5s': md5s})
+			#return render_template(
+			#	'confirm_restore.html',
+			#	media=media,
+			#	existing_media=existing_media,
+			#	temp_path=temp_path,
+			#)
+		#for medium in data:
+			#try:
+				#create_medium(
+					#id_to_md5(medium.id),
+					#medium.uploader_remote_origin,
+					#medium.uploader_uuid,
+					#medium.owner_uuid,
+					#medium.mime,
+					#medium.size,
+					#medium.upload_time
+				#)
+			#except ValueError:
+				#pass
+			#TODO update medium
+			#TODO set tags
+		#if 'restore' in g.media_archive.callbacks:
+			#for f in g.media_archive.callbacks['restore']:
+				#TODO callbacks to restore data related to media (e.g. comments, sticker placements)
+				#f(temp_path)
+		pass
+
+	return render_template('restore.html')
+
 def api_medium_ids_to_list():
 	if 'medium_ids' not in request.form:
 		abort(400)

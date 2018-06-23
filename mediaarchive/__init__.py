@@ -373,6 +373,21 @@ class MediaArchive:
 			**params
 		)
 
+	def get_medium_file_path(self, medium):
+		if MediumProtection.NONE != medium.protection:
+			protection_path = 'protected'
+		else:
+			protection_path = 'nonprotected'
+
+		file_path = os.path.join(
+			self.config['media_path'],
+			protection_path,
+			medium.id + '.' + mime_to_extension(medium.mime)
+		)
+		if os.path.exists(file_path):
+			return file_path
+		return ''
+
 	def populate_uris(self, medium):
 		if self.config['api_uri']:
 			fetch_uri = self.config['api_uri'].format('fetch/{}')

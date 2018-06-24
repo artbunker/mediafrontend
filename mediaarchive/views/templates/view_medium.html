@@ -32,7 +32,7 @@
 {% endmacro %}
 {% block content %}
 	<div id="view_medium">
-		<div class="medium" data-id="{{ medium.id }}" data-upload-time="{{ (medium.upload_time.timestamp() * 1000)|int }}" data-creation-time="{{ (medium.creation_time.timestamp() * 1000)|int }}" data-category="{{ medium.category }}" data-mime="{{ medium.mime }}" data-size="{{ medium.size }}" data-data1="{{ medium.data1 }}" data-data2="{{ medium.data2 }}" data-data3="{{ medium.data3 }}" data-data4="{{ medium.data4 }}" data-data5="{{ medium.data5 }}" data-data6="{{ medium.data6 }}"{% include 'rgb.html' %}>
+		<div class="medium" data-id="{{ medium.id }}" data-upload-time="{{ (medium.upload_time.timestamp() * 1000)|int }}" data-creation-time="{{ (medium.creation_time.timestamp() * 1000)|int }}" data-category="{{ medium.category }}" data-mime="{{ medium.mime }}" data-size="{{ medium.size }}" data-data1="{{ medium.data1 }}" data-data2="{{ medium.data2 }}" data-data3="{{ medium.data3 }}" data-data4="{{ medium.data4 }}" data-data5="{{ medium.data5 }}" data-data6="{{ medium.data6 }}"{% include 'medium_rgb.html' %}>
 			{% if medium.uris['original'] %}
 				{% if 'application/x-shockwave-flash' == medium.mime %}
 					<div class="summary">
@@ -95,7 +95,7 @@
 			{% endif %}
 		</div>
 		{% include 'media_navigation.html' %}
-		{% include 'info.html' %}
+		{% include 'medium_info.html' %}
 		{% include 'fuzzy_time.html' %}
 		<div class="tags" data-visible-tags="{{ visible_tags }}">
 			<div class="inner_tags">
@@ -132,6 +132,6 @@
 			</div>
 			<script type="module" src="{{ url_for('media_archive.static', filename='scripts/view_tags_editor.js') }}"></script>
 		{% endif %}
-		{% include 'sets.html' %}
+		{% include 'medium_sets.html' %}
 	</div>
 {% endblock %}

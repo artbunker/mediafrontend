@@ -25,7 +25,7 @@
 		data-data3="{{ medium.data3 }}" 
 		data-data4="{{ medium.data4 }}" 
 		data-data5="{{ medium.data5 }}" 
-		data-data6="{{ medium.data6 }}"{% include 'rgb.html' %}>
+		data-data6="{{ medium.data6 }}"{% include 'medium_rgb.html' %}>
 		{% if thumb_medium.uris['static'][256] and thumb_medium.uris['fallback'][256] %}
 			<div class="summary">
 				<a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">
@@ -44,7 +44,7 @@
 			</div>
 		{% endif %}
 		{% if tiles %}
-			{% include 'set_tiles.html' %}
+			{% include 'medium_set_tiles.html' %}
 			{% include 'group_tiles.html' %}
 		{% endif %}
 	</div>

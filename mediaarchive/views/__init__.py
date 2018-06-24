@@ -49,7 +49,7 @@ def upload(api=False):
 		if api:
 			abort(405)
 		return render_template(
-			'upload.html',
+			'upload_media.html',
 			errors=errors,
 			manager=manager,
 			contributors=contributors,
@@ -73,7 +73,7 @@ def upload(api=False):
 				'id': medium.id,
 				'view_uri': url_for('media_archive.view_medium', medium_id=medium.id, _external=True),
 				'thumbnail': (
-					render_template('thumbnail.html', medium=medium)
+					render_template('medium_thumbnail.html', medium=medium)
 					.replace('\n', '')
 					.replace('\r', '')
 					.replace('\t', '')
@@ -113,7 +113,7 @@ def upload(api=False):
 			fields['groups'].append(group)
 
 	return render_template(
-		'upload.html',
+		'upload_media.html',
 		errors=errors,
 		manager=manager,
 		contributors=contributors,
@@ -125,7 +125,7 @@ def upload(api=False):
 
 @media_archive.route('/help')
 def help():
-	return render_template('help.html')
+	return render_template('media_help.html')
 
 def search(
 		current_endpoint,
@@ -255,7 +255,7 @@ def search(
 	import re
 
 	return render_template(
-		'search.html',
+		'search_media.html',
 		media=media,
 		tags_query=tags_query,
 		search_field=search_field,
@@ -617,7 +617,7 @@ def api_generate_set():
 			tags_string = '#' + tags_string
 		rendered[medium.id] = {
 			'set_tiles': (
-				render_template('set_tiles.html', medium=medium)
+				render_template('medium_set_tiles.html', medium=medium)
 				.replace('\n', '')
 				.replace('\r', '')
 				.replace('\t', '')
@@ -749,7 +749,7 @@ def view_medium(medium_id, slideshow=None, **kwargs):
 		groups = []
 		if 'groups' in e.description:
 			groups = e.description['groups']
-		return render_template('premium.html', groups=groups, slideshow=slideshow)
+		return render_template('premium_media.html', groups=groups, slideshow=slideshow)
 
 	edit_medium = False
 	edit_tags = False
@@ -1050,7 +1050,7 @@ def edit_medium(medium_id, api=False):
 				'media': {
 					medium.id: {
 						'thumbnail': (
-							render_template('thumbnail.html', medium=medium)
+							render_template('medium_thumbnail.html', medium=medium)
 							.replace('\n', '')
 							.replace('\r', '')
 							.replace('\t', '')
@@ -1111,7 +1111,7 @@ def generate_summaries(medium_id, api=False):
 			'media': {
 				medium.id: {
 					'thumbnail': (
-						render_template('thumbnail.html', medium=medium)
+						render_template('medium_thumbnail.html', medium=medium)
 						.replace('\n', '')
 						.replace('\r', '')
 						.replace('\t', '')
@@ -1135,7 +1135,7 @@ def remove_summaries(medium_id):
 
 	#TODO confirmation
 	#TODO	if 'confirm' not in request.args:
-	#TODO		return render_template('confirm_remove_summaries.html')
+	#TODO		return render_template('confirm_remove_medium_summaries.html')
 
 	g.media_archive.remove_medium_summaries(medium)
 
@@ -1154,7 +1154,7 @@ def remove_file(medium_id):
 
 	#TODO confirmation
 	#TODO	if 'confirm' not in request.args:
-	#TODO		return render_template('confirm_remove_file.html')
+	#TODO		return render_template('confirm_remove_medium_file.html')
 
 	g.media_archive.remove_medium_file(medium)
 

@@ -4,9 +4,9 @@
 		{% for medium in original_medium.sets[set] %}
 			{% set tiles = False %}
 			{% if medium.id == original_medium.id %}
-				<span class="current">{% include 'thumbnail.html' %}</span>
+				<span class="current">{% include 'medium_thumbnail.html' %}</span>
 			{% else %}
-				{% include 'thumbnail.html' %}
+				{% include 'medium_thumbnail.html' %}
 			{% endif %}
 		{% endfor %}
 	</div>

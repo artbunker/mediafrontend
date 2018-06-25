@@ -1,3 +1,17 @@
+{% set statuses = {
+	'forbidden': 'Forbidden',
+	'copyright': 'Copyright',
+	'allowed': 'Allowed',
+} %}
+
+{% macro status_display(status) %}
+	{% if status in statuses %}
+		{{ statuses[status] }}
+	{% else %}
+		{{ status }}
+	{% endif %}
+{% endmacro %}
+
 {% set searchabilities = {
 	'hidden': 'Hidden',
 	'groups': 'Groups',

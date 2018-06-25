@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+{% block title %}Export{% endblock %}
+{% block style %}
+	{{ super() }}
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/forms.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/export.css') }}">
+{% endblock %}
+{% block content %}
+	<div id="export">
+		<form method="get">
+			{% from 'media.jinja' import filesize %}
+			<legend>{{ filesize(bytesize) }} in {{ total_media }} total media</legend>
+			{% for arg in request.args %}
+				<input name="{{ arg }}" type="hidden" value="{{ request.args[arg] }}">
+			{% endfor %}
+			<input name="confirm" type="hidden" value="1">
+			<input type="submit" value="Export">
+		</form>
+	</div>
+{% endblock %}

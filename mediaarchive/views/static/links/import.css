@@ -1,0 +1,16 @@
+#import {
+	min-width: 512px;
+}
+.form_file {
+	margin-top: 0;
+}
+h2 {
+	margin: 1em auto;
+	text-align: left;
+}
+table {
+	max-width: 512px;
+}
+td:first-child {
+	white-space: nowrap;
+}

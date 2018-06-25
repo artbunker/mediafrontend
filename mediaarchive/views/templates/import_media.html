@@ -1,0 +1,120 @@
+{% extends 'layout.html' %}
+{% block title %}Import{% endblock %}
+{% block style %}
+	{{ super() }}
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/forms.css') }}">
+	{% if info %}<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/tables.css') }}">{% endif %}
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/import.css') }}">
+{% endblock %}
+{% block content %}
+	<div id="import">
+		{% set submit_value = 'Analyze' %}
+		{% set confirm = '' %}
+		{% if info %}
+			{% from 'users.jinja' import edit_user_link %}
+			<table>
+				<caption>Import info</caption>
+				<tbody>
+					<tr>
+						<td>Version</td>
+						<td>{{ info['version'] }}</td>
+					</tr>
+					<tr>
+						<td>Export time</td>
+						<td data-timestamp="{{ info['export_time'].timestamp() }}">{{ info['export_time'].strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}</td>
+					</tr>
+					<tr{% if not info['requested_by'] %} class="warning"{% endif %}>
+						<td>Requested by</td>
+						<td>{{ edit_user_link(info['requested_by']) }}</td>
+					</tr>
+					<tr>
+						<td>Filter</td>
+						<td>{{ info['filter'] }}</td>
+					</tr>
+					<tr>
+						<td>Signature</td>
+						<td>{{ info['signature'] }}</td>
+					</tr>
+				</tbody>
+			</table>
+			{% from 'media.jinja' import status_display, searchability_display, protection_display, filesize %}
+			<h2>{{ data|length }} total media</h2>
+			{% for medium in data %}
+				<table>
+					<caption>{{ medium['id'] }}</caption>
+					<tbody>
+						{% if medium['already_exists'] %}
+							<tr>
+								<td colspan="2"><a href="{{ url_for('media_archive.view_medium', medium_id=medium.id) }}">Already exists</a> (will overwrite)</td>
+							</tr>
+						{% endif %}
+						{% if not medium['original_file'] %}
+							<tr>
+								<td colspan="2">Record only (no file)</td>
+							</tr>
+						{% endif %}
+						<tr>
+							<td>Size</td>
+							<td>{{ filesize(medium['size']) }}</td>
+						</tr>
+						<tr>
+							<td>Mime</td>
+							<td>{{ medium['mime'] }}</td>
+						</tr>
+						<tr>
+							<td>Uploaded at</td>
+							<td data-timestamp="{{ medium['upload_time'].timestamp() }}">{{ medium['upload_time'].strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}</td>
+						</tr>
+						<tr>
+							<td>Uploaded by</td>
+							<td>{{ edit_user_link(medium['uploader']) }} ({{ medium['uploader_remote_origin'] }})</td>
+						</tr>
+						<tr>
+							<td>Owned by</td>
+							<td>{{ edit_user_link(medium['owner']) }}</td>
+						</tr>
+						<tr>
+							<td>Created</td>
+							<td data-timestamp="{{ medium['creation_time'].timestamp() }}">{{ medium['creation_time'].strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}</td>
+						</tr>
+						<tr>
+							<td>Status</td>
+							<td>{{ status_display(medium['status']|lower) }}</td>
+						</tr>
+						<tr>
+							<td>Protection</td>
+							<td>{{ protection_display(medium['protection']|lower) }}</td>
+						</tr>
+						<tr>
+							<td>Seachability</td>
+							<td>{{ searchability_display(medium['searchability']|lower) }}</td>
+						</tr>
+						<tr>
+							<td>Group bits</td>
+							<td>{{ medium['group_bits'] }}</td>
+						</tr>
+						{% if 0 < medium['tags']|length %}
+							<tr>
+								<td>Tags</td>
+								<td>#{{ medium['tags']|join(' #') }}</td>
+							</tr>
+						{% endif %}
+					</tbody>
+				</table>
+			{% endfor %}
+			{% set submit_value = 'Import' %}
+			{% set confirm = 'confirm' %}
+		{% endif %}
+		<form method="post" enctype="multipart/form-data">
+			<input name="{{ confirm }}" type="hidden" value="1">
+			<span class="form_file">
+				<label for="file_upload">Archive File</label>
+				<input id="file_upload" name="file_upload" type="file" required>
+				<span class="file_selection" data-file-selected="File selected" data-file-not-selected="No file selected"></span>
+			</span>
+			<br>
+			<input type="submit" value="{{ submit_value }}">
+		</form>
+		{% include 'fuzzy_time.html' %}
+	</div>
+{% endblock %}

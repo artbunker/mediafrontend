@@ -32,6 +32,9 @@
 		{% if 0 < media|length %}
 			<span id="total_media">{{ total_media }} media</span>
 			<a href="{{ url_for(slideshow_endpoint, medium_id=media[0].id, **kwargs) }}">Slideshow</a>
+			{% if manage %}
+				<a href="{{ url_for(current_endpoint, export=1, tags=tags_query, **kwargs)}}">Export</a>
+			{% endif %}
 		{% endif %}
 		<a href="{{ url_for('media_archive.help') }}">Help</a>
 		{#TODO  #}

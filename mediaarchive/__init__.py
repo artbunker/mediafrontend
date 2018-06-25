@@ -388,6 +388,342 @@ class MediaArchive:
 			return file_path
 		return ''
 
+	def export_media(self, filter={}):
+		import time
+		import json
+		import uuid
+		import hashlib
+
+		nonce = str(uuid.uuid4())
+
+		media_data = []
+		media_files = []
+		temp_files = []
+		signature_input = ''
+		media = self.search_media(filter=filter, sort='upload_time')
+		for medium in media:
+			medium_filename = medium.id + '.' + mime_to_extension(medium.mime)
+			current_data = {
+				'md5': str(hashlib.md5(medium.md5).hexdigest()),
+				'id': str(medium.id),
+				'uploader_remote_origin': str(medium.uploader_remote_origin.exploded),
+				'upload_time': int(medium.upload_time.timestamp()),
+				'creation_time': int(medium.creation_time.timestamp()),
+				'uploader_uuid': str(medium.uploader_uuid),
+				'owner_uuid': str(medium.owner_uuid),
+				'status': str(medium.status),
+				'protection': str(medium.protection),
+				'searchability': str(medium.searchability),
+				'group_bits': int.from_bytes(medium.group_bits, 'big'),
+				'mime': medium.mime,
+				'size': medium.size,
+				'data1': medium.data1,
+				'data2': medium.data2,
+				'data3': medium.data3,
+				'data4': medium.data4,
+				'data5': medium.data5,
+				'data6': medium.data6,
+				'tags': medium.tags,
+				'filename': medium_filename,
+				'original_file': False,
+			}
+
+			medium_file_path = self.get_medium_file_path(medium)
+			if medium_file_path:
+				media_files.append((medium_file_path, os.path.join('media', medium_filename)))
+				current_data['original_file'] = True
+
+			media_data.append(current_data)
+
+			for key in current_data:
+				signature_input += str(current_data[key])
+
+		# generate signature
+		signature = md5_to_id(hashlib.md5(signature_input.encode('utf-8')).digest())
+
+		# generate temp data.json
+		data_file_path = os.path.join(__name__, 'tmp', 'data_' + nonce + '.json')
+		with open(data_file_path, 'w') as f:
+			f.write(json.dumps(media_data))
+		temp_files.append((data_file_path, 'data.json'))
+
+		# generate temp information file with version/time/requested by uuid/filter
+		info_file_path = os.path.join(__name__, 'tmp', 'info_' + nonce + '.json')
+		#TODO parse filter to convert non-string and non-numeric values to strings
+		with open(info_file_path, 'w') as f:
+			f.write(json.dumps({
+				'version': '0.0.1',
+				'export_time': int(time.time()),
+				'requested_by_uuid': str(self.accounts.current_user.uuid),
+				#TODO add filter directly to info json
+				'filter': str(filter),
+				'signature': signature,
+			}))
+		temp_files.append((info_file_path, 'info.json'))
+
+		# generate temp files from callbacks
+		if 'export' in self.callbacks:
+			for f in self.callbacks['export']:
+				# result of callback must be a tuple of (name, arcname)
+				# name will be deleted by this script after being added to the export archive
+				temp_files.append(f(media))
+
+		import tarfile
+
+		export_file_path = os.path.join(__name__, 'tmp', 'media.export.' + signature + '.tar.gz')
+		if not os.path.exists(export_file_path):
+			export_archive = tarfile.open(export_file_path, 'w:gz')
+
+			# add media files
+			for name, arcname in media_files:
+				export_archive.add(name, arcname)
+
+			# add temp files
+			for name, arcname in temp_files:
+				export_archive.add(name, arcname)
+
+			export_archive.close()
+
+		# delete temp files
+		for name, arcname in temp_files:
+			os.remove(name)
+
+		# send export archive
+		from flask import send_from_directory
+
+		#TODO delete export after sending
+		#TODO maybe send with a generator reading out chunks of the file for large files
+		#TODO or leave it like this but set up regular clearing of tmp directory
+		r = send_from_directory(
+			os.path.join(__name__, 'tmp'),
+			'media.export.' + signature + '.tar.gz',
+			mimetype='application/gzip',
+			as_attachment=True,
+		)
+		return r
+
+	def get_import_archive_info(self, import_archive):
+		import json
+		import uuid
+		from datetime import datetime, timezone
+
+		info_file = import_archive.extractfile('info.json')
+
+		if not info_file:
+			abort(400, {'message': 'import_archive_missing_info'})
+		try:
+			info = json.load(info_file)
+		except json.decoder.JSONDecodeError:
+			abort(400, {'message': 'malformed_import_archive_info'})
+
+		if -1 != info['signature'].find('..') or '/' == info['signature'][0]:
+			abort(400, {'message': 'import_archive_invalid_signature'})
+
+		info['requested_by'] = self.accounts.get_user(uuid.UUID(info['requested_by_uuid']))
+		info['export_time'] = datetime.fromtimestamp(info['export_time'], timezone.utc)
+
+		return info
+
+	def get_import_archive_data(self, import_archive):
+		import json
+		import uuid
+		from datetime import datetime, timezone
+
+		data_file = import_archive.extractfile('data.json')
+		if not data_file:
+			abort(400, {'message': 'import_archive_missing_data'})
+		try:
+			data = json.load(data_file)
+		except json.decoder.JSONDecodeError:
+			abort(400, {'message': 'malformed_import_archive_data'})
+
+		# get users for uploaders and owners in data
+		user_uuids = []
+		for medium in data:
+			if -1 != medium['filename'].find('..') or '/' == medium['filename'][0]:
+				abort(400, {'message': 'import_archive_invalid_medium_filename'})
+			user_uuids.append(uuid.UUID(medium['uploader_uuid']))
+			user_uuids.append(uuid.UUID(medium['uploader_uuid']))
+
+		users = self.accounts.users.users_dictionary(
+			self.accounts.search_users(filter={'user_uuids': user_uuids})
+		)
+
+		md5s = []
+		for medium in data:
+			medium['md5'] = id_to_md5(medium['id'])
+			md5s.append(medium['md5'])
+			
+		existing_media = self.media.media_dictionary(self.search_media(filter={'md5s': md5s}))
+
+		for medium in data:
+			medium['already_exists'] = False
+			if medium['md5'] in existing_media:
+				medium['already_exists'] = True
+				medium['medium'] = existing_media[medium['md5']]
+			medium['upload_time'] = datetime.fromtimestamp(medium['upload_time'], timezone.utc)
+			medium['creation_time'] = datetime.fromtimestamp(medium['creation_time'], timezone.utc)
+
+			medium['uploader'] = None
+			medium['owner'] = None
+
+			uploader_uuid = uuid.UUID(medium['uploader_uuid'])
+			if uploader_uuid in users:
+				medium['uploader'] = users[uploader_uuid]
+
+			owner_uuid = uuid.UUID(medium['uploader_uuid'])
+			if owner_uuid in users:
+				medium['owner'] = users[owner_uuid]
+
+		return data
+
+	def analyze_import_file(self, import_archive_object):
+		import tarfile
+		import uuid
+
+		#TODO catch exception here for invalid tar gz
+		import_archive = tarfile.open(mode='r:gz', fileobj=import_archive_object)
+		info = self.get_import_archive_info(import_archive)
+		data = self.get_import_archive_data(import_archive)
+		
+		#TODO check for signature mismatch
+
+		total_media_files = 0
+		other_files = []
+		for tarinfo in import_archive:
+			if -1 != tarinfo.name.find('..'):
+				abort(400, {'message': 'import_archive_invalid_path' + tarinfo.name})
+			elif 'media/' == tarinfo.name[:6]:
+				total_media_files += 1
+			elif 'info.json' != tarinfo.name and 'data.json' != tarinfo.name:
+				other_file = {
+					'name': tarinfo.name,
+					'size': tarinfo.size,
+				}
+				if tarinfo.isreg():
+					other_file['type'] = 'regular'
+				elif tarinfo.isdir():
+					other_file['type'] = 'directory'
+				else:
+					other_file['type'] = 'other'
+				other_files.append(other_file)
+		return info, data, other_files
+
+	def import_media(self, import_archive_object):
+		import tarfile
+		import uuid
+		from datetime import datetime, timezone
+
+		from media import Medium
+
+		#TODO catch exception here for invalid tar gz
+		import_archive = tarfile.open(mode='r:gz', fileobj=import_archive_object)
+		info = self.get_import_archive_info(import_archive)
+		data = self.get_import_archive_data(import_archive)
+
+		#TODO check for signature mismatch
+
+		temp_media_directory = os.path.join(
+			__name__,
+			'tmp',
+			'import.' + info['signature'] + '.' + str(uuid.uuid4())
+		)
+
+		updated_medium_md5s = []
+		for medium in data:
+			print('importing media ' + medium['id'])
+			if medium['original_file']:
+				if 'media/' + medium['filename'] not in import_archive.getnames():
+					#TODO warning log of original file expected but missing from archive
+					continue
+			if medium['already_exists']:
+				self.remove_medium(medium['medium'])
+
+			current_medium = Medium(
+				medium['md5'],
+				medium['uploader_remote_origin'],
+				medium['upload_time'].timestamp(),
+				medium['creation_time'].timestamp(),
+				uuid.UUID(medium['uploader_uuid']),
+				uuid.UUID(medium['owner_uuid']),
+				medium['status'],
+				medium['protection'],
+				medium['searchability'],
+				medium['group_bits'],
+				medium['mime'],
+				medium['size'],
+				medium['data1'],
+				medium['data2'],
+				medium['data3'],
+				medium['data4'],
+				medium['data5'],
+				medium['data6'],
+			)
+			try:
+				self.media.create_medium(
+					current_medium.md5,
+					current_medium.uploader_remote_origin,
+					current_medium.uploader_uuid,
+					current_medium.owner_uuid,
+					current_medium.mime,
+					current_medium.size,
+					current_medium.upload_time.timestamp()
+				)
+			except ValueError:
+				pass
+			# update
+			self.media.update_medium(
+				current_medium,
+				creation_time=current_medium.creation_time.timestamp(),
+				status=str(current_medium.status),
+				protection=str(current_medium.protection),
+				searchability=str(current_medium.searchability),
+				group_bits=current_medium.group_bits,
+				mime=current_medium.mime,
+				size=current_medium.size,
+				data1=current_medium.data1,
+				data2=current_medium.data2,
+				data3=current_medium.data3,
+				data4=current_medium.data4,
+				data5=current_medium.data5,
+				data6=current_medium.data6,
+			)
+			# set tags
+			self.media.remove_tags(current_medium)
+			self.media.add_tags(current_medium, medium['tags'])
+			if medium['original_file']:
+				# extract associated medium file to protected path
+				member = import_archive.getmember('media/' + medium['filename'])
+				import_archive.extract(member, temp_media_directory)
+				os.rename(
+					os.path.join(temp_media_directory, 'media', medium['filename']),
+					os.path.join(
+						self.config['media_path'],
+						'protected',
+						md5_to_id(current_medium.md5) + '.' + mime_to_extension(current_medium.mime)
+					)
+				)
+				# add to list of medium to re-fetch, place, and generate summaries
+				updated_medium_md5s.append(current_medium.md5)
+
+		# remove temp media directory
+		import shutil
+
+		shutil.rmtree(temp_media_directory)
+
+		if 'import' in self.callbacks:
+			for f in self.callbacks['import']:
+				# callbacks to import data related to media (e.g. comments, sticker placements)
+				f(import_archive, info, data)
+
+		import_archive.close()
+
+		if updated_medium_md5s:
+			media = self.search_media(filter={'md5s': updated_medium_md5s})
+			for medium in media:
+				self.place_medium_file(medium)
+				self.generate_medium_summaries(medium)
+
 	def populate_uris(self, medium):
 		if self.config['api_uri']:
 			fetch_uri = self.config['api_uri'].format('fetch/{}')

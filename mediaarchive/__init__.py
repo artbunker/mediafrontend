@@ -1391,6 +1391,8 @@ class MediaArchive:
 					sort = 'creation_time'
 				elif 'upload' == sort:
 					sort = 'upload_time'
+				elif 'modify' == sort:
+					sort = 'touch_time'
 				filter['sort'] = sort
 			elif 'order:' == tag[:6]:
 				if 'desc' != tag[6:]:
@@ -1446,6 +1448,26 @@ class MediaArchive:
 					if 'created_befores' not in filter:
 						filter['created_befores'] = []
 					filter['created_befores'].append(created_before)
+			elif 'modified after:' == tag[:15]:
+				import dateutil.parser
+				try:
+					modified_after = dateutil.parser.parse(tag[15:]).timestamp()
+				except ValueError:
+					pass
+				else:
+					if 'touched_afters' not in filter:
+						filter['touched_afters'] = []
+					filter['touched_afters'].append(modified_after)
+			elif 'modified before:' == tag[:16]:
+				import dateutil.parser
+				try:
+					modified_before = dateutil.parser.parse(tag[16:]).timestamp()
+				except ValueError:
+					pass
+				else:
+					if 'touched_befores' not in filter:
+						filter['touched_befores'] = []
+					filter['touched_befores'].append(modified_before)
 			elif 'mimetype:' == tag[:9]:
 				filter['mime'] = tag[9:]
 			elif '-mimetype:' == tag[:10]:

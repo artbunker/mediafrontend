@@ -516,6 +516,7 @@ def api_generate_set():
 	set_tag = 'set:' + uuid_to_id(uuid.uuid4())
 
 	g.media_archive.media.add_tags(media, set_tag)
+	g.media_archive.media.touch_media(media)
 
 	#TODO the media module should modify media in place so another fetch isn't necessary
 	media = g.media_archive.search_media(filter={'ids': medium_ids})
@@ -560,6 +561,8 @@ def api_modify_tags(mode):
 		g.media_archive.media.add_tags(media, tags_list)
 	else:
 		abort(400)
+
+	g.media_archive.media.touch_media(media)
 
 	#TODO the media module should modify media in place so another fetch isn't necessary
 	media = g.media_archive.search_media(filter={'ids': medium_ids})
@@ -947,6 +950,7 @@ def edit_medium(medium_id, api=False):
 			medium = g.media_archive.get_medium(new_medium.md5)
 
 	if 0 == len(errors):
+		g.media_archive.media.touch_media(medium)
 		if api:
 			# delay and re-fetch to get accurate thumbnail
 			import time
@@ -1066,6 +1070,7 @@ def remove_file(medium_id):
 	#TODO		return render_template('confirm_remove_medium_file.html')
 
 	g.media_archive.remove_medium_file(medium)
+	g.media_archive.media.touch_media(medium)
 
 	return redirect(url_for('media_archive.edit_medium', medium_id=medium.id), 302)
 

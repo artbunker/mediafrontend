@@ -228,7 +228,7 @@ def search(
 			sort=pagination['sort']
 		)
 		adjacent_media = (prev_medium_id, next_medium_id, slideshow_endpoint)
-		return view_medium(medium_id, adjacent_media, **kwargs)
+		return view_medium(medium_id, adjacent_media, tags=tags_query, **kwargs)
 
 	media = g.media_archive.search_media(filter=filter, **pagination)
 	total_media = g.media_archive.media.count_media(filter=filter)
@@ -239,9 +239,10 @@ def search(
 		contributors = g.media_archive.get_contributors()
 		api_uris = g.media_archive.get_api_uris()
 
-	# strip medium ids from protected media if not managing
+	# mark protected media if not managing
 	else:
 		for medium in media:
+			medium.protected = False
 			if (
 					(
 							0 < int.from_bytes(medium.group_bits, 'big')
@@ -255,7 +256,8 @@ def search(
 							)
 						)
 				):
-					medium.id = ''
+					medium.protected = True
+					#medium.id = ''
 
 	tags_this_page = []
 	for medium in media:
@@ -386,7 +388,12 @@ def manage_media():
 		g.media_archive.accounts.require_global_group('contributor')
 		filter['owner_uuids'] = g.accounts.current_user.uuid
 
-	return search('media_archive.manage_media', overrides={'filter': filter}, manage=True, omit_future=False)
+	return search(
+		'media_archive.manage_media',
+		overrides={'filter': filter},
+		manage=True,
+		omit_future=False
+	)
 
 @media_archive.route('/import', methods=['GET', 'POST'])
 @require_sign_in
@@ -451,6 +458,13 @@ def api_fetch_medium(medium_filename):
 		#TODO maybe actually feed 400 image fetch svg back?
 		abort(400)
 
+	e = check_protection(medium)
+	if e:
+		if hasattr(g, 'json_request') and g.json_request:
+			raise
+		#TODO maybe actually feed protected/premium image fetch svg back?
+		return e
+
 	if 2 == len(filename_pieces):
 		medium_extension = filename_pieces[1]
 		# reencode
@@ -464,8 +478,6 @@ def api_fetch_medium(medium_filename):
 			media_path = os.path.join(g.media_archive.config['media_path'], 'protected')
 	else:
 		media_path = os.path.join(g.media_archive.config['summaries_path'], 'protected')
-
-	g.media_archive.require_access(medium)
 
 	if not os.path.exists(os.path.join(media_path, medium_filename)):
 		#TODO maybe actually feed 404 image fetch svg back?
@@ -652,19 +664,49 @@ def tags_file(tags_filename):
 		conditional=True
 	)
 
-@media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>", methods=['GET', 'POST'])
-def view_medium(medium_id, slideshow=None, **kwargs):
+def check_protection(medium, slideshow=None, **kwargs):
+	import werkzeug.exceptions
+
 	from statuspages import PaymentRequired
 
-	medium = g.media_archive.require_medium(id_to_md5(medium_id))
-
+	protected = False
+	groups = []
 	try:
 		g.media_archive.require_access(medium)
-	except PaymentRequired as e:
-		groups = []
+	except werkzeug.exceptions.Unauthorized as e:
+		protected = True
 		if 'groups' in e.description:
 			groups = e.description['groups']
-		return render_template('premium_media.html', groups=groups, slideshow=slideshow)
+	except werkzeug.exceptions.Forbidden as e:
+		protected = True
+		if 'groups' in e.description:
+			groups = e.description['groups']
+	except PaymentRequired as e:
+		if 'groups' in e.description:
+			groups = e.description['groups']
+		return render_template(
+			'premium_media.html',
+			groups=groups,
+			slideshow=slideshow,
+			kwargs=kwargs
+		)
+	if protected:
+		return render_template(
+			'protected_media.html',
+			groups=groups,
+			slideshow=slideshow,
+			kwargs=kwargs
+		)
+
+	return None
+
+@media_archive.route('/' + "<regex('([a-zA-Z0-9_\-]+)'):medium_id>", methods=['GET', 'POST'])
+def view_medium(medium_id, slideshow=None, **kwargs):
+	medium = g.media_archive.require_medium(id_to_md5(medium_id))
+
+	e = check_protection(medium, slideshow, **kwargs)
+	if e:
+		return e
 
 	edit_medium = False
 	edit_tags = False

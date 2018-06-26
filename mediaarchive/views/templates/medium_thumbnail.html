@@ -1,5 +1,5 @@
-{% if not medium.id %}
-	<div class="thumbnail">
+{% if medium.protected %}
+	<div class="thumbnail" data-id="{{ medium.id }}">
 		<div class="summary thumb nofile protected">Protected Medium</div>
 	</div>
 {% else %}

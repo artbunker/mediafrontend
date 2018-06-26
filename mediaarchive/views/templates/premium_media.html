@@ -1,34 +1,7 @@
-{% extends 'layout.html' %}
+{% extends 'protected_media.html' %}
 {% block title %}Premium{% endblock %}
 {% block style %}
 	{{ super() }}
-	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/navigation.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/premium.css') }}">
 {% endblock %}
-{% block content %}
-	<div id="premium"{% if groups %} class="{% for group in groups %}{{ group }} {% endfor %}"{% endif %}>
-		<div class="card header">Premium required</div>
-		{% if not g.media_archive.accounts.current_user %}
-			<div class="card">
-				You're currently not signed in.
-			</div>
-			<div class="card">
-				If you already have a an account with permissions to view this page, <a href="{{ url_for('accounts_user.sign_in_services') }}">try signing in</a>
-			</div>
-			<div class="card">
-				If you're still not able to view this page but believe you should be able to, contact staff for more information.
-			</div>
-		{% else %}
-			{% from 'permissions.jinja' import group_display %}
-			<div class="card">
-				This page requires one or more permissions you don't have:
-			</div>
-			<div class="card groups">
-				{% for group in groups %}
-					<span class="group {{ group }}" title="{{ group_display(group) }}">{{ group_display(group) }}</span>
-				{% endfor %}
-			</div>
-		{% endif %}
-		{% include 'media_navigation.html' %}
-	</div>
-{% endblock %}
+{% block header %}Premium{% endblock %}

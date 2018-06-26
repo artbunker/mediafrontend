@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% block title %}Protected{% endblock %}
+{% block style %}
+	{{ super() }}
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/navigation.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/protected.css') }}">
+{% endblock %}
+{% block content %}
+	<div id="protected"{% if groups %} class="{% for group in groups %}{{ group }} {% endfor %}"{% endif %}>
+		<h2>{% block header %}Protected{% endblock %}</h2>
+		<div class="card">
+			{% if not g.media_archive.accounts.current_user %}
+				<div class="section">
+					You're currently not signed in.
+				</div>
+				<div class="section">
+					If you already have a an account with permissions to view this page, <a href="{{ url_for('accounts_user.sign_in_services') }}">try signing in</a>.
+				</div>
+				<div class="section">
+					If you're still not able to view this page but believe you should be able to, contact staff for more information.
+				</div>
+			{% else %}
+				{% from 'permissions.jinja' import group_display %}
+				<div class="section">
+					This page requires one or more permissions you don't have
+				</div>
+				{% if groups %}
+					{# render group tiles here or make a special set of tiles for premium/protected? #}
+					<div class="section groups">
+						{% for group in groups %}
+							<span class="group {{ group }}" title="{{ group_display(group) }}">{{ group_display(group) }}</span>
+						{% endfor %}
+					</div>
+				{% endif %}
+			{% endif %}
+		{% if slideshow %}
+			{% set prev_medium_id, next_medium_id, navigation_endpoint = slideshow %}
+			{% include 'media_navigation.html' %}
+		{% endif %}
+	</div>
+{% endblock %}

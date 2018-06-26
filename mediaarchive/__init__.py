@@ -409,6 +409,7 @@ class MediaArchive:
 				'uploader_remote_origin': str(medium.uploader_remote_origin.exploded),
 				'upload_time': int(medium.upload_time.timestamp()),
 				'creation_time': int(medium.creation_time.timestamp()),
+				'touch_time': int(medium.touch_time.timestamp()),
 				'uploader_uuid': str(medium.uploader_uuid),
 				'owner_uuid': str(medium.owner_uuid),
 				'status': str(medium.status),
@@ -563,6 +564,7 @@ class MediaArchive:
 				medium['medium'] = existing_media[medium['md5']]
 			medium['upload_time'] = datetime.fromtimestamp(medium['upload_time'], timezone.utc)
 			medium['creation_time'] = datetime.fromtimestamp(medium['creation_time'], timezone.utc)
+			medium['touch_time'] = datetime.fromtimestamp(medium['touch_time'], timezone.utc)
 
 			medium['uploader'] = None
 			medium['owner'] = None
@@ -644,6 +646,7 @@ class MediaArchive:
 				medium['uploader_remote_origin'],
 				medium['upload_time'].timestamp(),
 				medium['creation_time'].timestamp(),
+				medium['touch_time'].timestamp(),
 				uuid.UUID(medium['uploader_uuid']),
 				uuid.UUID(medium['owner_uuid']),
 				medium['status'],
@@ -675,6 +678,7 @@ class MediaArchive:
 			self.media.update_medium(
 				current_medium,
 				creation_time=current_medium.creation_time.timestamp(),
+				touch_time=current_medium.touch_time.timestamp(),
 				status=str(current_medium.status),
 				protection=str(current_medium.protection),
 				searchability=str(current_medium.searchability),

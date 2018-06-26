@@ -1632,7 +1632,22 @@ class MediaArchive:
 		f.write(json.dumps(suggestions))
 		f.close()
 
-	def require_access(self, medium):
+	def contains_premium_group(self, haystack_group_bits):
+		premium_groups = []
+		for premium_group in self.config['premium_groups']:
+			premium_group_bit = self.accounts.users.group_name_to_bit(premium_group)
+			if self.accounts.users.contains_all_group_bits(
+					haystack_group_bits,
+					premium_group_bit
+				):
+				if not self.accounts.has_global_group(
+						self.accounts.current_user,
+						premium_group
+					):
+					premium_groups.append(premium_group)
+		return premium_groups
+
+	def require_access(self, medium, require_groups=False):
 		signed_in = False
 		owner = False
 		manager = False
@@ -1650,7 +1665,16 @@ class MediaArchive:
 			if not owner:
 				if MediumProtection.PRIVATE == medium.protection:
 					abort(404, {'message': 'medium_not_found'})
+				protected = False
 				if MediumProtection.NONE == medium.protection:
+					if require_groups and 0 < int.from_bytes(medium.group_bits, 'big'):
+						if not signed_in:
+							abort(401, {'message': 'medium_protected'})
+						if not self.accounts.current_user_has_permissions(
+								medium.group_bits,
+								'global'
+							):
+							protected = True
 					return
 				if not signed_in:
 					abort(401, {'message': 'medium_protected'})
@@ -1659,21 +1683,12 @@ class MediaArchive:
 							'global',
 							medium.group_bits
 						):
-						groups = []
-						for premium_group in self.config['premium_groups']:
-							premium_group_bit = self.accounts.users.group_name_to_bit(premium_group)
-							if self.accounts.users.contains_all_group_bits(
-									medium.group_bits,
-									premium_group_bit
-								):
-								if not self.accounts.has_global_group(
-										self.accounts.current_user,
-										premium_group
-									):
-									groups.append(premium_group)
-						if groups:
-							abort(402, {'message': 'premium_medium', 'groups': groups})
-						abort(403, {'message': 'protected_medium'})
+						protected = True
+				if protected:
+					premium_groups = self.contains_premium_groups(medium.group_bits)
+					if premium_groups:
+						abort(402, {'message': 'premium_medium', 'groups': premium_groups})
+					abort(403, {'message': 'protected_medium'})
 
 	def upload_from_request(self):
 		errors = []

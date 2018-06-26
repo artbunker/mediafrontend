@@ -664,7 +664,7 @@ def tags_file(tags_filename):
 		conditional=True
 	)
 
-def check_protection(medium, slideshow=None, **kwargs):
+def check_protection(medium, slideshow=None, require_groups=False, **kwargs):
 	import werkzeug.exceptions
 
 	from statuspages import PaymentRequired
@@ -672,7 +672,7 @@ def check_protection(medium, slideshow=None, **kwargs):
 	protected = False
 	groups = []
 	try:
-		g.media_archive.require_access(medium)
+		g.media_archive.require_access(medium, require_groups)
 	except werkzeug.exceptions.Unauthorized as e:
 		protected = True
 		if 'groups' in e.description:
@@ -704,7 +704,7 @@ def check_protection(medium, slideshow=None, **kwargs):
 def view_medium(medium_id, slideshow=None, **kwargs):
 	medium = g.media_archive.require_medium(id_to_md5(medium_id))
 
-	e = check_protection(medium, slideshow, **kwargs)
+	e = check_protection(medium, slideshow, require_groups=True, **kwargs)
 	if e:
 		return e
 

@@ -113,6 +113,8 @@
 				<span class="file_selection" data-file-selected="File selected" data-file-not-selected="No file selected"></span>
 			</span>
 			<br>
+			<input class="{{ confirm }}" id="generate_summaries" name="generate_summaries" type="checkbox"><label for="generate_summaries" data-type="checkbox">Create Summaries</label>
+			<br>
 			<input type="submit" value="{{ submit_value }}">
 		</form>
 		{% include 'fuzzy_time.html' %}

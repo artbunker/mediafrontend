@@ -611,7 +611,7 @@ class MediaArchive:
 				other_files.append(other_file)
 		return info, data, other_files
 
-	def import_media(self, import_archive_object):
+	def import_media(self, import_archive_object, generate_summaries=False):
 		import tarfile
 		import uuid
 		from datetime import datetime, timezone
@@ -726,7 +726,8 @@ class MediaArchive:
 			media = self.search_media(filter={'md5s': updated_medium_md5s})
 			for medium in media:
 				self.place_medium_file(medium)
-				self.generate_medium_summaries(medium)
+				if generate_summaries:
+					self.generate_medium_summaries(medium)
 
 	def populate_uris(self, medium):
 		if self.config['api_uri']:

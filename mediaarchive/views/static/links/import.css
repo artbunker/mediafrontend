@@ -14,3 +14,11 @@ table {
 td:first-child {
 	white-space: nowrap;
 }
+#generate_summaries + label,
+#generate_summaries + label + br {
+	display: none;
+}
+#generate_summaries.confirm + label,
+#generate_summaries.confirm + label + br {
+	display: inline-block;
+}

@@ -411,7 +411,10 @@ def import_media():
 			)
 
 		# do actual import
-		g.media_archive.import_media(request.files['file_upload'])
+		g.media_archive.import_media(
+			request.files['file_upload'],
+			('generate_summaries' in request.form)
+		)
 		return redirect(url_for('media_archive.manage_media'), 302)
 
 	return render_template('import_media.html')

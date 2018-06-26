@@ -379,8 +379,12 @@ def edit_tag(mode):
 
 	return redirect(url_for('media_archive.manage_tags'), 302)
 
+@media_archive.route('/manage/<medium_id>')
+def manage_slideshow(medium_id):
+	return manage_media(medium_id=medium_id)
+
 @media_archive.route('/manage')
-def manage_media():
+def manage_media(medium_id=None):
 	filter = {}
 
 	if not g.media_archive.accounts.has_global_group(g.media_archive.accounts.current_user, 'manager'):
@@ -392,7 +396,9 @@ def manage_media():
 		'media_archive.manage_media',
 		overrides={'filter': filter},
 		manage=True,
-		omit_future=False
+		omit_future=False,
+		medium_id=medium_id,
+		slideshow_endpoint='media_archive.manage_slideshow',
 	)
 
 @media_archive.route('/import', methods=['GET', 'POST'])

@@ -104,10 +104,21 @@ audio {
 	margin-right: 1px;
 	margin-bottom: 1px;
 	border-radius: 0.25rem;
+}
+.set video,
+.set picture,
+.set picture img,
+.set .summary.nofile::before {
 	opacity: 0.5;
 }
-.set .current .thumbnail,
-.set .thumbnail:hover {
+.set .current video,
+.set .current picture,
+.set .current picture img,
+.set .current .summary.nofile::before,
+.set .thumbnail:hover video,
+.set .thumbnail:hover picture,
+.set .thumbnail:hover picture img,
+.set .thumbnail:hover .summary.nofile::before {
 	opacity: 1;
 }
 .set .current,

@@ -871,6 +871,7 @@ def edit_medium(medium_id, api=False):
 		'groups': [],
 
 		'owner_id': medium.owner_id,
+		'status': medium.status.name.lower(),
 		'searchability': medium.searchability.name.lower(),
 		'protection': medium.protection.name.lower(),
 		'creation_time': medium.creation_time,
@@ -907,8 +908,12 @@ def edit_medium(medium_id, api=False):
 
 	updates = {}
 
-	# manager can set medium owner directly
+	# manager can set medium owner directly and modify status
 	if manager:
+		if 'status' in request.form:
+			status = request.form['status'].upper()
+			if status != medium.status.name:
+				updates['status'] = status
 		if 'owner_id' in request.form and request.form['owner_id'] != medium.owner_id:
 			owner = g.media_archive.accounts.get_user(id_to_uuid(request.form['owner_id']))
 			if not owner:

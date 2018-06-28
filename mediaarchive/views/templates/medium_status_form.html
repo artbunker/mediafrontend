@@ -1,0 +1,14 @@
+<label for="status">Status</label>
+<select id="status" name="status">
+	{% from 'media.jinja' import statuses, status_display %}
+	{% for status in statuses %}
+		{% set selected = '' %}
+		{% if status == fields['status'] %}
+			{% set selected = ' selected' %}
+		{% endif %}
+		<option value="{{ status }}"{{ selected }}>
+			{{ status_display(status) }}
+		</option>
+	{% endfor %}
+</select>
+<br>

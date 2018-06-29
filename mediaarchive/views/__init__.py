@@ -62,6 +62,10 @@ def upload(api=False):
 	errors, medium = g.media_archive.upload_from_request()
 
 	if 0 == len(errors):
+		g.media_archive.add_log(
+			'create_medium',
+			g.media_archive.accounts.current_user.uuid
+		)
 		# delay and re-fetch to get accurate uris
 		import time
 
@@ -1142,10 +1146,16 @@ def remove_medium(medium_id, api=False):
 
 	if not g.media_archive.accounts.current_user_has_global_group('manager'):
 		if MediumStatus.ALLOWED != medium.status:
-			#TODO log attempted non-allowed remove
+			g.media_archive.add_log(
+				'attempt_non_allowed_medium_remove',
+				g.media_archive.accounts.current_user.uuid
+			)
 			abort(404, {'message': 'medium_not_found'})
 		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
-			#TODO log attempted non-owner remove
+			g.media_archive.add_log(
+				'attempt_non_owner_remove',
+				g.media_archive.accounts.current_user.uuid
+			)
 			abort(403)
 
 	#TODO	if not api and 'confirm' not in request.args:
@@ -1156,6 +1166,10 @@ def remove_medium(medium_id, api=False):
 			f(medium)
 
 	g.media_archive.remove_medium(medium)
+	g.media_archive.add_log(
+		'remove_medium',
+		g.media_archive.accounts.current_user.uuid
+	)
 
 	if api:
 		from statuspages import success

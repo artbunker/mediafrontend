@@ -62,12 +62,17 @@ def upload(api=False):
 	errors, medium = g.media_archive.upload_from_request()
 
 	if 0 == len(errors):
-		if api:
-			# delay and re-fetch to get accurate thumbnail
-			import time
-			time.sleep(0.5)
-			medium = g.media_archive.get_medium(medium.md5)
+		# delay and re-fetch to get accurate uris
+		import time
 
+		time.sleep(0.5)
+		medium = g.media_archive.get_medium(medium.md5)
+
+		if 'create_medium' in g.media_archive.callbacks:
+			for f in g.media_archive.callbacks['create_medium']:
+				f(medium)
+
+		if api:
 			from statuspages import success
 			return success({
 				'id': medium.id,
@@ -1145,6 +1150,10 @@ def remove_medium(medium_id, api=False):
 
 	#TODO	if not api and 'confirm' not in request.args:
 	#TODO		return render_template('confirm_remove_medium.html')
+
+	if 'remove_medium' in g.media_archive.callbacks:
+		for f in g.media_archive.callbacks['remove_medium']:
+			f(medium)
 
 	g.media_archive.remove_medium(medium)
 

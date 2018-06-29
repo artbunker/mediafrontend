@@ -242,6 +242,8 @@ def search(
 	media = g.media_archive.search_media(filter=filter, **pagination)
 	total_media = g.media_archive.media.count_media(filter=filter)
 
+	g.media_archive.populate_media_covers(media)
+
 	contributors = []
 	api_uris = {}
 	if manage:
@@ -814,6 +816,7 @@ def view_medium(medium_id, slideshow=None, **kwargs):
 			)
 			unordered = []
 			ordered = {}
+			g.media_archive.populate_media_covers(media)
 			for set_medium in media:
 				for tag in set_medium.tags:
 					if 'set:' != tag[:4]:
@@ -840,6 +843,8 @@ def view_medium(medium_id, slideshow=None, **kwargs):
 	navigation_endpoint = 'media_archive.view_medium'
 	if slideshow:
 		prev_medium_id, next_medium_id, navigation_endpoint = slideshow
+
+	g.media_archive.populate_media_covers(medium)
 
 	return render_template(
 		'view_medium.html',

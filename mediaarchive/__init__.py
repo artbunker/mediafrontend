@@ -1846,6 +1846,28 @@ class MediaArchive:
 			contributors.append(permission.user)
 		return contributors
 
+	def populate_media_covers(self, media):
+		if not isinstance(media, list):
+			media = [media]
+		cover_medium_ids = []
+		media_with_covers = []
+		for medium in media:
+			medium.cover = None
+			for tag in medium.tags:
+				if 'cover:' == tag[:6]:
+					medium.cover_id = tag[6:]
+					cover_medium_ids.append(medium.cover_id)
+					media_with_covers.append(medium)
+				else:
+					continue
+
+		if not cover_medium_ids:
+			return
+
+		cover_media = self.media.media_dictionary(self.search_media(filter={'ids': cover_medium_ids}))
+		for medium in media_with_covers:
+			medium.cover = cover_media[id_to_md5(medium.cover_id)]
+
 	def get_api_uris(self):
 		api_uris = {}
 		if self.config['api_uri']:

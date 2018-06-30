@@ -136,6 +136,28 @@ def upload(api=False):
 def help():
 	return render_template('media_help.html')
 
+def populate_medium_protected_property(medium):
+	medium.protected = False
+	if (
+			g.media_archive.accounts.current_user
+			and g.media_archive.accounts.current_user.uuid == medium.owner_uuid
+		):
+		return
+	if (
+			(
+					0 < int.from_bytes(medium.group_bits, 'big')
+					or MediumProtection.NONE != medium.protection
+				)
+			and (
+				not g.media_archive.accounts.current_user
+				or not g.media_archive.accounts.current_user_has_permissions(
+						medium.group_bits,
+						'global'
+					)
+				)
+		):
+			medium.protected = True
+
 def search(
 		current_endpoint,
 		overrides={},
@@ -253,22 +275,7 @@ def search(
 	# mark protected media if not managing
 	else:
 		for medium in media:
-			medium.protected = False
-			if (
-					(
-							0 < int.from_bytes(medium.group_bits, 'big')
-							or MediumProtection.NONE != medium.protection
-						)
-					and (
-						not g.media_archive.accounts.current_user
-						or not g.media_archive.accounts.current_user_has_permissions(
-								medium.group_bits,
-								'global'
-							)
-						)
-				):
-					medium.protected = True
-					#medium.id = ''
+			populate_medium_protected_property(medium)
 
 	tags_this_page = []
 	for medium in media:
@@ -818,6 +825,7 @@ def view_medium(medium_id, slideshow=None, **kwargs):
 			ordered = {}
 			g.media_archive.populate_media_covers(media)
 			for set_medium in media:
+				populate_medium_protected_property(set_medium)
 				for tag in set_medium.tags:
 					if 'set:' != tag[:4]:
 						continue

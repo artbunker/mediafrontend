@@ -1,5 +1,7 @@
 {% if medium.protected %}
-	<div class="thumbnail" data-id="{{ medium.id }}">
+	<div 
+		class="thumbnail" 
+		data-id="{{ medium.id }}"{% for group in medium.groups %} data-group-{{ group }}="1"{% endfor %}>
 		<div class="summary thumb nofile protected">Protected Medium</div>
 		{% if tiles %}
 			{% include 'medium_group_tiles.html' %}

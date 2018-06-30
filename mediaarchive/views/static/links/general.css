@@ -110,10 +110,10 @@ div[data-mime="application/x-shockwave-flash"] .summary::after {
 /*protected placeholde*/
 .summary.protected::before {
 	background-image: url(protected.svg);
-	width: 50%;
-	height: 50%;
-	top: 25%;
-	left: 25%;
+	width: 75%;
+	height: 75%;
+	top: 12.5%;
+	left: 12.5%;
 }
 /*thumbnails*/
 .thumbnail {

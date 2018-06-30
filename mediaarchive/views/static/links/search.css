@@ -88,10 +88,10 @@
 	display: inline-block;
 	position: absolute;
 	z-index: 10;
-	width: calc(100% - 1rem);
+	width: 100%;
 	height: 12%;
 	bottom: 0.5rem;
-	right: 0.5rem;
+	right: 0;
 	text-align: right;
 }
 .group_tile {
@@ -102,8 +102,12 @@
 	border-radius: 0.25rem;
 	overflow: hidden;
 	background-size: contain;
-	background-image: url(protection.svg);
-	margin-left: 0.25rem;
+	background-image: url(protected.svg);
+	background-repeat: no-repeat;
+	margin-right: 0.25rem;
+}
+.group_tile:last-child {
+	margin-right: 0.5rem;
 }
 
 /*js search box*/

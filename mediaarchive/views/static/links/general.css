@@ -82,7 +82,10 @@ div[data-mime="application/x-shockwave-flash"] .summary::after {
 	border-radius: 10%;
 	z-index: 20;
 }
+.thumbnail[data-category=application] .summary:not(.nofile)::after,
+.thumbnail[data-category=archive] .summary:not(.nofile)::after,
 .thumbnail[data-category=audio] .summary:not(.nofile)::after,
+.thumbnail[data-category=text] .summary:not(.nofile)::after,
 .thumbnail[data-category=video] .summary:not(.nofile)::after,
 .thumbnail[data-mime="application/x-shockwave-flash"] .summary:not(.nofile)::after,
 .thumbnail[data-mime="image/gif"]:not([data-data4="0"]):not([data-data4="1"]) .summary:not(.nofile)::after {

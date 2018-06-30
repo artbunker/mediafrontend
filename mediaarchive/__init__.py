@@ -800,10 +800,18 @@ class MediaArchive:
 				):
 				medium.uris['reencoded']['original'] = media_uri.format(medium.id + '.reencoded.webm')
 
+	def populate_groups(self, medium):
+		medium.groups = []
+		for group in self.config['requirable_groups']:
+			group_bit = self.accounts.users.group_name_to_bit(group)
+			if self.accounts.users.contains_all_group_bits(medium.group_bits, group_bit):
+				medium.groups.append(group)
+
 	def populate_medium_properties(self, medium):
 		populate_id(medium)
 		populate_category(medium)
 		self.populate_uris(medium)
+		self.populate_groups(medium)
 		medium.uploader_id = uuid_to_id(medium.uploader_uuid)
 		medium.owner_id = uuid_to_id(medium.owner_uuid)
 		if medium.category in ['image', 'video'] and medium.data3:

@@ -1,6 +1,9 @@
 {% if medium.protected %}
 	<div class="thumbnail" data-id="{{ medium.id }}">
 		<div class="summary thumb nofile protected">Protected Medium</div>
+		{% if tiles %}
+			{% include 'medium_group_tiles.html' %}
+		{% endif %}
 	</div>
 {% else %}
 	{% set thumb_medium = medium %}
@@ -45,7 +48,7 @@
 		{% endif %}
 		{% if tiles %}
 			{% include 'medium_set_tiles.html' %}
-			{% include 'group_tiles.html' %}
+			{% include 'medium_group_tiles.html' %}
 		{% endif %}
 	</div>
 {% endif %}

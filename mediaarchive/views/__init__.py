@@ -207,7 +207,6 @@ def search(
 		)
 		tags.append('created before:' + current_datetime_atom)
 
-
 	filter = {}
 	if tags:
 		filter = g.media_archive.parse_search_tags(tags, manage)
@@ -233,10 +232,16 @@ def search(
 
 	if 'export' in request.args:
 		if not g.media_archive.accounts.current_user_has_global_group('manager'):
-			#TODO lock export to managers only, or show alternate export request page for contributors
-			g.media_archive.accounts.require_global_group('contributor')
-			if g.media_archive.accounts.current_user.uuid not in filter['owner_uuids']:
-				abort(403)
+			if 'confirm' in request.args:
+				#TODO store export request filter somewhere
+				#print('export request by ' + g.media_archive.accounts.current_user.id + ' with filter:')
+				#print(filter)
+				g.media_archive.add_log(
+					'export_media_request',
+					g.media_archive.accounts.current_user.uuid
+				)
+				return redirect(url_for(current_endpoint, tags=tags_query, **kwargs), 302)
+			return render_template('export_media_request.html')
 
 		total_media = g.media_archive.media.count_media(filter=filter)
 		bytesize = g.media_archive.media.media_size(filter=filter)

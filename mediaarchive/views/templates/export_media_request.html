@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block title %}Export Request{% endblock %}
+{% block style %}
+	{{ super() }}
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='links/forms.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('media_archive.static', filename='links/export_request.css') }}">
+{% endblock %}
+{% block content %}
+	<div id="export_request">
+		<h1>Export your media</h1>
+		<div>Request a copy of media you are the current owner of and information related to those media</div>
+		<div>Your export will be available to download once it finishes</div>
+		<form method="get">
+			<input name="confirm" type="hidden" value="1">
+			{% for arg in request.args %}
+				<input name="{{ arg }}" type="hidden" value="{{ request.args[arg] }}">
+			{% endfor %}
+			<input type="submit" value="Request Export">
+		</form>
+	</div>
+{% endblock %}

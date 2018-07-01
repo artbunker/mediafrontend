@@ -249,6 +249,10 @@ def search(
 		if 'confirm' not in request.args:
 			return render_template('export_media.html', total_media=total_media, bytesize=bytesize)
 
+		g.media_archive.add_log(
+			'export_media',
+			g.media_archive.accounts.current_user.uuid
+		)
 		return g.media_archive.export_media(filter)
 
 	# slideshow mode for this search
@@ -447,6 +451,10 @@ def import_media():
 			)
 
 		# do actual import
+		g.media_archive.add_log(
+			'import_media',
+			g.media_archive.accounts.current_user.uuid
+		)
 		g.media_archive.import_media(
 			request.files['file_upload'],
 			('generate_summaries' in request.form)
@@ -1012,6 +1020,10 @@ def edit_medium(medium_id, api=False):
 			#TODO display replacement failed message?
 			pass
 		else:
+			g.media_archive.add_log(
+				'replace_medium',
+				g.media_archive.accounts.current_user.uuid
+			)
 			#TODO check if old medium had summaries before attempting to generate summaries
 			g.media_archive.generate_medium_summaries(new_medium)
 			# move tags to new medium
@@ -1034,6 +1046,10 @@ def edit_medium(medium_id, api=False):
 
 	if 0 == len(errors):
 		g.media_archive.media.touch_media(medium)
+		g.media_archive.add_log(
+			'edit_medium',
+			g.media_archive.accounts.current_user.uuid
+		)
 		if api:
 			# delay and re-fetch to get accurate thumbnail
 			import time

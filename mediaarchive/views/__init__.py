@@ -1187,7 +1187,7 @@ def remove_medium(medium_id, api=False):
 			abort(404, {'message': 'medium_not_found'})
 		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
 			g.media_archive.add_log(
-				'attempt_non_owner_remove',
+				'attempt_non_owner_medium_remove',
 				g.media_archive.accounts.current_user.uuid
 			)
 			abort(403)

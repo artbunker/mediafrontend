@@ -46,7 +46,10 @@ class Manage {
 				this.select_negate = true;
 			}
 			// ignore other management keys if in an input
-			if ('INPUT' == document.activeElement.tagName) {
+			if (
+				'INPUT' == document.activeElement.tagName
+				|| 'TEXTAREA' == document.activeElement.tagName
+			) {
 				return;
 			}
 			if (this.keys.toggle_management == e.key) {

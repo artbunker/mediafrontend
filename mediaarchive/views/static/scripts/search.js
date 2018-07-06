@@ -45,7 +45,10 @@ if (target_input) {
 	});
 	// listener for search key
 	window.addEventListener('keydown', e => {
-		if ('INPUT' == document.activeElement.tagName) {
+		if (
+			'INPUT' == document.activeElement.tagName
+			|| 'TEXTAREA' == document.activeElement.tagName
+		) {
 			return;
 		}
 		if ('s' == e.key) {

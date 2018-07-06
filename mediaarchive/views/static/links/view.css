@@ -43,6 +43,9 @@ audio {
 	display: block;
 	width: 100%;
 }
+video {
+	height: auto;
+}
 .medium, .medium::before {
 	border-top-left-radius: 8px;
 	border-top-right-radius: 8px;

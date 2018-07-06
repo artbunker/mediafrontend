@@ -165,3 +165,33 @@ div[data-mime="application/x-shockwave-flash"] .summary::after {
 .scripts_enabled .thumbnail[data-mime="image/gif"]:not([data-data4="0"]):not([data-data4="1"]):hover .summary:not(.nofile)::after {
 	display: none;
 }
+/*blacklist*/
+.thumbnail.blacklist {
+	background-color: #000000;
+	--checker_h: rgba(0, 0, 0, 1)!important;
+}
+.thumbnail.blacklist .summary video,
+.thumbnail.blacklist .summary picture,
+.thumbnail.blacklist .summary picture img {
+	filter: brightness(0.3) saturate(0.5);
+}
+.thumbnail.blacklist:hover .summary video,
+.thumbnail.blacklist:hover .summary picture,
+.thumbnail.blacklist:hover .summary picture img {
+	filter: brightness(1) saturate(1);
+}
+.thumbnail.blacklist:not(:hover) .summary::before {
+	display: block;
+	content: "";
+	position: absolute;
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-image: url(blacklisted.svg)!important;
+	width: 72%;
+	height: 72%;
+	top: 14%;
+	left: 14%;
+	z-index: 10;
+	filter: brightness(0.5);
+}

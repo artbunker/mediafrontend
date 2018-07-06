@@ -223,7 +223,7 @@ body[data-selection_total="1"] #manage_drawer #manage_generate_set,
 #dim {
 	display: none;
 }
-.active_panel #manage_active_panel + #dim {
+.active_panel #dim {
 	display: block;
 	position: fixed;
 	top: 0;

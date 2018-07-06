@@ -37,7 +37,7 @@
 			{% endif %}
 		{% endif %}
 		<a href="{{ url_for('media_archive.help') }}">Help</a>
-		{#TODO  #}
+		<a class="preferences">Preferences</a>
 	</div>
 	{% if 0 < tags_this_page|length %}
 		<div id="tags_this_page">
@@ -79,12 +79,12 @@
 	{{ super() }}
 {% endblock %}
 {% block body %}
+	<div id="dim"></div>
 	{% if manage %}
 		<div id="manage_active_panel">
 			<form method="post" id="manage_form">
 			</form>
 		</div>
-		<div id="dim"></div>
 		<div 
 			id="manage_panels"
 			data-action-edit="{{ api_uris['edit'] }}" 
@@ -146,5 +146,12 @@
 		</div>
 		<script type="module" src="{{ url_for('media_archive.static', filename='scripts/manage.js') }}"></script>
 	{% endif %}
+	<form id="media_preferences">
+		<legend>Blacklisted Tags</legend>
+		<legend>Hide media with these tags (# separated)</legend>
+		<textarea id="blacklisted_tags"></textarea>
+		<br>
+		<input type="submit" value="Save Changes">
+	</form>
 	{{ super() }}
 {% endblock %}

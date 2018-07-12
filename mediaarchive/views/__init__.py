@@ -203,8 +203,8 @@ def search(
 		import time
 		current_datetime_atom = datetime.fromtimestamp(
 			time.time(),
-			timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f%z'
-		)
+			timezone.utc
+		).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
 		tags.append('created before:' + current_datetime_atom)
 
 	filter = {}

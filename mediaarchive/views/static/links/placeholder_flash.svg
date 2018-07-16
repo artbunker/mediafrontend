@@ -2,6 +2,6 @@
 <svg width="50" height="50" viewBox="0 0 50 50" version="1.1" 
 	xmlns="http://www.w3.org/2000/svg" 
 	xmlns:xlink="http://www.w3.org/1999/xlink">
-	<path d="M12 37 C 32 37, 18 13, 38 13" stroke-width="6" stroke="white" fill="transparent" />
-	<line x1="25" y1="25" x2="34" y2="25" stroke-width="6" stroke="white" />
+	<path d="M12 38 C 32 38, 18 12, 38 12" stroke-width="7" stroke="white" fill="transparent" />
+	<line x1="25" y1="26" x2="35" y2="26" stroke-width="7" stroke="white" />
 </svg>

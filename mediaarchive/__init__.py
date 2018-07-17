@@ -226,14 +226,6 @@ def populate_categories(media):
 	for medium in media:
 		medium.category = mime_to_category(medium.mime)
 
-def create_temp_medium_file(file_contents):
-	import uuid
-	file_path = os.path.join(__name__, 'tmp', 'temp_medium_' + str(uuid.uuid4()))
-	f = open(file_path, 'w+b')
-	f.write(file_contents)
-	f.close()
-	return file_path
-
 def get_file_size(file_path):
 	return os.path.getsize(file_path)
 
@@ -373,6 +365,14 @@ class MediaArchive:
 			**params
 		)
 
+	def create_temp_medium_file(self, file_contents):
+		import uuid
+		file_path = os.path.join(self.config['temp_path'], 'temp_medium_' + str(uuid.uuid4()))
+		f = open(file_path, 'w+b')
+		f.write(file_contents)
+		f.close()
+		return file_path
+
 	def get_medium_file_path(self, medium):
 		if MediumProtection.NONE != medium.protection:
 			protection_path = 'protected'
@@ -443,13 +443,13 @@ class MediaArchive:
 		signature = md5_to_id(hashlib.md5(signature_input.encode('utf-8')).digest())
 
 		# generate temp data.json
-		data_file_path = os.path.join(__name__, 'tmp', 'data_' + nonce + '.json')
+		data_file_path = os.path.join(self.config['temp_path'], 'data_' + nonce + '.json')
 		with open(data_file_path, 'w') as f:
 			f.write(json.dumps(media_data))
 		temp_files.append((data_file_path, 'data.json'))
 
 		# generate temp information file with version/time/requested by uuid/filter
-		info_file_path = os.path.join(__name__, 'tmp', 'info_' + nonce + '.json')
+		info_file_path = os.path.join(self.config['temp_path'], 'info_' + nonce + '.json')
 		#TODO parse filter to convert non-string and non-numeric values to strings
 		with open(info_file_path, 'w') as f:
 			f.write(json.dumps({
@@ -471,7 +471,7 @@ class MediaArchive:
 
 		import tarfile
 
-		export_file_path = os.path.join(__name__, 'tmp', 'media.export.' + signature + '.tar.gz')
+		export_file_path = os.path.join(self.config['temp_path'], 'media.export.' + signature + '.tar.gz')
 		if not os.path.exists(export_file_path):
 			export_archive = tarfile.open(export_file_path, 'w:gz')
 
@@ -496,7 +496,7 @@ class MediaArchive:
 		#TODO maybe send with a generator reading out chunks of the file for large files
 		#TODO or leave it like this but set up regular clearing of tmp directory
 		r = send_from_directory(
-			os.path.join(__name__, 'tmp'),
+			os.path.join(self.config['temp_path']),
 			'media.export.' + signature + '.tar.gz',
 			mimetype='application/gzip',
 			as_attachment=True,
@@ -626,8 +626,7 @@ class MediaArchive:
 		#TODO check for signature mismatch
 
 		temp_media_directory = os.path.join(
-			__name__,
-			'tmp',
+			self.config['temp_path'],
 			'import.' + info['signature'] + '.' + str(uuid.uuid4())
 		)
 
@@ -996,7 +995,7 @@ class MediaArchive:
 
 		snapshots = []
 		for i in range(1, self.config['video_snapshots']):
-			snapshot_path = os.path.join(__name__, 'tmp', 'temp_snapshot_' + str(uuid.uuid4()) + '.png')
+			snapshot_path = os.path.join(self.config['temp_path'], 'temp_snapshot_' + str(uuid.uuid4()) + '.png')
 
 			ffmpeg_call = [
 				self.config['ffmpeg_path'],
@@ -1733,7 +1732,7 @@ class MediaArchive:
 		if 0 < len(errors):
 			return errors, None
 
-		file_path = create_temp_medium_file(file_contents)
+		file_path = self.create_temp_medium_file(file_contents)
 		size = get_file_size(file_path)
 		mime = get_file_mime(file_path)
 

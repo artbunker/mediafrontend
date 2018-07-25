@@ -544,7 +544,7 @@ class MediaArchive:
 			if -1 != medium['filename'].find('..') or '/' == medium['filename'][0]:
 				abort(400, {'message': 'import_archive_invalid_medium_filename'})
 			user_uuids.append(uuid.UUID(medium['uploader_uuid']))
-			user_uuids.append(uuid.UUID(medium['uploader_uuid']))
+			user_uuids.append(uuid.UUID(medium['owner_uuid']))
 
 		users = self.accounts.users.users_dictionary(
 			self.accounts.search_users(filter={'user_uuids': user_uuids})

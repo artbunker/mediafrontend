@@ -511,14 +511,14 @@ class MediaArchive:
 		info_file = import_archive.extractfile('info.json')
 
 		if not info_file:
-			abort(400, {'message': 'import_archive_missing_info'})
+			abort(400, {'message': 'media_import_archive_missing_info'})
 		try:
 			info = json.load(info_file)
 		except json.decoder.JSONDecodeError:
-			abort(400, {'message': 'malformed_import_archive_info'})
+			abort(400, {'message': 'malformed_media_import_archive_info'})
 
 		if -1 != info['signature'].find('..') or '/' == info['signature'][0]:
-			abort(400, {'message': 'import_archive_invalid_signature'})
+			abort(400, {'message': 'media_import_archive_invalid_signature'})
 
 		info['requested_by'] = self.accounts.get_user(uuid.UUID(info['requested_by_uuid']))
 		info['export_time'] = datetime.fromtimestamp(info['export_time'], timezone.utc)
@@ -532,17 +532,17 @@ class MediaArchive:
 
 		data_file = import_archive.extractfile('data.json')
 		if not data_file:
-			abort(400, {'message': 'import_archive_missing_data'})
+			abort(400, {'message': 'media_import_archive_missing_data'})
 		try:
 			data = json.load(data_file)
 		except json.decoder.JSONDecodeError:
-			abort(400, {'message': 'malformed_import_archive_data'})
+			abort(400, {'message': 'malformed_media_import_archive_data'})
 
 		# get users for uploaders and owners in data
 		user_uuids = []
 		for medium in data:
 			if -1 != medium['filename'].find('..') or '/' == medium['filename'][0]:
-				abort(400, {'message': 'import_archive_invalid_medium_filename'})
+				abort(400, {'message': 'media_import_archive_invalid_medium_filename'})
 			user_uuids.append(uuid.UUID(medium['uploader_uuid']))
 			user_uuids.append(uuid.UUID(medium['owner_uuid']))
 
@@ -594,7 +594,7 @@ class MediaArchive:
 		other_files = []
 		for tarinfo in import_archive:
 			if -1 != tarinfo.name.find('..'):
-				abort(400, {'message': 'import_archive_invalid_path' + tarinfo.name})
+				abort(400, {'message': 'media_import_archive_invalid_path' + tarinfo.name})
 			elif 'media/' == tarinfo.name[:6]:
 				total_media_files += 1
 			elif 'info.json' != tarinfo.name and 'data.json' != tarinfo.name:

@@ -167,6 +167,7 @@ def search(
 		omit_future=True,
 		medium_id=None,
 		slideshow_endpoint=None,
+		header=None,
 		**kwargs,
 	):
 	tags_query = ''
@@ -304,6 +305,7 @@ def search(
 		'search_media.html',
 		media=media,
 		tags_query=tags_query,
+		header=header,
 		search_field=search_field,
 		tag_suggestion_lists=tag_suggestion_lists,
 		manage=manage,

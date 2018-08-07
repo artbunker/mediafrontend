@@ -12,6 +12,9 @@
 	{% endif %}
 {% endblock %}
 {% block content %}
+	{% if header %}
+		{{ header|safe }}
+	{% endif %}
 	{% if search_field %}
 		{% block meta %}
 			{{ super() }}

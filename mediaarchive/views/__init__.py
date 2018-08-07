@@ -162,6 +162,7 @@ def search(
 		current_endpoint,
 		overrides={},
 		search_field=True,
+		hide_tags_this_page=False,
 		manage=False,
 		omit_future=True,
 		medium_id=None,
@@ -287,11 +288,12 @@ def search(
 			populate_medium_protected_property(medium)
 
 	tags_this_page = []
-	for medium in media:
-		if 0 < len(medium.tags):
-			for tag in medium.tags:
-				if tag not in tags_this_page:
-					tags_this_page.append(tag)
+	if not hide_tags_this_page:
+		for medium in media:
+			if 0 < len(medium.tags):
+				for tag in medium.tags:
+					if tag not in tags_this_page:
+						tags_this_page.append(tag)
 
 	tag_suggestion_lists = g.media_archive.get_tag_suggestion_lists(manage=manage, search=True)
 

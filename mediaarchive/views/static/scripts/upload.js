@@ -23,13 +23,13 @@ class Upload {
 		for (let i = 0; i < checkboxes.length; i++) {
 			let checkbox = checkboxes[i];
 			checkbox.checked = false;
-			let checkbox_preference = localStorage.getItem(checkbox.id);
+			let checkbox_preference = localStorage.getItem('media_upload_' + checkbox.id);
 			if (checkbox_preference) {
 				checkbox.checked = true;
 			}
 			checkbox.addEventListener('change', e => {
 				if (e.currentTarget.checked) {
-					localStorage.setItem(e.currentTarget.id, true);
+					localStorage.setItem('media_upload_' + e.currentTarget.id, 1);
 				}
 				else {
 					localStorage.removeItem(e.currentTarget.id);
@@ -44,13 +44,13 @@ class Upload {
 			if (!select) {
 				continue;
 			}
-			let select_preference = localStorage.getItem(select.id);
+			let select_preference = localStorage.getItem('media_upload_' + select.id);
 			if (select_preference) {
 				select.value = select_preference;
 			}
 			select.addEventListener('change', e => {
 				let select_value = e.currentTarget.options[e.currentTarget.selectedIndex].value;
-				localStorage.setItem(e.currentTarget.id, select_value);
+				localStorage.setItem('media_upload_' + e.currentTarget.id, select_value);
 			});
 		}
 

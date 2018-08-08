@@ -33,6 +33,7 @@ def upload(api=False):
 
 		'generate_summaries': g.media_archive.config['upload_defaults']['generate_summaries'],
 		'owner_id': g.media_archive.accounts.current_user.id,
+		'status': 'allowed',
 		'searchability': g.media_archive.config['upload_defaults']['searchability'],
 		'protection': g.media_archive.config['upload_defaults']['protection'],
 		'creation_date': '',

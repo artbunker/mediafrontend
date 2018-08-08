@@ -149,12 +149,6 @@
 		</div>
 		<script type="module" src="{{ url_for('media_archive.static', filename='scripts/manage.js') }}"></script>
 	{% endif %}
-	<form id="media_preferences">
-		<legend>Blacklisted Tags</legend>
-		<legend>Hide media with these tags (# separated)</legend>
-		<textarea id="blacklisted_tags"></textarea>
-		<br>
-		<input type="submit" value="Save Changes">
-	</form>
+	{% include 'media_preferences_form.html' %}
 	{{ super() }}
 {% endblock %}

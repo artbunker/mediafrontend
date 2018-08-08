@@ -166,21 +166,21 @@ div[data-mime="application/x-shockwave-flash"] .summary::after {
 	display: none;
 }
 /*blacklist*/
-.thumbnail.blacklist {
+.blacklist {
 	background-color: #000000;
 	--checker_h: rgba(0, 0, 0, 1)!important;
 }
-.thumbnail.blacklist .summary video,
-.thumbnail.blacklist .summary picture,
-.thumbnail.blacklist .summary picture img {
+.blacklist .summary video,
+.blacklist .summary picture,
+.blacklist .summary picture img {
 	filter: brightness(0.3) saturate(0.5);
 }
-.thumbnail.blacklist:hover .summary video,
-.thumbnail.blacklist:hover .summary picture,
-.thumbnail.blacklist:hover .summary picture img {
+.blacklist:hover .summary video,
+.blacklist:hover .summary picture,
+.blacklist:hover .summary picture img {
 	filter: brightness(1) saturate(1);
 }
-.thumbnail.blacklist:not(:hover) .summary::before {
+.blacklist:not(:hover) .summary::before {
 	display: block;
 	content: "";
 	position: absolute;

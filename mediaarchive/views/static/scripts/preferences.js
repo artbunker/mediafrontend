@@ -6,6 +6,11 @@ preferences_link.addEventListener('click', e => {
 	document.body.classList.add('editing_preferences');
 });
 let preferences_form = document.querySelector('#media_preferences');
+preferences_form.style.visibility = 'hidden';
+document.body.classList.add('editing_preferences');
+preferences_form.style.top = Math.floor((window.innerHeight / 2) - (preferences_form.clientHeight / 2)) + 'px';
+document.body.classList.remove('editing_preferences');
+preferences_form.style.visibility = '';
 let preferences_inputs = preferences_form.querySelectorAll('input:not([type="submit"])');
 let preferences_textareas = preferences_form.querySelectorAll('textarea');
 // load preferences

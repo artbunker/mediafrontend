@@ -182,7 +182,7 @@
 	max-width: calc(100% - 2em);
 	max-height: calc(100vh - 2em);
 	position: fixed;
-	top: 25vh;
+	top: 2rem;
 	left: 25%;
 	border: 1px solid var(--background);
 	z-index: 1000;

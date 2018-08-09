@@ -9,7 +9,7 @@
 }
 #results {
 	display: grid;
-	grid-template-columns: repeat(8, 8fr);
+	grid-template-columns: repeat(var(--per_row), 1fr);
 	grid-gap: 1px;
 }
 #search input[type=text] {
@@ -174,12 +174,12 @@
 }
 
 @media only screen and (max-width: 1024px) {
-	#results {
-		grid-template-columns: repeat(4, 4fr);
+	:root {
+		--per_row: 4;
 	}
 }
 @media only screen and (max-width: 512px) {
-	#results {
-		grid-template-columns: repeat(2, 2fr);
+	:root {
+		--per_row: 2;
 	}
 }

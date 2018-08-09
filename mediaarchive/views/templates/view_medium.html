@@ -35,7 +35,7 @@
 		<div class="medium" data-id="{{ medium.id }}" data-upload-time="{{ (medium.upload_time.timestamp() * 1000)|int }}" data-creation-time="{{ (medium.creation_time.timestamp() * 1000)|int }}" data-category="{{ medium.category }}" data-mime="{{ medium.mime }}" data-size="{{ medium.size }}" data-data1="{{ medium.data1 }}" data-data2="{{ medium.data2 }}" data-data3="{{ medium.data3 }}" data-data4="{{ medium.data4 }}" data-data5="{{ medium.data5 }}" data-data6="{{ medium.data6 }}"{% include 'medium_rgb.html' %}>
 			{% if medium.uris['original'] %}
 				{% if 'application/x-shockwave-flash' == medium.mime %}
-					<div class="summary">
+					<div class="summary view">
 						{% set dimensions = '' %}
 						{% if medium.data1 and medium.data2 %}
 							{% set dimensions = [' width="', medium.data1, '" height="', medium.data2, '"']|join('') %}
@@ -64,18 +64,20 @@
 							{% set video_mime = medium.mime %}
 						{% endif %}
 						{% if video_uri %}
-							<video 
-								{% if medium.data1 and medium.data2 %}
-									width="{{ medium.data1 }}" height="{{ medium.data2 }}" 
-								{% endif %}
-								{% if medium.uris['static']['1024'] %}
-									poster="{{ medium.uris['static']['1024'] }}" 
-								{% endif %}
-								preload="auto" 
-								controls loop>
-								<source src="{{ video_uri }}" type="{{ video_mime }}">
-								Video element not supported
-							</video>
+							<div class="summary view">
+								<video 
+									{% if medium.data1 and medium.data2 %}
+										width="{{ medium.data1 }}" height="{{ medium.data2 }}" 
+									{% endif %}
+									{% if medium.uris['static']['1024'] %}
+										poster="{{ medium.uris['static']['1024'] }}" 
+									{% endif %}
+									preload="auto" 
+									controls loop>
+									<source src="{{ video_uri }}" type="{{ video_mime }}">
+									Video element not supported
+								</video>
+							</div>
 							{# <a href="{{ medium.uris['original'] }}">Original</a> #}
 						{% else %}
 							{{ image_view(medium, view_medium) }}

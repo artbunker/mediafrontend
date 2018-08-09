@@ -12,6 +12,25 @@
 	grid-template-columns: repeat(var(--per_row), 1fr);
 	grid-gap: 1px;
 }
+
+/* hack for firefox search grid rendering */
+@-moz-document url-prefix() {
+	#results {
+		display: block;
+		text-align: left;
+		font-size: 0;
+	}
+	#results .thumbnail {
+		width: calc(calc(100% - 2rem) / var(--per_row));
+		margin-right: 1px;
+		margin-bottom: 1px;
+		overflow: hidden;
+	}
+	#results .thumbnail:nth-child(var(--per_row)) {
+		margin-right: 0;
+	}
+}
+
 #search input[type=text] {
 	width: 100%;
 	margin-top: 0;

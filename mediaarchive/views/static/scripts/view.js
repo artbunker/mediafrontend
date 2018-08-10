@@ -22,7 +22,7 @@ if (blacklisted_tags) {
 	}
 }
 // auto slideshow
-let slideshow_delay_s = localStorage.getItem('media_preference_slideshow_delay_s');
+let slideshow_delay_s = parseInt(localStorage.getItem('media_preference_slideshow_delay_s'));
 let medium_prev = document.querySelector('#medium_prev');
 let medium_next = document.querySelector('#medium_next');
 if (slideshow_delay_s) {

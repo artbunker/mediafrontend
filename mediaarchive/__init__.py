@@ -728,19 +728,22 @@ class MediaArchive:
 				if generate_summaries:
 					self.generate_medium_summaries(medium)
 
-	def populate_uris(self, medium):
+	def populate_uris(self, medium, external=False):
 		if self.config['api_uri']:
 			fetch_uri = self.config['api_uri'].format('fetch/{}')
 		else:
 			fetch_uri = url_for(
 				'media_archive.api_fetch_medium',
-				medium_filename='MEDIUM_FILENAME'
+				medium_filename='MEDIUM_FILENAME',
+				_external=external,
 			).replace('MEDIUM_FILENAME', '{}')
 
-		if not self.config['medium_file_uri']:
-			self.config['medium_file_uri'] = url_for(
+		medium_file_uri = self.config['medium_file_uri']
+		if not medium_file_uri:
+			medium_file_uri = url_for(
 				'media_archive.medium_file',
-				medium_filename='MEDIUM_FILENAME'
+				medium_filename='MEDIUM_FILENAME',
+				_external=external,
 			).replace('MEDIUM_FILENAME', '{}')
 
 		if MediumProtection.NONE != medium.protection:
@@ -748,7 +751,7 @@ class MediaArchive:
 			media_uri = fetch_uri
 		else:
 			protection_path = 'nonprotected'
-			media_uri = self.config['medium_file_uri']
+			media_uri = medium_file_uri
 
 		medium.uris = {
 			'original': '',

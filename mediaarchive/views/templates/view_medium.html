@@ -137,3 +137,7 @@
 		{% include 'medium_sets.html' %}
 	</div>
 {% endblock %}
+{% block head %}
+	{{ super() }}
+	{% include 'media_rich_data.html' %}
+{% endblock %}

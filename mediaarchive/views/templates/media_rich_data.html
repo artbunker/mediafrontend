@@ -1,0 +1,19 @@
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="View media {{ media.id }}">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="{{ media.uris['static'][g.media_archive.config['summary_values']['view']] }}">
+<meta property="og:title" content="View media">
+<meta property="og:description" content="{{ media.id }}">
+<meta property="og:determiner" content="a">
+<meta property="og:type" content="persephone:media-view">
+<meta property="og:image" content="{{ media.uris['static'][g.media_archive.config['summary_values']['view']] }}">
+{% if media.uris['reencoded']['clip'] %}
+	<meta property="og:video" content="{{ media.uris['reencoded']['clip']] }}">
+{% endif %}
+{% for tag in medium.tags %}
+	{% if 'author:' == tag[:7] %}
+		<meta property="og:author" content="{{ tag[7:] }}">
+	{% elif 'title:' == tag[:6] %}
+		<meta property="og:description" content="{{ tag[6:] }}">
+	{% endif %}
+{% endfor %}

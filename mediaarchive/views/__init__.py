@@ -65,7 +65,8 @@ def upload(api=False):
 	if 0 == len(errors):
 		g.media_archive.add_log(
 			'create_medium',
-			g.media_archive.accounts.current_user.uuid
+			g.media_archive.accounts.current_user.uuid,
+			id_to_uuid(medium.id)
 		)
 		# delay and re-fetch to get accurate uris
 		import time
@@ -1027,7 +1028,8 @@ def edit_medium(medium_id, api=False):
 		else:
 			g.media_archive.add_log(
 				'replace_medium',
-				g.media_archive.accounts.current_user.uuid
+				g.media_archive.accounts.current_user.uuid,
+				id_to_uuid(new_medium.id)
 			)
 			#TODO check if old medium had summaries before attempting to generate summaries
 			g.media_archive.generate_medium_summaries(new_medium)
@@ -1053,7 +1055,8 @@ def edit_medium(medium_id, api=False):
 		g.media_archive.media.touch_media(medium)
 		g.media_archive.add_log(
 			'edit_medium',
-			g.media_archive.accounts.current_user.uuid
+			g.media_archive.accounts.current_user.uuid,
+			id_to_uuid(medium.id)
 		)
 		if api:
 			# delay and re-fetch to get accurate thumbnail
@@ -1187,13 +1190,15 @@ def remove_medium(medium_id, api=False):
 		if MediumStatus.ALLOWED != medium.status:
 			g.media_archive.add_log(
 				'attempt_non_allowed_medium_remove',
-				g.media_archive.accounts.current_user.uuid
+				g.media_archive.accounts.current_user.uuid,
+				id_to_uuid(medium.id)
 			)
 			abort(404, {'message': 'medium_not_found'})
 		if medium.owner_uuid != g.media_archive.accounts.current_user.uuid:
 			g.media_archive.add_log(
 				'attempt_non_owner_medium_remove',
-				g.media_archive.accounts.current_user.uuid
+				g.media_archive.accounts.current_user.uuid,
+				id_to_uuid(medium.id)
 			)
 			abort(403)
 
@@ -1207,7 +1212,8 @@ def remove_medium(medium_id, api=False):
 	g.media_archive.remove_medium(medium)
 	g.media_archive.add_log(
 		'remove_medium',
-		g.media_archive.accounts.current_user.uuid
+		g.media_archive.accounts.current_user.uuid,
+		id_to_uuid(medium.id)
 	)
 
 	if api:

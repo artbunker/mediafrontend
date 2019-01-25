@@ -1,0 +1,94 @@
+{
+	"db_prefix": "",
+
+	"ffprobe_path": "path/to/ffmpeg/ffprobe.exe",
+	"ffmpeg_path": "path/to/ffmpeg/ffmpeg.exe",
+	"ffmpeg_thread_limit": 1,
+
+	"temp_path": "path/to/temporary/directory",
+	"media_path": "path/to/original/media/directory",
+	"summaries_path": "path/to/summary/media/directory",
+	"tags_path": "path/to/tags/directory",
+
+	"medium_file_uri": "",
+
+	"summary_file_uri": "",
+
+	"tags_file_uri": "",
+
+	"upload_cooldown_amount": 1000,
+	"upload_cooldown_period": 86400,
+
+	"per_medium_like_cooldown_amount": 1,
+	"per_medium_like_cooldown_period": 43200,
+
+	"maximum_tag_length": 32,
+
+	"requirable_groups": [
+		"manager",
+	],
+
+	"premium_groups": [
+		""
+	],
+
+	"upload_defaults": {
+		"generate_summaries": true,
+		"searchability": "hidden",
+		"protection": "none",
+		"author_tag": true,
+		"filename_tag": false
+	},
+
+	"disallowed_mimetypes": [
+		"unknown"
+	],
+	"maximum_upload_filesize": 33554432,
+
+	"maximum_search_tags": 12,
+	"maximum_search_perpage": 64,
+
+	"hide_total_like_counts": true,
+
+	"summary_edges": [
+		1024,
+		256,
+		64
+	],
+	"summary_values": {
+		"view": 1024,
+		"thumbnail": 256
+	},
+
+	"video_snapshots": 8,
+	"video_slideshow_edge": 128,
+	"video_reencode_edge": 256,
+	"video_clip_edge": 256,
+
+	"video_clip_duration_ms": 5000,
+
+	"default_thumbnail_edge": 64,
+	"default_view_edge": 1024,
+
+	"canonical_search_tags": {
+		"tag to alias from": "tag to alias to",
+		"multiple sources can alias to the same tag": "tag to alias to",
+		"": ""
+	},
+
+	"clutter_tag_prefixes": [
+		"title:",
+		"filename:",
+		"superior of:",
+		"inferior of:",
+		"mirror:",
+		"link:",
+		"next:",
+		"prev:",
+		"cover:",
+		"set:",
+		"suppress:",
+		"disable:",
+		"text:"
+	]
+}

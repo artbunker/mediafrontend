@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% block title %}Protected{% endblock %}
+{% block content %}
+	<h2{% if groups %} class="{% for group in groups %}{{ group }} {% endfor %}"{% endif %}>{% block header %}Protected{% endblock %}</h2>
+	{% if not g.media.accounts.current_user %}
+		<p>You're currently not signed in.</p>
+		<p>
+			If you already have a an account with permissions to view this page, <a href="{{ url_for('accounts_signed_out.sign_in_services') }}">try signing in</a>.
+		</p>
+		<p>
+			If you're still not able to view this page but believe you should be able to, contact staff for more information.
+		</p>
+	{% else %}
+		{% from 'permissions.jinja' import group_display %}
+		<p>
+			This page requires one or more permissions you don't have. Check the groups listed below to see if you can get them.
+		</p>
+		{% if groups %}
+			<p>
+				{% for group in groups %}
+					{% if group in g.media.config['premium_groups'] %}
+						<a href="{{ url_for('persephone.premium_info', campaign=group) }}">
+							<span 
+								class="group {{ group }}" 
+								title="{{ group_display(group) }}">
+								{{ group_display(group) }}
+							</span>
+						</a>
+					{% else %}
+						<span 
+							class="group {{ group }}" 
+							title="{{ group_display(group) }}">
+							{{ group_display(group) }}
+						</span>
+					{% endif %}
+				{% endfor %}
+			</p>
+		{% endif %}
+	{% endif %}
+	{% include 'media_slideshow_navigation.html' %}
+{% endblock %}

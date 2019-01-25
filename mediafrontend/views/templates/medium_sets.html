@@ -1,0 +1,14 @@
+{% set original_medium = medium %}
+{% set tiles = False %}
+{% for set in original_medium.sets %}
+	<div class="medium_set" data-title="{{ set }}">
+		{% for medium in original_medium.sets[set] %}
+			{% if medium.id == original_medium.id %}
+				<span class="current">{% include 'medium_thumbnail.html' %}</span>
+			{% else %}
+				{% include 'medium_thumbnail.html' %}
+			{% endif %}
+		{% endfor %}
+	</div>
+{% endfor %}
+{% set medium = original_medium %}

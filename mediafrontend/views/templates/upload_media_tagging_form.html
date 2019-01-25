@@ -1,0 +1,17 @@
+<div id="tagging">
+	<legend>Tagging</legend>
+	<input 
+		id="author_tag" 
+		name="author_tag" 
+		type="checkbox"{% if fields['author_tag'] %} checked{% endif %}>
+	<label for="author_tag">Author Tag</label>
+	<br>
+	<input 
+		id="filename_tag" 
+		name="filename_tag" 
+		type="checkbox"{% if fields['filename_tag'] %} checked{% endif %}>
+	<label for="filename_tag">Filename Tag</label>
+	<br>
+	<label for="tags">Additional Tags</label>
+	<input id="tags" name="tags" type="text" value="{{ fields['tags'] }}">
+</div>

@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block title %}Replace tag{% endblock %}
+{% block content %}
+	<div class="replace_tag">
+		<h1>Replace tag</h1>
+		<nav>
+			<a href="{{ redirect_uri }}">Return</a>
+		</nav>
+		<p>
+			<span class="tag" data-tag="{{ tag }}">
+				<a>{{ tag }}</a>
+			</span>
+		</p>
+		<form method="get">
+			<input type="hidden" name="mode" value="replace">
+			<input type="hidden" name="tag" value="{{ tag }}">
+			<input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+			<label for="replacement">Replace with</label>
+			<input id="replacement" name="replacement">
+			<br>
+			<input type="submit" value="Submit">
+		</form>
+	</div>
+{% endblock %}

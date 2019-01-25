@@ -1,0 +1,33 @@
+<meta name="twitter:card" content="summary_large_image">
+<meta 
+	name="twitter:image" 
+	content="{{ medium.uris['fallback'][g.media.config['summary_values']['view']] }}">
+<meta 
+	property="og:image" 
+	content="{{ medium.uris['fallback'][g.media.config['summary_values']['view']] }}">
+
+{% if medium.uris['reencoded']['clip'] %}
+	<meta property="og:video" content="{{ medium.uris['reencoded']['clip'] }}">
+{% endif %}
+{% if 'author' in medium.semantic_tags %}
+	<meta property="og:author" content="{{ medium.semantic_tags['author'] }}">
+{% endif %}
+	
+{% set title = '' %}
+{% if 'title' in medium.semantic_tags %}
+	{% set title = medium.semantic_tags['title'] %}
+{% else %}
+	{% set title = 'View media ' + medium.id %}
+{% endif %}
+<meta name="twitter:title" content="{{ title }}">
+<meta property="og:title" content="{{ title }}">
+
+{% set tags = [] %}
+{% for tag in medium.tags %}
+	{% set _ = tags.append('#' + tag) %}
+{% endfor %}
+{% set description = ' '.join(tags) %}
+<meta name="twitter:description" content="{{ description }}">
+<meta name="og:description" content="{{ description }}">
+
+<meta property="og:type" content="persephone:medium-view">

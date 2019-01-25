@@ -1,0 +1,12 @@
+{% if management_mode %}
+	<div class="medium_management">
+		<span class="edit">
+			<a href="{{ url_for(
+				request.endpoint,
+				medium_id=medium.id,
+				mode='edit',
+				**kwargs,
+			) }}">Edit medium</a>
+		</span>
+	</div>
+{% endif %}

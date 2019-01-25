@@ -1,0 +1,5 @@
+{% if 'sets' in medium.semantic_tags %}
+	{% for set in medium.semantic_tags['sets'] %}
+		<div class="set" title="{{ set }}">{{ set }}</div>
+	{% endfor %}
+{% endif %}

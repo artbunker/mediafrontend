@@ -1,0 +1,13 @@
+<div id="properties">
+	<legend>Properties</legend>
+	{% if g.media.accounts.current_user.has_permission(group_names='manager') %}
+		<input id="generate_summaries" name="generate_summaries" type="checkbox"{% if fields['generate_summaries'] %} checked{% endif %}>
+		<label for="generate_summaries">Build summaries</label>
+		<br>
+		{% include 'medium_status_form.html' %}
+	{% endif %}
+	{% include 'medium_owner_form.html' %}
+	{% include 'medium_searchability_form.html' %}
+	{% include 'medium_protection_form.html' %}
+	{% include 'medium_creation_date_form.html' %}
+</div>

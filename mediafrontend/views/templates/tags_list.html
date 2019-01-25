@@ -1,0 +1,95 @@
+{% extends 'layout.html' %}
+{% block title %}Tags list{% endblock %}
+{% block content %}
+	<h1>Tags list</h1>
+	{% macro render_result(result) %}
+		<tr>
+			<td>
+				<span class="tag" data-tag="{{ result['tag'] }}">
+					<a>{{ result['tag'] }}</a>
+				</span>
+			</td>
+			<td>{{ result['count'] }}</td>
+			<td>
+				<a 
+					href="{{ url_for(
+						request.endpoint,
+						tag=result['tag'],
+						mode='remove',
+						redirect_uri=request.url,
+					) }}" 
+					title="Remove this tag">
+					Remove
+				</a>
+			</td>
+			<td>
+				<a 
+					href="{{ url_for(
+						request.endpoint,
+						tag=result['tag'],
+						mode='replace',
+						redirect_uri=request.url,
+					) }}" 
+					title="Replace this tag">
+					Replace
+				</a>
+			</td>
+			<td>
+				<a 
+					href="{{ url_for(
+						request.endpoint,
+						tag=result['tag'],
+						mode='accompany',
+						redirect_uri=request.url,
+					) }}" 
+					title="Accompany this tag">
+					Accompany
+				</a>
+			</td>
+		</tr>
+	{% endmacro %}
+	{% set columns = [
+		{
+			'name': 'tag',
+			'label': 'Tag',
+			'sortable': True,
+			'searchable': True,
+			'type': 'text',
+		},
+		{
+			'name': 'count',
+			'label': 'Count',
+			'sortable': True,
+			'searchable': False,
+		},
+		{
+			'name': 'remove',
+			'label': 'Remove',
+			'sortable': False,
+			'searchable': False,
+		},
+		{
+			'name': 'replace',
+			'label': 'Replace',
+			'sortable': False,
+			'searchable': False,
+		},
+		{
+			'name': 'accompany',
+			'label': 'Accompany',
+			'sortable': False,
+			'searchable': False,
+		},
+	] %}
+	{% from 'tabular_list.jinja' import tabular_list %}
+	{{ tabular_list(
+		columns,
+		request.endpoint,
+		results,
+		total_results,
+		render_result,
+		total_pages,
+		pagination,
+		search,
+	) }}
+{% endblock %}

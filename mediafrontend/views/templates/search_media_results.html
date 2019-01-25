@@ -1,0 +1,21 @@
+<h2>Search results</h2>
+<div id="results">
+	{% for medium in results.values() %}
+		{% set tiles = True %}
+		{% include 'medium_thumbnail.html' %}
+	{% endfor %}
+</div>
+{% from 'pages_list.jinja' import pages_list %}
+{{ pages_list(
+	total_pages=total_pages,
+	url=url_for(
+		request.endpoint,
+		page='PAGE',
+		tags=tags_query,
+		**kwargs,
+	).replace(
+		'page=PAGE',
+		'page={}',
+	),
+	current_page=pagination['page'],
+) }}

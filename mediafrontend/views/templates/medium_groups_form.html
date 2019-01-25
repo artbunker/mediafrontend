@@ -1,0 +1,18 @@
+{% if g.media.config['requirable_groups'] %}
+	{% from 'permissions.jinja' import group_display %}
+	<div id="groups">
+		<legend>Required Groups</legend>
+		{% for group in g.media.config['requirable_groups'] %}
+			{% if group in g.media.accounts.available_groups %}
+				{% set checked = '' %}
+				{% if group in fields['groups'] %}
+					{% set checked = ' checked' %}
+				{% endif %}
+				<input id="group_{{ group }}" name="group_{{ group }}" type="checkbox"{{ checked }}>
+				<label for="group_{{ group }}">{{ group_display(group) }}</label>
+				<br>
+			{% endif %}
+		{% endfor %}
+		<input type="hidden" name="groups" value="1">
+	</div>
+{% endif %}

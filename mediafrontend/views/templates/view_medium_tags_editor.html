@@ -1,0 +1,28 @@
+<div 
+	class="tags_editor" 
+	data-show-link="Edit Tags" 
+	data-save-link="Save" 
+	data-discard-link="Discard" 
+	data-copy-link="Copy" 
+	data-saving-placeholder="Saving..." 
+	data-saving-in-progress="Saving in progress" 
+	data-problem-saving="Problem saving tags" 
+	data-search-tag-title="Search for this tag" 
+	data-search-uri="{{ url_for(
+		request.endpoint,
+		tags='PLACEHOLDER',
+		**kwargs,
+	).replace('PLACEHOLDER', '{}') }}" 
+	data-clutter-tag-prefixes="{{ '#'.join(g.media.config['clutter_tag_prefixes']) }}" 
+	{% include 'tag_editor_attributes.html' %}>
+	<form method="post">
+		<label for="edit_tags">Edit tags</label>
+		<input 
+			type="text" 
+			id="edit_tags" 
+			name="edit_tags"{% if 0 < medium.tags|length %} 
+			value="{{ medium.tags|join('#') }}"{% endif %}>
+		<br>
+		<input type="submit" value="Save tags">
+	</form>
+</div>

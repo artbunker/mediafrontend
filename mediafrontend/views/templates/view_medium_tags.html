@@ -1,0 +1,12 @@
+<div class="medium_tags" data-visible-tags="{{ visible_tags }}">
+	<div class="inner_tags">
+		{% for tag in medium.tags %}
+			<span 
+				class="tag{% if tag in clutter_tags %} clutter_tag{% endif %}" 
+				data-tag="{{ tag }}" 
+				title="Search for this tag">
+				<a href="{{ url_for(request.endpoint, tags=tag, **kwargs) }}">#{{ tag }}</a>
+			</span>
+		{% endfor %}
+	</div>
+</div>

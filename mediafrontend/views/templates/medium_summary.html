@@ -1,0 +1,144 @@
+{% set view_size = g.media.config['summary_values']['view'] %}
+{% set view_medium = medium %}
+{% if medium.cover %}
+	{% set view_medium = medium.cover %}
+{% endif %}
+{% set show_original_link = False %}
+{% macro image_view(medium, view_medium) %}
+	{% if view_medium.uris['static'][view_size] and view_medium.uris['fallback'][view_size] %}
+		<div class="summary view">
+			<a href="{{ medium.uris['original'] }}">
+				<picture>
+					{% if 'image/gif' == view_medium.mime and 0 < view_medium.data4 %}
+						<source srcset="{{ view_medium.uris['original'] }}" type="image/gif">
+					{% endif %}
+					<source srcset="{{ view_medium.uris['static'][view_size] }}" type="image/webp">
+					<source srcset="{{ view_medium.uris['fallback'][view_size] }}" type="image/png">
+					<img srcset="{{ view_medium.uris['fallback'][view_size] }}" alt="">
+				</picture>
+			</a>
+		</div>
+	{% elif 'image/svg+xml' == medium.mime %}
+		<div class="summary view">
+			<a href="{{ medium.uris['original'] }}">
+				<picture>
+					<source srcset="{{ view_medium.uris['original'] }}" type="image/svg+xml">
+					<img srcset="{{ view_medium.uris['original'] }}" alt="">
+				</picture>
+			</a>
+		</div>
+	{% else %}
+		<div class="summary view nofile"><a href="{{ medium.uris['original'] }}">Original file</a></div>
+	{% endif %}
+{% endmacro %}
+<div 
+	class="medium" 
+	data-id="{{ medium.id }}" 
+	data-upload-time="{{ medium.upload_time }}" 
+	data-creation-time="{{ medium.creation_time }}" 
+	data-category="{{ medium.category }}" 
+	data-mime="{{ medium.mime }}" 
+	data-size="{{ medium.size }}" 
+	data-data1="{{ medium.data1 }}" 
+	data-data2="{{ medium.data2 }}" 
+	data-data3="{{ medium.data3 }}" 
+	data-data4="{{ medium.data4 }}" 
+	data-data5="{{ medium.data5 }}" 
+	data-data6="{{ medium.data6 }}"{% include 'medium_rgb.html' %}>
+	{% if medium.uris['original'] %}
+		{% if 'application/x-shockwave-flash' == medium.mime %}
+			<div class="summary view">
+				{% set dimensions = '' %}
+				{% if medium.data1 and medium.data2 %}
+					{% set dimensions = [
+						' width="',
+						medium.data1,
+						'" height="',
+						medium.data2,
+						'"',
+					]|join('') %}
+					{% set dimensions = ' width="' + medium.data1 + '" height="' + medium.data2 + '"' %}
+				{% endif %}
+				<object data="{{ medium.uris['original'] }}"{{ dimensions }}>
+					<param name="movie" value="{{ medium.uris['original'] }}">
+					<param name="allowFullScreen" value="true">
+					<param name="quality" value="high">
+					<embed 
+						src="{{ medium.uris['original'] }}" 
+						type="application/x-shockwave-flash" 
+						allowfullscreen="true" 
+						quality="high" 
+						pluginspage="http://www.macromedia.com/go/getflashplayer"{{ dimensions }}>
+				</object>
+			</div>
+		{% else %}
+			{% if 'video' == medium.category %}
+				{% set video_uri = '' %}
+				{% if medium.uris['reencoded']['original'] %}
+					{% set video_uri = medium.uris['reencoded']['original'] %}
+					{% set video_mime = 'video/webm' %}
+				{% elif medium.uris['original'] and (
+					'video/mp4' == medium.mime
+					or 'video/mpeg' == medium.mime
+					or 'video/webm' == medium.mime
+					or 'application/ogg' == medium.mime
+					or 'video/ogg' == medium.mime
+				) %}
+					{% set video_uri = medium.uris['original'] %}
+					{% set video_mime = medium.mime %}
+				{% endif %}
+				{% if video_uri %}
+					<div class="summary view">
+						<video 
+							{% if medium.data1 and medium.data2 %}
+								width="{{ medium.data1 }}" height="{{ medium.data2 }}" 
+							{% endif %}
+							{% if medium.uris['static'][view_size] %}
+								poster="{{ medium.uris['static'][view_size] }}" 
+							{% endif %}
+							preload="auto" 
+							controls loop>
+							<source src="{{ video_uri }}" type="{{ video_mime }}">
+							Video element not supported
+						</video>
+					</div>
+					{# <a href="{{ medium.uris['original'] }}">Original</a> #}
+				{% else %}
+					{{ image_view(medium, view_medium) }}
+				{% endif %}
+			{% elif 'audio' == medium.category %}
+				{{ image_view(medium, view_medium) }}
+				<audio controls>
+					<source src="{{ medium.uris['original'] }}" type="{{ medium.mime }}">
+					Audio element not supported
+				</audio>
+			{% elif 'text' == medium.category %}
+				{% if medium.cover %}
+					{{ image_view(medium, view_medium) }}
+				{% else %}
+					{% set show_original_link = True %}
+				{% endif %}
+				{% if medium.contents %}
+					<br>
+					<div class="medium_contents summary view">{{ medium.contents|safe }}</div>
+				{% else %}
+					{#TODO better text media rendering #}
+					{#TODO direct embed for plaintext, safe embed for html, pre-formatted for markdown etc #}
+					<iframe src="{{ medium.uris['original'] }}"></iframe>
+				{% endif %}
+			{#% elif 'archive' == medium.category and 0 < medium.data1 and 0 < medium.data2 %#}
+				{#TODO sequential image archive, render first image from archive #}
+				{#TODO interface for browsing the rest of the archive #}
+			{% else %}
+				{{ image_view(medium, view_medium) }}
+			{% endif %}
+		{% endif %}
+	{% else %}
+		<div class="summary view nofile">No original file</div>
+	{% endif %}
+</div>
+{% if show_original_link %}
+	<p class="medium_original_link">
+		<a href="{{ medium.uris['original'] }}">{{ medium.category|title }} file</a>
+	</p>
+{% endif %}

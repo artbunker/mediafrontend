@@ -1,0 +1,26 @@
+{% if prev_medium_id or next_medium_id %}
+	<nav id="adjacent_media">
+		{% if prev_medium_id %}
+			<a 
+				id="medium_prev" 
+				class="prev" 
+				href="{{ url_for(
+					request.endpoint,
+					medium_id=prev_medium_id,
+					tags=tags_query,
+					**kwargs,
+				) }}">Previous in slideshow</a>
+		{% endif %}
+		{% if next_medium_id %}
+			<a 
+				id="medium_next" 
+				class="next" 
+				href="{{ url_for(
+					request.endpoint,
+					medium_id=next_medium_id,
+					tags=tags_query,
+					**kwargs,
+				) }}">Next in slideshow</a>
+		{% endif %}
+	</div>
+{% endif %}

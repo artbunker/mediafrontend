@@ -1,0 +1,136 @@
+<table>
+	<caption>Contributor search help</caption>
+	<tbody>
+		<tr>
+			<td colspan="2">Some additional tags are available to contributors</td>
+		</tr>
+		<tr>
+			<td>
+				<span class="tag" data-tag="searchability:">
+					<span>#searchability:{public | groups | hidden}</span>
+				</span>
+			</td>
+			<td>Returns media of a searchability type</td>
+		</tr>
+	</tbody>
+</table>
+<table>
+	<caption>Semantic tags</caption>
+	<tbody>
+		<tr>
+			<td colspan="2">
+				Some tags have a special meaning that can affect how a medium's view page and thumbnail are displayed.
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<span class="tag" data-tag="set:">
+					<span>#set:{set name}</span>
+				</span>
+			</td>
+			<td>
+				Used to create visual set groupings below a medium on the view page.
+				<br><br>
+				{set name} can be any text string but should probably be something you can remember and re-type if you're adding it to multiple media manually.
+				<br><br>
+				By default the order that set media appear in the set is by their Creation date (not their Upload date) from earliest to latest, but this can be overridden by adding :{weight} to the set tag after {set name} (e.g. <span class="tag" data-tag="set:"><span>#set:some set name:5</span></span>) in which case the medium with {weight} will appear after any media without {weight} and be sorted among any other media with {weight} from least to greatest.
+				<br><br>
+				If two media in a set have the same {weight} then they will be sorted by their respective Creation date from earliest to latest
+				<br><br>
+				A medium can be part of multiple sets, in which case multiple set containers will appear below the medium.
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<span class="tag" data-tag="cover:">
+					<span>#cover:{medium ID}</span>
+				</span>
+			</td>
+			<td>
+				Used to make the thumbnail of another medium appear for the medium you've added the tag to.
+				<br><br>
+				This is mostly useful for audio/text/archive/application media, which normally only appear as a filetype placeholder icon.
+				<br><br>
+				In addition to displaying a thumbnail in search results and in set lists, for audio the cover medium will appear above the actual player on the view page.
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<span class="tag" data-tag="render:">
+					<span>#render:{html fragment{# | markdown#}}</span>
+				</span>
+			</td>
+			<td>Used to embed text types directly into the view page</td>
+		</tr>
+		<tr>
+			<td>
+				<span class="tag" data-tag="next:">
+					<span>#next:{medium ID}</span>
+				</span>
+			</td>
+			<td>
+				Used to specify another medium as the next in a sequence.
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<span class="tag" data-tag="prev:">
+					<span>#prev:{medium ID}</span>
+				</span>
+			</td>
+			<td>
+				Used to specify another medium as the previous in a sequence.
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<span class="tag" data-tag="disable:">
+					<span>#disable:{feature name}</span>
+				</span>
+			</td>
+			<td>Used to disable a normal feature of the view page's interactivity. E.g. adding comments, or placing stickers. But should leave any interactions that already happened in place.</td>
+		</tr>
+		<tr>
+			<td>
+				<span class="tag" data-tag="suppress:">
+					<span>#suppress:{feature name}</span>
+				</span>
+			</td>
+			<td>Used to suppress a normal feature of the view page. E.g. the comment field, or stickers</td>
+		</tr>
+		<tr>
+			<td>
+				<span class="tag" data-tag="mirror:">
+					<span>#mirror:{URI}</span>
+				</span>
+			</td>
+			<td>Used to specify a mirror of a medium at an outside URI</td>
+		</tr>
+		<tr>
+			<td>
+				<span class="tag" data-tag="superior of:">
+					<span>#superior of:{media ID}</span>
+				</span>
+			</td>
+			<td>Used to indicate a medium is a superior version of another medium</td>
+		</tr>
+		<tr>
+			<td>
+				<span class="tag" data-tag="inferior of:">
+					<span>#inferior of:{media ID}</span>
+				</span>
+			</td>
+			<td>Used to indicate when a medium is an inferior version of another medium</td>
+		</tr>
+		{#TODO
+		<tr>
+			<td>
+				<span class="tag" data-tag="link:">
+					<span>#link:{URI}</span>
+				</span>
+			</td>
+			<td>Used to override default view page behavior where a medium summary links to the original file, and instead force it to link to the specified URI</td>
+		</tr>
+		#}
+	</tbody>
+</table>

@@ -1,0 +1,82 @@
+<table>
+	<caption>Media properties</caption>
+	<thead>
+		<tr>
+			<td>Property</td>
+			<td>Description</td>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Focus</td>
+			<td>
+				Used to adjust which part of a non-square visual medium's thumbnail is visible.
+			</td>
+		</tr>
+		<tr>
+			<td>Upload date</td>
+			<td>
+				The actual upload date of the media.
+				<br><br>
+				This is set only when uploading new media or when replacing the files of existing media.
+			</td>
+		</tr>
+		<tr>
+			<td>Creation date</td>
+			<td>
+				A user-specified date meant to represent when media were created or published.
+				<br><br>
+				Used as the default sort order of media in normal search results. This can be set to any date, and is mostly meant to be used to backdate older media that weren't uploaded until after their creation.
+				<br><br>
+				When uploading new media this is set to the current date unless a creation date is specified in the upload form.
+			</td>
+		</tr>
+		<tr>
+			<td>Owner</td>
+			<td>
+				The user who currently has ownership of a media.
+				<br><br>
+				{# Contibutors can transfer ownership of their own media to other contributors, and moderators can change the ownership of any media. #}
+				Moderators can change the ownership of any media.
+			</td>
+		</tr>
+		<tr>
+			<td>Searchability</td>
+			<td>
+				While media will always be returned in search results for moderators (and for the owner of the media within their own media search), you may limit how media are returned in search results for other users.
+				<br><br>
+				Media with searchability "Hidden" will not be returned in search results (but will be visible and linked to in media sets below other media in the same sets).
+				<br>
+				<small>Media with searchability "Hidden" will appear semi-transparent by default.</small>
+				<br><br>
+				Media with searchability "Groups" will only be returned for users that have all the required group permissions.
+				<br>
+				<small>If a medium has no groups selected it will only be returned in search results for signed in users.</small>
+				<br><br>
+				Media with searchbility "Public" will be returned in normal search results for anyone.
+			</td>
+		</tr>
+		<tr>
+			<td>Protection</td>
+			<td>
+				While media are always viewable to moderators and the owner of the media, you may assign various protection levels which prevent viewing of the medium file, generated summaries, and thumbnails by other users.
+				<br><br>
+				Media with protection "Private" are not viewable.
+				<br><br>
+				Media with protection "Groups" are only viewable by users that have all the required group permissions.
+				<br>
+				<small>If a medium has no groups selected it will be viewable to signed in users but users who aren't signed in will be promped to sign in.</small>
+				<br><br>
+				Media with protection "None" are viewable by anyone.
+			</td>
+		</tr>
+		<tr>
+			<td>Groups</td>
+			<td>
+				The group permissions used in combination with media visibility and protection.
+				<br><br>
+				If searchability is public and protection is none but some groups are selected then search result thumbnails will display the selected group tiles, but both the view page and direct links will be viewable if visited.
+			</td>
+		</tr>
+	</tbody>
+</table>

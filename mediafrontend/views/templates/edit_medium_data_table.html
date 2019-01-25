@@ -1,0 +1,24 @@
+<table>
+	<tr>
+		<td>Uploaded</td>
+		<td 
+			data-timestamp="{{ medium.upload_time }}">
+			{{ medium.upload_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}
+		</td>
+	</tr>
+	{% if g.media.accounts.current_user.has_permission(group_names='manager') %}
+		<tr>
+			<td>Uploaded by user</td>
+			{% from 'users.jinja' import edit_user_link %}
+			<td>{{ edit_user_link(medium.uploader) }}</td>
+		</tr>
+		<tr>
+			<td>Uploader by origin</td>
+			<td>{{ medium.uploader_remote_origin.exploded }}</td>
+		</tr>
+	{% endif %}
+	<tr>
+		<td>Mimetype</td>
+		<td>{{ medium.mime }}</td>
+	</tr>
+</table>

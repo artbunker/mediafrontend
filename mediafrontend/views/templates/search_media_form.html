@@ -1,0 +1,16 @@
+{% if search_field %}
+	<div id="search">
+		<form method="get">
+			<input 
+				type="text" 
+				id="tags" 
+				name="tags" 
+				value="{{ tags_query }}" 
+				placeholder="Tag search" 
+				data-max-tags="{{ g.media.config['maximum_search_tags'] }}" 
+				data-too-many-tags="Maximum allowed search tags">
+			<br>
+			<input type="submit" value="Search">
+		</form>
+	</div>
+{% endif %}

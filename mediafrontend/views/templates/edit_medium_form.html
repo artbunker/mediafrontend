@@ -1,0 +1,32 @@
+<form method="post" enctype="multipart/form-data" novalidate>
+	{% set hidden_focus = False %}
+	{% if 
+		medium.data1 != medium.data2
+		and (
+			medium.data1
+			or medium.data2
+		) %}
+		<label for="focus">Focus</label>
+		<input 
+			id="focus" 
+			name="focus" 
+			type="range" 
+			min="0" 
+			max="1" 
+			step="0.01" 
+			value="{{ fields['focus'] }}">
+		<br>
+	{% else %}
+		{% set hidden_focus = True %}
+	{% endif %}
+	{% include 'medium_groups_form.html' %}
+	{% include 'medium_properties_form.html' %}
+	<div id="replacement">
+		<legend>Replacement</legend>
+		{% include 'medium_creation_form.html' %}
+	</div>
+	{% if hidden_focus %}
+		<input type="hidden" name="focus" value="0.5">
+	{% endif %}
+	<input type="submit" value="Save Changes">
+</form>

@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block title %}Accompany tag{% endblock %}
+{% block content %}
+	<div class="accompany_tag">
+		<h1>Accompany tag</h1>
+		<nav>
+			<a href="{{ redirect_uri }}">Return</a>
+		</nav>
+		<p>
+			<span class="tag" data-tag="{{ tag }}">
+				<a>{{ tag }}</a>
+			</span>
+		</p>
+		<form method="get">
+			<input type="hidden" name="mode" value="accompany">
+			<input type="hidden" name="tag" value="{{ tag }}">
+			<input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+			<label for="accompaniment">Accompany with</label>
+			<input id="accompaniment" name="accompaniment">
+			<br>
+			<input type="submit" value="Submit">
+		</form>
+	</div>
+{% endblock %}

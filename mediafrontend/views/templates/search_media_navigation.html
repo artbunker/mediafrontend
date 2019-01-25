@@ -1,0 +1,30 @@
+<nav class="media_navigation" data-preferences="Preferences">
+	{% if results.values() %}
+		<span id="total_media">{{ total_results }} media</span>
+		<a href="{{ url_for('media_supplemental.help') }}">Help</a>
+		<a 
+			href="{{ url_for(
+				request.endpoint,
+				medium_id=results.values()[0].id,
+				tags=tags_query,
+				**kwargs,
+			) }}">
+			Slideshow
+		</a>
+		<a 
+			id="media_search_random" 
+			href="{{ url_for(
+				request.endpoint,
+				tags=tags_query,
+				random='1',
+				**kwargs,
+			) }}">
+			Random
+		</a>
+	{% else %}
+		<a href="{{ url_for('media_supplemental.help') }}">Help</a>
+	{% endif %}
+	{% if rss_url %}
+		<a href="{{ rss_url }}">RSS</a>
+	{% endif %}
+</nav>

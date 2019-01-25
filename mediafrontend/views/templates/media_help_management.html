@@ -1,0 +1,60 @@
+{% if g.media.accounts.current_user.has_permission(group_names='manager') %}
+	<table>
+		<caption>Management search help</caption>
+		<tbody>
+			<tr>
+				<td colspan="2">
+					Some additional tags are available to managers.
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<span class="tag" data-tag="id:">
+						<span>#id:{medium ID}</span>
+					</span>
+				</td>
+				<td>Returns media with the specified IDs</td>
+			</tr>
+			<tr>
+				<td>
+					<span class="tag" data-tag="origin:">
+						<span>#origin:{IPv4 or IPv6}</span>
+					</span>
+				</td>
+				<td>Returns media uploaded by IP addresses</td>
+			</tr>
+			<tr>
+				<td>
+					<span class="tag" data-tag="uploader:">
+						<span>#uploader:{user ID}</span>
+					</span>
+				</td>
+				<td>Returns media uploaded by a user ID</td>
+			</tr>
+			<tr>
+				<td>
+					<span class="tag" data-tag="owner:">
+						<span>#owner:{user ID}</span>
+					</span>
+				</td>
+				<td>Returns media currently owned by a user ID</td>
+			</tr>
+			<tr>
+				<td>
+					<span class="tag" data-tag="status:">
+						<span>#status:{allowed | copyright | forbidden}</span>
+					</span>
+				</td>
+				<td>Returns media of a status type</td>
+			</tr>
+			<tr>
+				<td>
+					<span class="tag" data-tag="liked by:">
+						<span>#liked by:{user ID}</span>
+					</span>
+				</td>
+				<td>Returns media liked by a specified user</td>
+			</tr>
+		</tbody>
+	</table>
+{% endif %}

@@ -1,0 +1,80 @@
+<div class="medium_info">
+	{% if not g.media.config['hide_total_like_counts'] %}
+		<span class="like_count" title="{{ '{} likes'.format(medium.like_count) }}">
+			{{ medium.like_count }}
+		</span>
+	{% endif %}
+	{% if g.media.accounts.current_user %}
+		{% if medium.likeable %}
+			<a 
+				href="{{ url_for(
+					request.endpoint,
+					medium_id=medium.id,
+					tags=tags_query,
+					like='add',
+					**kwargs,
+				) }}" 
+				{% if medium.current_user_like_count %}
+					class="like_medium_again" 
+					title="Add another like to this medium ({{ 'currently {} likes'.format(
+						medium.current_user_like_count
+					) }} )" 
+					data-current-likes="{{ medium.current_user_like_count }}">
+					Like again
+				{% else %}
+					class="like_medium" 
+					title="Add a like to this medium">
+					Like
+				{% endif %}
+			</a>
+		{% else %}
+			<span 
+				class="like_medium_again cooldown" 
+				title="Wait a bit before adding another like to this medium ({{ 'currently {} likes'.format(
+						medium.current_user_like_count
+					) }} )" 
+				data-current-likes="{{ medium.current_user_like_count }}">
+				Like again
+			</span>
+		{% endif %}
+		{% if medium.current_user_like_count %}
+			<a 
+				class="unlike_medium" 
+				href="{{ url_for(
+					request.endpoint,
+					medium_id=medium.id,
+					tags=tags_query,
+					like='remove',
+					**kwargs,
+				) }}" 
+				{% if 1 == medium.current_user_like_count %}
+					title="Unlike this medium">
+				{% else %}
+					title="Remove your most recent like on this medium">
+				{% endif %}
+				Unlike
+			</a>
+		{% endif %}
+	{% endif %}
+	{% from 'media.jinja' import filesize %}
+	<span class="size">{{ filesize(medium.size) }}</span>
+	<span 
+		class="creation_date" 
+		data-timestamp="{{ medium.creation_time }}">
+		{{ medium.creation_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}
+	</span>
+	{% if 0 < medium.data1 and 0 < medium.data2 %}
+		<span class="dimensions">
+			<span class="width">{{ medium.data1 }}</span>x<span class="height">{{ medium.data2 }}</span>
+		</span>
+	{% endif %}
+	{% if 1 < medium.data4 %}
+		<span class="frames">{{ medium.data4 }} frames</span>
+	{% endif %}
+	{% if 0 < medium.data5 %}
+		<span class="duration">{{ medium.data5 }} ms</span>
+	{% endif %}
+	{% if 0 < medium.data6 %}
+		<span class="bitrate">{{ medium.data6 }} kbps</span>
+	{% endif %}
+</div>

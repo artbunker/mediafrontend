@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% block title %}View {{ medium.id }}{% if 'title' in medium.semantic_tags %} - {{ medium.semantic_tags['title'] }}{% endif %}{% endblock %}
+{% block content %}
+	{% if 'title' in medium.semantic_tags %}
+		{% set title = medium.semantic_tags['title'] %}
+	{% else %}
+		{% set title = 'Untitled' %}
+	{% endif %}
+	<h2>{{ title }}</h2>
+	{% include 'medium_summary.html' %}
+	{% include 'view_medium_management_info.html' %}
+	{% include 'medium_info.html' %}
+	{% include 'view_medium_tags.html' %}
+	{% if management_mode %}
+		{% include 'view_medium_tags_editor.html' %}
+	{% endif %}
+	{% include 'media_slideshow_navigation.html' %}
+	{% include 'medium_sets.html' %}
+	{% include 'medium_semantic_tag_block.html' %}
+{% endblock %}
+{% block meta %}
+	{{ super() }}
+	{% include 'media_rich_data.html' %}
+	{% if management_mode %}
+		{% include 'tag_suggestions_list_meta.html' %}
+	{% endif %}
+{% endblock %}

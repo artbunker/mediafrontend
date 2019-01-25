@@ -1,0 +1,160 @@
+<table>
+	<caption>Advanced help</caption>
+		<tr>
+			<td>~{partial tag}</td>
+			<td>
+				<span class="tag" data-tag="~">
+					<span>~{partial tag}</span>
+				</span>
+			</td>
+			<td>Prefixing a partial tag with "~" will return media which have tags containing that partial tag</td>
+		</tr>
+		<tr>
+			<td>-~{partial tag}</td>
+			<td>
+				<span class="tag" data-tag="-~">
+					<span>~{partial tag}</span>
+				</span>
+			</td>
+			<td>Prefixing a partial tag with "~-" will omit media which have tags containing that partial tag</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="group:">
+					<span>#group:{group name}</span>
+				</span>
+			</td>
+			<td>
+				Returns media which have the specified group protection and which you also have all permissions to search for
+				<br><br>
+				<small>You may specify multiple group: or -group: tags to search for media with specific group permissions</small>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="uploaded after:">
+					<span>#uploaded after:{date string}</span>
+				</span>
+			</td>
+			<td>Returns media uploaded after the specified date</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="uploaded before:">
+					<span>#uploaded before:{date string}</span>
+				</span>
+			</td>
+			<td>Returns media uploaded before the specified date</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="created after:">
+					<span>#created after:{date string}</span>
+				</span>
+			</td>
+			<td>Returns media created after the specified date</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="created before:">
+					<span>#created before:{date string}</span>
+				</span>
+			</td>
+			<td>Returns media created before the specified date</td>
+		</tr>
+		{#
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="modified after:">
+					<span>#modified after:{date string}</span>
+				</span>
+			</td>
+			<td>Returns media modified after the specified date</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="modified before:">
+					<span>#modified before:{date string}</span>
+				</span>
+			</td>
+			<td>Returns media modified before the specified date</td>
+		</tr>
+		#}
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="category:">
+					<span>#category:{medium category}</span>
+				</span>
+			</td>
+			<td>
+				Returns only media which are in the specified category
+				<br><br>
+				<small>Specifying multiple category: tags will return media which match any of them, but specifying multiple -category: tags will exclude them all to narrow your search</small>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="mimetype:">
+					<span>#mimetype:{medium mimetype}</span>
+				</span>
+			</td>
+			<td>
+				Returns only media which have the specified MIME type
+				<br><br>
+				<small>Specifying multiple mimetype: tags will return media which match any of them, but specifying multiple -mimetype: tags will exclude them all to narrow your search</small>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="orientation:">
+					<span>#orientation:{landscape | portrait}</span>
+				</span>
+			</td>
+			<td>
+				Returns visual media with the specified ascpect ratio
+				<br><br>
+				<small>This will omit any media that don't have dimensions (including media which haven't been analyzed)</small>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="smaller than:">
+					<span>#smaller than:{bytesize}</span>
+				</span>
+			</td>
+			<td>Returns media smaller than a filesize</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="larger than:">
+					<span>#larger than:{bytesize}</span>
+				</span>
+			</td>
+			<td>Returns media larger than a filesize</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="data1 less than:">
+					<span>#data{1-6} less than:{integer}</span>
+				</span>
+			</td>
+			<td>Returns media with data properties less than a specified value</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="data1 more than:">
+					<span>#data{1-6} more than:{integer}</span>
+				</span>
+			</td>
+			<td>Returns media with data properties more than a specified value</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="tag" data-tag="protection:">
+					<span>#protection:{none | groups | private}</span>
+				</span>
+			</td>
+			<td>Returns media of a protection type (or -protection:{protection type} to exclude media of a protection type)</td>
+		</tr>
+	</tbody>
+</table>

@@ -1,0 +1,28 @@
+{% if medium.semantic_tags %}
+	<table class="medium_semantic_tag_info">
+		<tbody>
+			{% for tag, display in {
+				'prev': 'Previous in sequence',
+				'next': 'Next in sequence',
+				'inferior of': 'Inferior of',
+				'superior of': 'Superior of',
+			}.items() %}
+				{% if tag in medium.semantic_tags %}
+					<tr>
+						<td>{{ display }}</td>
+						<td>
+							<a href="{{ url_for(
+									request.endpoint,
+									medium_id=medium.semantic_tags[tag],
+									tags=tag_query,
+									**kwargs,
+								) }}">
+								{{ medium.semantic_tags[tag] }}
+							</a>
+						</td>
+					</tr>
+				{% endif %}
+			{% endfor %}
+		</tbody>
+	</table>
+{% endif %}

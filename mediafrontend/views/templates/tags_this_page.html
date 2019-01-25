@@ -1,0 +1,53 @@
+{% if tags_this_page %}
+	<div id="tags_this_page">
+		<h2>Tags this page</h2>
+		<div>
+			{% for tag in tags_this_page %}
+				{% set clear_query = re.sub(
+					'#+',
+					'#',
+					re.sub(
+						'(^|#)\-?'
+							+ tag.replace(
+								'\\',
+								'\\\\'
+							)
+							+ '(#|$)',
+						'#',
+						tags_query + '#'
+					)
+				).replace('\\\\', '\\') %}
+				{% if '#' == clear_query[0] %}
+					{% set clear_query = clear_query[1:] %}
+				{% endif %}
+				<span 
+					class="tag" 
+					data-tag="{{ tag }}">
+					<a 
+						href="{{ url_for(
+							request.endpoint,
+							tags=tag,
+							**kwargs,
+						) }}" 
+						title="Search this tag">{{ tag }}</a>
+					<a 
+						class="action add" 
+						href="{{ url_for(
+							request.endpoint,
+							tags=clear_query + tag,
+							**kwargs,
+						) }}" 
+						title="Add this tag to current search">+</a>
+					<a 
+						class="action remove" 
+						href="{{ url_for(
+							request.endpoint,
+							tags=clear_query + '-' + tag,
+							**kwargs,
+						) }}" 
+						title="Remove this tag from current search">-</a>
+				</span>
+			{% endfor %}
+		</div>
+	</div>
+{% endif %}

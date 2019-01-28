@@ -782,6 +782,8 @@ class MediaFrontend(Media):
 				medium.semantic_tags['sets'].append(set_name)
 			elif 'text:' == tag[:5]:
 				medium.semantic_tags['text'] = tag[5:]
+			elif 'blurb:' == tag[:6]:
+				medium.semantic_tags['blurb'] = tag[6:]
 
 	def current_user_medium_response_code(self, medium):
 		if self.accounts.current_user:

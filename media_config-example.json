@@ -25,7 +25,7 @@
 	"maximum_tag_length": 32,
 
 	"requirable_groups": [
-		"manager",
+		"manager"
 	],
 
 	"premium_groups": [

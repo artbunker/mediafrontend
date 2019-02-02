@@ -655,7 +655,7 @@ def view_medium(
 		management_mode=False,
 		prev_medium_id='',
 		next_medium_id='',
-		**kwargs,
+		**kwargs
 	):
 	g.media.populate_medium_like_data(medium)
 	g.media.populate_media_covers(medium)
@@ -757,7 +757,7 @@ def view_medium(
 					url_for(
 						request.endpoint,
 						tags_query=tags_query,
-						**kwargs,
+						**kwargs
 					),
 					code=303,
 				)
@@ -768,7 +768,7 @@ def view_medium(
 					medium_id=medium.id,
 					tags_query=tags_query,
 					mode='edit',
-					**kwargs,
+					**kwargs
 				),
 				code=303,
 			)
@@ -812,7 +812,7 @@ def view_medium(
 					request.endpoint,
 					medium_id=medium.id,
 					tags_query=tags_query,
-					**kwargs,
+					**kwargs
 				),
 				code=303,
 			)
@@ -850,13 +850,13 @@ def search_results_rss(results, media_endpoint='', tags_query='', **kwargs):
 			media_endpoint,
 			tags=tags_query,
 			_external=True,
-			**kwargs,
+			**kwargs
 		)
 	else:
 		page_uri = url_for(
 			media_endpoint,
 			_external=True,
-			**kwargs,
+			**kwargs
 		)
 	#TODO a more robust description with selected filters goes here
 	feed_description = 'what'
@@ -894,7 +894,7 @@ def search_results_rss(results, media_endpoint='', tags_query='', **kwargs):
 			media_endpoint,
 			medium_id=result.id,
 			_external=True,
-			**kwargs,
+			**kwargs
 		)
 		guid = result.id
 		pubdate = result.creation_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f%z')
@@ -929,7 +929,7 @@ def search_media(
 		rss=False,
 		rss_endpoint='',
 		rss_media_endpoint='',
-		**kwargs,
+		**kwargs
 	):
 	tags_query = ''
 	if 'tags' in request.args:
@@ -1018,7 +1018,7 @@ def search_media(
 			management_mode=management_mode,
 			prev_medium_id=prev_medium_id,
 			next_medium_id=next_medium_id,
-			**kwargs,
+			**kwargs
 		)
 
 	if 'random' in request.args:
@@ -1034,7 +1034,7 @@ def search_media(
 				url_for(
 					request.endpoint,
 					tags=tags_query,
-					**kwargs,
+					**kwargs
 				),
 				code=303,
 			)
@@ -1044,7 +1044,7 @@ def search_media(
 				request.endpoint,
 				medium_id=media.values()[0].id,
 				tags=tags_query + '#sort:random:' + seed,
-				**kwargs,
+				**kwargs
 			),
 			code=303,
 		)
@@ -1061,7 +1061,7 @@ def search_media(
 			results,
 			media_endpoint=rss_media_endpoint,
 			tags_query=tags_query,
-			**kwargs,
+			**kwargs
 		)
 
 	g.media.populate_media_covers(results)

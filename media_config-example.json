@@ -90,6 +90,7 @@
 		"suppress:",
 		"disable:",
 		"text:",
-		"embed:"
+		"embed:",
+		"blurb"
 	]
 }

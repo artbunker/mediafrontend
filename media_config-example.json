@@ -89,6 +89,7 @@
 		"set:",
 		"suppress:",
 		"disable:",
-		"text:"
+		"text:",
+		"embed:"
 	]
 }

@@ -32,7 +32,7 @@
 	{% endif %}
 {% endmacro %}
 <div 
-	class="medium" 
+	class="medium{% if 'embed' in medium.semantic_tags %} embed{% endif %}" 
 	data-id="{{ medium.id }}" 
 	data-upload-time="{{ medium.upload_time }}" 
 	data-creation-time="{{ medium.creation_time }}" 
@@ -71,6 +71,8 @@
 						pluginspage="http://www.macromedia.com/go/getflashplayer"{{ dimensions }}>
 				</object>
 			</div>
+		{% elif 'embed' in medium.semantic_tags %}
+			{% include 'medium_summary_embed.html' %}
 		{% else %}
 			{% if 'video' == medium.category %}
 				{% set video_uri = '' %}

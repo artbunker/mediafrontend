@@ -1,7 +1,7 @@
 {% if 'youtube:' == medium.semantic_tags['embed'][:8] %}
 	<iframe 
-		width="560" 
-		height="315" 
+		width="512" 
+		height="288" 
 		src="https://www.youtube.com/embed/{{ medium.semantic_tags['embed'][8:] }}" 
 		frameborder="0" 
 		allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
@@ -9,8 +9,8 @@
 {% elif 'vimeo:' == medium.semantic_tags['embed'][:6] %}
 	<iframe 
 		src="https://player.vimeo.com/video/{{ medium.semantic_tags['embed'][6:] }}" 
-		width="640" 
-		height="360" 
+		width="512" 
+		height="288" 
 		frameborder="0" 
 		webkitallowfullscreen 
 		mozallowfullscreen 

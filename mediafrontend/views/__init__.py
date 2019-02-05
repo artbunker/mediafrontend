@@ -683,6 +683,8 @@ def view_medium(
 				next_medium_id=next_medium_id,
 				kwargs=kwargs,
 			), 403
+		elif 404 == medium.current_user_response_code:
+			abort(404, 'Medium not found')
 		else:
 			abort(medium.current_user_response_code)
 	else:

@@ -545,13 +545,17 @@ class MediaFrontend(Media):
 					if data + ' more than:' == tag[:16]:
 						filter[data + '_more_than'] = tag[:16]
 			elif 'protection:' == tag[:11]:
-				filter['protection'] = tag[11:].upper()
+				if 'with_protections' not in filter:
+					filter['with_protections'] = []
+				filter['with_protections'].append(tag[11:].upper())
 			elif '-protection:' == tag[:12]:
 				if 'without_protections' not in filter:
 					filter['without_protections'] = []
 				filter['without_protections'].append(tag[12:].upper())
 			elif 'searchability:' == tag[:14]:
-				filter['searchability'] = tag[14:].upper()
+				if 'with_searchabilities' not in filter:
+					filter['with_searchabilities'] = []
+				filter['with_searchabilities'].append(tag[14:].upper())
 			elif '-searchability:' == tag[:15]:
 				if 'without_searchabilities' not in filter:
 					filter['without_searchabilities'] = []
@@ -575,7 +579,9 @@ class MediaFrontend(Media):
 					filter['owner_uuids'] = []
 				filter['owner_uuids'].append(id_to_uuid(tag[6:]))
 			elif 'status:' == tag[:7] and management_mode:
-				filter['status'] = tag[7:].upper()
+				if 'with_statuses' not in filter:
+					filter['with_statuses'] = []
+				filter['with_statuses'].append(tag[7:].upper())
 			elif '-status:' == tag[:8] and management_mode:
 				if 'without_statuses' not in filter:
 					filter['without_statuses'] = []

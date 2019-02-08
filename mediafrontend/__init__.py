@@ -1167,7 +1167,7 @@ class MediaFrontend(Media):
 			tag_suggestion_lists.append(tags_file_uri.format(tag_file + '.json'))
 		for protected_tag_file in protected_tag_files:
 			tag_suggestion_lists.append(
-				protected_tags_file_uri.format(tag_file + '.json')
+				protected_tags_file_uri.format(protected_tag_file + '.json')
 			)
 		return tag_suggestion_lists
 

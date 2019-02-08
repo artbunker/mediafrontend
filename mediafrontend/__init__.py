@@ -606,9 +606,9 @@ class MediaFrontend(Media):
 				filter['with_tags'].append(tag)
 
 		if groups:
-			filter['with_group_bits'] = self.accounts.users.combine_groups(names=groups)
+			filter['with_group_bits'] = self.accounts.combine_groups(names=groups)
 		if without_groups:
-			filter['without_group_bits'] = self.accounts.users.combine_groups(
+			filter['without_group_bits'] = self.accounts.combine_groups(
 				names=without_groups,
 			)
 		if with_mimes:

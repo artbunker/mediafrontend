@@ -40,12 +40,14 @@ def initialize(config, accounts, access_log, engine, install):
 			summary_filename='SUMMARY_FILENAME',
 			_external=True,
 		).replace('SUMMARY_FILENAME', '{}')
-	if not g.media.config['tags_file_uri']:
-		g.media.config['tags_file_uri'] = url_for(
+	protected_tags_file_uri = url_for(
 			'media_static.tags_file',
 			tags_filename='TAGS_FILENAME',
 			_external=True,
 		).replace('TAGS_FILENAME', '{}')
+	g.media.config['protected_tags_file_uri'] = protected_tags_file_uri
+	if not g.media.config['tags_file_uri']:
+		g.media.config['tags_file_uri'] = protected_tags_file_uri
 
 	#TODO limit maximum upload filesize by determining min of server capability and config capability
 	pass

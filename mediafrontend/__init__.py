@@ -1150,24 +1150,25 @@ class MediaFrontend(Media):
 
 	def get_tag_suggestion_lists(self, management_mode=False, search=False):
 		tag_files = ['signed_out']
+		protected_tag_files = []
 		if search:
 			tag_files.append('search_signed_out')
 		if self.accounts.current_user:
-			tag_files.append('signed_in')
+			protected_tag_files.append('signed_in')
 			if management_mode:
-				tag_files.append('manage')
+				protected_tag_files.append('manage')
 				if search:
-					tag_files.append('search_manage')
+					protected_tag_files.append('search_manage')
 					tag_files.append('clutter')
 		tags_file_uri = self.config['tags_file_uri']
-		if not tags_file_uri:
-			tags_file_uri = url_for(
-				'media_static.tags_file',
-				tags_filename='TAGS_FILENAME'
-			).replace('TAGS_FILENAME', '{}')
+		protected_tags_file_uri = self.config['protected_tags_file_uri']
 		tag_suggestion_lists = []
 		for tag_file in tag_files:
 			tag_suggestion_lists.append(tags_file_uri.format(tag_file + '.json'))
+		for protected_tag_file in protected_tag_files:
+			tag_suggestion_lists.append(
+				protected_tags_file_uri.format(tag_file + '.json')
+			)
 		return tag_suggestion_lists
 
 	def create_temp_medium_file(self, file_contents):

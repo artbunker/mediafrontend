@@ -1,3 +1,9 @@
 {% for tag_suggestion_list in tag_suggestion_lists %}
-	<meta name="tag_suggestion_list" content="{{ tag_suggestion_list }}">
+	<meta 
+		name="tag_suggestion_list" 
+		content="{{ tag_suggestion_list }}" 
+		data-credentials="{% if 
+				'signed_out.json' == tag_suggestion_list[-15:]
+				or 'clutter.json' == tag_suggestion_list[-12:]
+			%}0{% else %}1{% endif %}">
 {% endfor %}

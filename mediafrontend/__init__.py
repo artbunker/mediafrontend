@@ -997,9 +997,9 @@ class MediaFrontend(Media):
 				for tag in set_medium.tags:
 					weight_start_pos = len(set) + 5
 					if 'set:' + set + ':' == tag[:weight_start_pos]:
-						weight = int(tag[weight_start_pos:])
+						weight = tag[weight_start_pos:]
 						while weight in weighted_set_medium_ids:
-							weight = weight + 1
+							weight = weight + 'a'
 						weighted_set_medium_ids[weight] = set_medium.id
 				if not weighted:
 					set_medium_ids.append(set_medium.id)

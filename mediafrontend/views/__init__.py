@@ -811,6 +811,8 @@ def view_medium(
 				if not likes.values():
 					abort(400)
 				g.media.delete_like(likes.values()[0].id)
+			if 'redirect_uri' in request.args:
+				return redirect(request.args['redirect_uri'], code=303)
 			return redirect(
 				url_for(
 					request.endpoint,

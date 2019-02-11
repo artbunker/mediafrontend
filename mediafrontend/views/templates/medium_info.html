@@ -12,6 +12,7 @@
 					medium_id=medium.id,
 					tags=tags_query,
 					like='add',
+					redirect_uri=request.url,
 					**kwargs,
 				) }}" 
 				{% if medium.current_user_like_count %}
@@ -45,6 +46,7 @@
 					medium_id=medium.id,
 					tags=tags_query,
 					like='remove',
+					redirect_uri=request.url,
 					**kwargs,
 				) }}" 
 				{% if 1 == medium.current_user_like_count %}

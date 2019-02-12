@@ -108,7 +108,7 @@
 					Audio element not supported
 				</audio>
 			{% elif 'text' == medium.category %}
-				{% if medium.cover %}
+				{% if medium.cover or not medium.contents %}
 					{{ image_view(medium, view_medium) }}
 				{% else %}
 					{% set show_original_link = True %}
@@ -116,10 +116,6 @@
 				{% if medium.contents %}
 					<br>
 					<div class="medium_contents summary view">{{ medium.contents|safe }}</div>
-				{% else %}
-					{#TODO better text media rendering #}
-					{#TODO direct embed for plaintext, safe embed for html, pre-formatted for markdown etc #}
-					<iframe src="{{ medium.uris['original'] }}"></iframe>
 				{% endif %}
 			{#% elif 'archive' == medium.category and 0 < medium.data1 and 0 < medium.data2 %#}
 				{#TODO sequential image archive, render first image from archive #}

@@ -923,6 +923,11 @@ class MediaFrontend(Media):
 			protection_path,
 			medium.id + '.' + mime_to_extension(medium.mime),
 		)
+		if (
+				'text:plain' not in medium.tags
+				and 'text:html fragment' not in medium.tags
+			):
+			return
 		contents = ''
 		try:
 			f = open(medium_path, 'r')

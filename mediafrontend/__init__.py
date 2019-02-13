@@ -405,6 +405,22 @@ class MediaFrontend(Media):
 			object_id=medium.id_bytes,
 		)
 
+	def create_like(self, medium_id, user_id):
+		like = super().create_like(medium_id, user_id)
+		self.access_log.create_log(
+			scope='like_medium',
+			subject_id=user_id,
+			object_id=like.id_bytes,
+		)
+
+	def delete_like(self, id, subject_id=''):
+		super().delete_like(id)
+		self.access_log.create_log(
+			scope='unlike_medium',
+			subject_id=subject_id,
+			object_id=id,
+		)
+
 	#additional media methods
 	def tag_string_to_list(self, tag_string):
 		return tag_string.split('#')

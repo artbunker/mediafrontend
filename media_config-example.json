@@ -1,8 +1,8 @@
 {
 	"db_prefix": "",
 
-	"ffprobe_path": "path/to/ffmpeg/ffprobe.exe",
-	"ffmpeg_path": "path/to/ffmpeg/ffmpeg.exe",
+	"ffprobe_path": "",
+	"ffmpeg_path": "",
 	"ffmpeg_thread_limit": 1,
 
 	"temp_path": "path/to/temporary/directory",

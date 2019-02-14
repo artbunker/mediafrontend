@@ -1039,10 +1039,8 @@ class MediaFrontend(Media):
 		contributors = []
 		contributor_bit = self.accounts.group_name_to_bit('contributor')
 		permissions = self.accounts.search_permissions(filter={
-			'permissions': {
-				'global': contributor_bit,
-				'media': contributor_bit,
-			}
+			'scopes': '',
+			'with_group_bits': contributor_bit,
 		})
 		for permission in permissions.values():
 			contributors.append(permission.user)

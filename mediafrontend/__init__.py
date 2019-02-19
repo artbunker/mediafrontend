@@ -1476,7 +1476,7 @@ class MediaFrontend(Media):
 		audio_codec = ''
 		video_codec = ''
 
-		probe_json = subprocess.getoutput([
+		probe_json = subprocess.getoutput(' '.join([
 			self.config['ffprobe_path'],
 			'-v',
 			'quiet',
@@ -1485,7 +1485,7 @@ class MediaFrontend(Media):
 			'-show_streams',
 			'-i',
 			file_path,
-		])
+		]))
 		probe = json.loads(probe_json)
 
 		if 'streams' in probe:

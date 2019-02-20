@@ -18,13 +18,21 @@ from accounts.views import require_sign_in
 from pagination_from_request import pagination_from_request
 from parse_id import generate_or_parse_id
 
-def initialize(config, accounts, access_log, engine, install):
+def initialize(
+		config,
+		accounts,
+		access_log,
+		engine,
+		install=False,
+		connection=None,
+	):
 	g.media = MediaFrontend(
 		config,
 		accounts,
 		access_log,
 		engine,
 		install=install,
+		connection=connection,
 	)
 
 	# use default medium and tags file uris if custom uris aren't specified

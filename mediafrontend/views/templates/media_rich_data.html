@@ -1,10 +1,14 @@
 <meta name="twitter:card" content="summary_large_image">
+{% set card_image = medium.uris['fallback'][g.media.config['summary_values']['view']] %}
+{% if 'image/gif' == medium.mime and 1 < medium.data4 %}
+	{% set card_image = medium.uris['original'] %}
+{% endif %}
 <meta 
 	name="twitter:image" 
-	content="{{ medium.uris['fallback'][g.media.config['summary_values']['view']] }}">
+	content="{{ card_image }}">
 <meta 
 	property="og:image" 
-	content="{{ medium.uris['fallback'][g.media.config['summary_values']['view']] }}">
+	content="{{ card_image }}">
 
 {% if medium.uris['reencoded']['clip'] %}
 	<meta property="og:video" content="{{ medium.uris['reencoded']['clip'] }}">

@@ -1134,7 +1134,7 @@ def search_media(
 		kwargs=kwargs,
 	)
 
-def tags_list():
+def tags_list(search_endpoint=''):
 	if (
 			'mode' in request.args
 			and 'tag' in request.args
@@ -1222,4 +1222,5 @@ def tags_list():
 		pagination=pagination,
 		total_results=total_results,
 		total_pages=math.ceil(total_results / pagination['perpage']),
+		search_endpoint=search_endpoint,
 	)

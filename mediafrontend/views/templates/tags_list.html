@@ -6,7 +6,7 @@
 		<tr>
 			<td>
 				<span class="tag" data-tag="{{ result['tag'] }}">
-					<a>{{ result['tag'] }}</a>
+					<a{% if search_endpoint %} href="{{ url_for(search_endpoint, tags=result['tag']) }}"{% endif %}>{{ result['tag'] }}</a>
 				</span>
 			</td>
 			<td>{{ result['count'] }}</td>

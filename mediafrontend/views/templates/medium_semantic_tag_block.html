@@ -6,7 +6,6 @@
 				'next': 'Next in sequence',
 				'inferior of': 'Inferior of',
 				'superior of': 'Superior of',
-				'mirror': 'Mirror',
 			}.items() %}
 				{% if tag in medium.semantic_tags %}
 					<tr>
@@ -24,6 +23,16 @@
 					</tr>
 				{% endif %}
 			{% endfor %}
+			{% if 'mirror' in medium.semantic_tags %}
+				<tr>
+					<td>Mirror</td>
+					<td>
+						<a href="{{ medium.semantic_tags['mirror'] }}">
+							{{ medium.semantic_tags['mirror'] }}
+						</a>
+					</td>
+				</tr>
+			{% endif %}
 		</tbody>
 	</table>
 {% endif %}

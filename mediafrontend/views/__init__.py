@@ -580,7 +580,10 @@ def process_edit_medium(medium, ignore_replacement=True):
 	# no need for manager checks here
 	# since the actual media.update_medium does it
 	if 'owner_id' in request.form:
-		owner = g.media.accounts.get_user(request.form['owner_id'])
+		if not request.form['owner_id']:
+			owner = g.media.accounts.current_user
+		else:
+			owner = g.media.accounts.get_user(request.form['owner_id'])
 		if not owner:
 			#TODO warning about owner not set?
 			#errors.append('Specified owner user not found')

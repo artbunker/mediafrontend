@@ -600,13 +600,13 @@ class MediaFrontend(Media):
 					filter['uploader_remote_origins'] = []
 				filter['uploader_remote_origins'].append(tag[7:])
 			elif 'uploader:' == tag[:9] and management_mode:
-				if not 'uploader_uuids' in filter:
-					filter['uploader_uuids'] = []
-				filter['uploader_uuids'].append(id_to_uuid(tag[9:]))
+				if not 'uploader_ids' in filter:
+					filter['uploader_ids'] = []
+				filter['uploader_ids'].append(tag[9:])
 			elif 'owner:' == tag[:6] and management_mode:
-				if not 'owner_uuids' in filter:
-					filter['owner_uuids'] = []
-				filter['owner_uuids'].append(id_to_uuid(tag[6:]))
+				if not 'owner_ids' in filter:
+					filter['owner_ids'] = []
+				filter['owner_ids'].append(tag[6:])
 			elif 'status:' == tag[:7] and management_mode:
 				if 'with_statuses' not in filter:
 					filter['with_statuses'] = []

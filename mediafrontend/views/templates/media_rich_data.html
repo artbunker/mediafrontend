@@ -31,6 +31,7 @@
 	{% set _ = tags.append('#' + tag) %}
 {% endfor %}
 {% set description = ' '.join(tags) %}
+{% set description = description ~ ' - created ' ~ medium.creation_datetime.strftime('%Y-%m-%d') %}
 <meta name="twitter:description" content="{{ description }}">
 <meta name="og:description" content="{{ description }}">
 

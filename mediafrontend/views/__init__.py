@@ -952,8 +952,10 @@ def search_media(
 		**kwargs
 	):
 	tags_query = ''
+	slideshow = False
 	if 'tags' in request.args:
 		tags_query = request.args['tags']
+		slideshow = True
 
 	tags = g.media.tag_string_to_list(tags_query)
 	limited_tags = []
@@ -1020,18 +1022,19 @@ def search_media(
 		# get adjacent media ids
 		prev_medium_id = ''
 		next_medium_id = ''
-		prev_medium, next_medium = g.media.get_adjacent_media(
-			medium,
-			filter=filter,
-			sort=pagination['sort'],
-			order=pagination['order'],
-			page=pagination['page'],
-			perpage=pagination['perpage'],
-		)
-		if prev_medium:
-			prev_medium_id = prev_medium.id
-		if next_medium:
-			next_medium_id = next_medium.id
+		if slideshow:
+			prev_medium, next_medium = g.media.get_adjacent_media(
+				medium,
+				filter=filter,
+				sort=pagination['sort'],
+				order=pagination['order'],
+				page=pagination['page'],
+				perpage=pagination['perpage'],
+			)
+			if prev_medium:
+				prev_medium_id = prev_medium.id
+			if next_medium:
+				next_medium_id = next_medium.id
 		return view_medium(
 			medium,
 			tags_query=tags_query,

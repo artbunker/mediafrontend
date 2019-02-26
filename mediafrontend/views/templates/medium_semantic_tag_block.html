@@ -14,7 +14,6 @@
 							<a href="{{ url_for(
 									request.endpoint,
 									medium_id=medium.semantic_tags[tag],
-									tags=tag_query,
 									**kwargs,
 								) }}">
 								{{ medium.semantic_tags[tag] }}

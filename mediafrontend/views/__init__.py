@@ -157,7 +157,7 @@ media_supplemental = Blueprint(
 	template_folder='templates',
 )
 
-@media_supplemental.route('/media/help')
+@media_supplemental.route('/help')
 def help():
 	return render_template('media_help.html')
 

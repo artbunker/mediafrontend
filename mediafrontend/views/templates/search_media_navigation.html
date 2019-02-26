@@ -11,16 +11,6 @@
 			) }}">
 			Slideshow
 		</a>
-		<a 
-			id="media_search_random" 
-			href="{{ url_for(
-				request.endpoint,
-				tags=tags_query,
-				random='1',
-				**kwargs,
-			) }}">
-			Random
-		</a>
 	{% else %}
 		<a href="{{ url_for('media_supplemental.help') }}">Help</a>
 	{% endif %}

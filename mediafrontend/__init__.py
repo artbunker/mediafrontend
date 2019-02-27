@@ -1059,7 +1059,13 @@ class MediaFrontend(Media):
 			contributors.append(permission.user)
 		return contributors
 
-	def build_tag_suggestions(self):
+	def build_tag_suggestions(self, manual=False):
+		if (
+				not manual
+				and not self.config['automatic_tag_suggestions_generation']
+			):
+			return;
+
 		suggestions = {
 			'search_signed_out': [
 				'protection:none',

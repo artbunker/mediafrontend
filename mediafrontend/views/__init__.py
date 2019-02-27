@@ -1141,50 +1141,52 @@ def search_media(
 	)
 
 def tags_list(search_endpoint=''):
-	if (
-			'mode' in request.args
-			and 'tag' in request.args
-			and request.args['tag']
-		):
-		tag = request.args['tag']
+	if 'mode' in request.args:
 		if 'redirect_uri' in request.args:
 			redirect_uri = request.args['redirect_uri']
 		else:
 			redirect_uri = url_for(request.endpoint)
-		if 'remove' == request.args['mode']:
-			if 'confirm' not in request.args:
-				return render_template(
-					'confirm_remove_tag.html',
-					tag=tag,
-					redirect_uri=redirect_uri,
-				)
-			g.media.delete_tags(tag)
-		else:
-			media = g.media.search_media(filter={'with_tags': tag})
-			medium_ids = list(media.keys())
-			if 'replace' == request.args['mode']:
-				if (
-						'replacement' not in request.args
-						or not request.args['replacement']
-					):
+		if 'generate_suggestions' == request.args['mode']:
+			g.media.build_tag_suggestions(manual=True)
+		elif (
+				'tag' in request.args
+				and request.args['tag']
+			):
+			tag = request.args['tag']
+			if 'remove' == request.args['mode']:
+				if 'confirm' not in request.args:
 					return render_template(
-						'replace_tag.html',
-						tag=request.args['tag'],
+						'confirm_remove_tag.html',
+						tag=tag,
 						redirect_uri=redirect_uri,
 					)
 				g.media.delete_tags(tag)
-				g.media.add_tags(medium_ids, request.args['replacement'])
-			elif 'accompany' == request.args['mode']:
-				if (
-						'accompaniment' not in request.args
-						or not request.args['accompaniment']
-					):
-					return render_template(
-						'accompany_tag.html',
-						tag=request.args['tag'],
-						redirect_uri=redirect_uri,
-					)
-				g.media.add_tags(medium_ids, request.args['accompaniment'])
+			else:
+				media = g.media.search_media(filter={'with_tags': tag})
+				medium_ids = list(media.keys())
+				if 'replace' == request.args['mode']:
+					if (
+							'replacement' not in request.args
+							or not request.args['replacement']
+						):
+						return render_template(
+							'replace_tag.html',
+							tag=request.args['tag'],
+							redirect_uri=redirect_uri,
+						)
+					g.media.delete_tags(tag)
+					g.media.add_tags(medium_ids, request.args['replacement'])
+				elif 'accompany' == request.args['mode']:
+					if (
+							'accompaniment' not in request.args
+							or not request.args['accompaniment']
+						):
+						return render_template(
+							'accompany_tag.html',
+							tag=request.args['tag'],
+							redirect_uri=redirect_uri,
+						)
+					g.media.add_tags(medium_ids, request.args['accompaniment'])
 		return redirect(
 			redirect_uri,
 			code=303,

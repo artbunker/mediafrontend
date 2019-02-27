@@ -76,6 +76,8 @@
 		"": ""
 	},
 
+	"automatic_tag_suggestions_generation": false,
+
 	"suggest_clutter_tags": false,
 	"clutter_tag_prefixes": [
 		"title:",

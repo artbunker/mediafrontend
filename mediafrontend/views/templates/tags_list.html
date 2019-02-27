@@ -2,6 +2,16 @@
 {% block title %}Tags list{% endblock %}
 {% block content %}
 	<h1>Tags list</h1>
+	<nav>
+		<a 
+			href="{{ url_for(
+				request.endpoint,
+				mode='generate_suggestions',
+				redirect_uri=request.url,
+			) }}">
+			Generate tag suggestions
+		</a>
+	</nav>
 	{% macro render_result(result) %}
 		<tr>
 			<td>

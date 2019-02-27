@@ -1089,7 +1089,6 @@ class MediaFrontend(Media):
 				'text:html fragment',
 				#'text:markdown',
 			],
-			'clutter': [],
 		}
 
 		def filter_tags(tags, remove_clutter=False, remove_nonclutter=False):
@@ -1157,13 +1156,14 @@ class MediaFrontend(Media):
 		suggestions['signed_in'] += get_nonclutter_tags(signed_in_tags)
 
 		# clutter
-		allowed_none_tags = self.search_tag_counts(
-			filter={'with_statuses': MediumStatus.ALLOWED},
-		)
-		clutter_tags = []
-		for tag in allowed_none_tags:
-			clutter_tags.append(tag['tag'])
-		suggestions['clutter'] += get_clutter_tags(clutter_tags)
+		if self.config['suggest_clutter_tags']:
+			allowed_none_tags = self.search_tag_counts(
+				filter={'with_statuses': MediumStatus.ALLOWED},
+			)
+			clutter_tags = []
+			for tag in allowed_none_tags:
+				clutter_tags.append(tag['tag'])
+			suggestions['clutter'] = get_clutter_tags(clutter_tags)
 
 		# manager
 		#TODO uploader:{each unique uploader id}?
@@ -1191,7 +1191,8 @@ class MediaFrontend(Media):
 				protected_tag_files.append('manage')
 				if search:
 					protected_tag_files.append('search_manage')
-					tag_files.append('clutter')
+					if self.config['suggest_clutter_tags']:
+						tag_files.append('clutter')
 		tags_file_uri = self.config['tags_file_uri']
 		protected_tags_file_uri = self.config['protected_tags_file_uri']
 		tag_suggestion_lists = []

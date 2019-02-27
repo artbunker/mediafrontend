@@ -76,6 +76,7 @@
 		"": ""
 	},
 
+	"suggest_clutter_tags": false,
 	"clutter_tag_prefixes": [
 		"title:",
 		"filename:",

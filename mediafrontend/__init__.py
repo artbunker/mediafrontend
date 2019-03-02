@@ -1529,7 +1529,7 @@ class MediaFrontend(Media):
 
 		# missing duration after streams probe, do packets probe
 		if not duration_s:
-			probe_json = subprocess.getoutput([
+			probe_json = subprocess.getoutput(' '.join([
 				self.config['ffprobe_path'],
 				'-v',
 				'quiet',
@@ -1538,7 +1538,7 @@ class MediaFrontend(Media):
 				'-show_packets',
 				'-i',
 				file_path,
-			])
+			]))
 			probe = json.loads(probe_json)
 
 			last_frame = probe['packets'].pop()

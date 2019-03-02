@@ -1517,15 +1517,15 @@ class MediaFrontend(Media):
 						height = int(value)
 					elif 'duration' == key:
 						duration_s = float(value)
-			if (
-					'codec_type' in stream
-					and 'codec_name' in stream
-				):
-				codec_name = stream['codec_name']
-				if 'audio' == stream['codec_type']:
-					audio_codec = codec_name
-				elif 'video' == stream['codec_type']:
-					video_codec = codec_name
+				if (
+						'codec_type' in stream
+						and 'codec_name' in stream
+					):
+					codec_name = stream['codec_name']
+					if 'audio' == stream['codec_type']:
+						audio_codec = codec_name
+					elif 'video' == stream['codec_type']:
+						video_codec = codec_name
 
 		# missing duration after streams probe, do packets probe
 		if not duration_s:

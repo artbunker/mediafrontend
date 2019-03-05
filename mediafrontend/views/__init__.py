@@ -1019,6 +1019,18 @@ def search_media(
 	# view medium/slideshow mode for this search
 	if medium_id:
 		medium = require_medium(medium_id)
+		if (
+				not management_mode
+				and 'owner_ids' in override_filters
+			):
+			override_owner_ids = override_filters['owner_ids']
+			if list is not type(override_owner_ids):
+				override_owner_ids = [override_owner_ids]
+			if (
+					medium.owner_id not in override_owner_ids
+					and medium.owner_id_bytes not in override_owner_ids
+				):
+				abort(404, 'Medium not found')
 		# get adjacent media ids
 		prev_medium_id = ''
 		next_medium_id = ''

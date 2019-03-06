@@ -671,6 +671,7 @@ def view_medium(
 		**kwargs
 	):
 	g.media.populate_medium_like_data(medium)
+	g.media.populate_medium_blurb(medium)
 	g.media.populate_media_covers(medium)
 	# manually turn on management mode if user is owner or manager
 	if (

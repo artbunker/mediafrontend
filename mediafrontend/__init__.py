@@ -818,7 +818,12 @@ class MediaFrontend(Media):
 			elif 'text:' == tag[:5]:
 				medium.semantic_tags['text'] = tag[5:]
 			elif 'blurb:' == tag[:6]:
-				medium.semantic_tags['blurb'] = tag[6:]
+				if 'raw:' == tag[6:10]:
+					medium.semantic_tags['blurb'] = (
+						Markup('<p>') + tag[10:] + Markup('</p>')
+					)
+				else:
+					medium.semantic_tags['blurb medium'] = tag[6:]
 			elif 'embed:' == tag[:6]:
 				medium.semantic_tags['embed'] = tag[6:]
 
@@ -900,6 +905,14 @@ class MediaFrontend(Media):
 		)
 		if len(most_recent_likes.values()) < self.config['per_medium_like_cooldown_amount']:
 			medium.likeable = True
+
+	def populate_medium_blurb(self, medium):
+		if 'blurb medium' in medium.semantic_tags:
+			blurb_medium = self.get_medium(medium.semantic_tags['blurb medium'])
+			if not blurb_medium:
+				return
+			self.populate_medium_contents(blurb_medium)
+			medium.semantic_tags['blurb'] = blurb_medium.contents
 
 	def populate_media_users(self, media):
 		if IDCollection == type(media):

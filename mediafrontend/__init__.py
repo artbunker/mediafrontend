@@ -1027,7 +1027,11 @@ class MediaFrontend(Media):
 				filter = default_filter.copy()
 				filter['with_tags_like'] = escape('set:' + set) + '%'
 				# get all media in set
-				medium.sets[set] = self.search_media(filter=filter)
+				medium.sets[set] = self.search_media(
+					filter=filter,
+					sort='creation_time',
+					order='asc',
+				)
 				for set_medium in medium.sets[set].values():
 					if set_medium not in set_media:
 						# add to all collected set media

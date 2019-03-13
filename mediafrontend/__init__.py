@@ -80,6 +80,7 @@ categories_to_mimes = {
 		#TODO markdown gets its own category later maybe?
 		'text/markdown',
 		'text/x-markdown',
+		#TODO html and other markup get their own category later maybe?
 		'text/html',
 	],
 	'video':	[
@@ -161,6 +162,11 @@ def mime_to_extension(mime):
 		# text special mimetype?
 		'text/srt': 'srt',
 		'text/vtt': 'vtt',
+		# markdown
+		'text/markdown': 'md',
+		'text/x-markdown': 'md',
+		# html
+		'text/html': 'html',
 
 		# video
 		'video/mp4': 'mp4',

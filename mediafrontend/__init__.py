@@ -1198,6 +1198,15 @@ class MediaFrontend(Media):
 		#TODO uploader:{each unique uploader id}?
 		#TODO owner:{each unique owner id}?
 		# for now no suggestions for tags on private/copyright/forbidden media
+		hidden_tags = self.search_tag_counts(
+			filter={
+				'with_searchabilities': MediumSearchability.HIDDEN,
+			},
+		)
+		manage_tags = []
+		for tag in hidden_tags:
+			manage_tags.append(tag['tag'])
+		suggestions['manage'] += get_nonclutter_tags(manage_tags)
 
 		#TODO remove tags already in signed_out from signed_in/manage?
 

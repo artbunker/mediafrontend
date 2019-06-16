@@ -1867,3 +1867,26 @@ class MediaFrontend(Media):
 
 		self.place_medium_file(medium, file_path)
 		return errors, filename, medium
+
+	def add_like(self, medium_id, user_id):
+		if self.per_medium_like_cooldown(medium_id, user_id):
+			return False
+		self.create_like(medium_id, user_id)
+		return True
+
+	def remove_most_recent_like(self, medium_id, user_id):
+		# attempt to remove the most recent like from this medium by the current user
+		likes = self.search_likes(
+			filter={
+				'user_ids': user_id,
+				'medium_ids': medium_id,
+			},
+			perpage=1,
+		)
+		if not likes.values():
+			return False
+		self.delete_like(
+			likes.values()[0].id,
+			subject_id=user_id,
+		)
+		return True

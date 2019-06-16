@@ -406,6 +406,49 @@ def api_remove_medium():
 	r.mimetype = 'application/json'
 	return r, 200
 
+@media_api.route('/medium/<medium_id>/like', methods=['POST', 'GET'])
+@require_sign_in
+def api_like_medium(medium_id):
+	medium = require_medium(medium_id)
+	response = api_access_not_allowed(medium, owner_or_manager_only=True)
+	if response:
+		return '', response
+	g.media.populate_medium_like_data(medium)
+	if (not g.media.add_like(
+		medium.id_bytes,
+		g.media.accounts.current_user.id_bytes
+	)):
+		abort(
+			429,
+			'Please wait a bit before adding another like to this medium',
+		)
+	g.media.populate_medium_like_data(medium)
+	medium.like_count += 1
+	rendered = render_template('medium_like_block.html', medium=medium, kwargs={})
+	r = make_response(json.dumps({'rendered': rendered}))
+	r.mimetype = 'application/json'
+	return r, 200
+
+@media_api.route('/medium/<medium_id>/like', methods=['DELETE'])
+@require_sign_in
+def api_unlike_medium(medium_id):
+	medium = require_medium(medium_id)
+	response = api_access_not_allowed(medium, owner_or_manager_only=True)
+	if response:
+		return '', response
+	g.media.populate_medium_like_data(medium)
+	if (not g.media.remove_most_recent_like(
+		medium.id_bytes,
+		g.media.accounts.current_user.id_bytes
+	)):
+		abort(400)
+	g.media.populate_medium_like_data(medium)
+	medium.like_count -= 1
+	rendered = render_template('medium_like_block.html', medium=medium, kwargs={})
+	r = make_response(json.dumps({'rendered': rendered}))
+	r.mimetype = 'application/json'
+	return r, 200
+
 #TODO i don't really need these but maybe add later for completeness
 #TODO api delete summary files
 #TODO api delete original file
@@ -802,30 +845,20 @@ def view_medium(
 			if not g.accounts.current_user:
 				abort(401)
 			if 'add' == request.args['like']:
-				if g.media.per_medium_like_cooldown(
-						medium.id,
-						g.accounts.current_user.id,
-					):
+				if (not g.media.add_like(
+					medium.id_bytes,
+					g.media.accounts.current_user.id_bytes
+				)):
 					abort(
 						429,
 						'Please wait a bit before adding another like to this medium',
 					)
-				g.media.create_like(medium.id_bytes, g.media.accounts.current_user.id_bytes)
 			else:
-				# attempt to remove the most recent like from this medium by the current user
-				likes = g.media.search_likes(
-					filter={
-						'user_ids': g.media.accounts.current_user.id_bytes,
-						'medium_ids': medium.id_bytes,
-					},
-					perpage=1,
-				)
-				if not likes.values():
+				if (not g.media.remove_most_recent_like(
+					medium.id_bytes,
+					g.media.accounts.current_user.id_bytes
+				)):
 					abort(400)
-				g.media.delete_like(
-					likes.values()[0].id,
-					subject_id=g.accounts.current_user.id,
-				)
 			if 'redirect_uri' in request.args:
 				return redirect(request.args['redirect_uri'], code=303)
 			return redirect(

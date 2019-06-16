@@ -1,0 +1,67 @@
+{% if not g.media.config['hide_total_like_counts'] %}
+	<span class="like_count" title="{{ '{} likes'.format(medium.like_count) }}">
+		{{ medium.like_count }}
+	</span>
+{% endif %}
+{% if g.media.accounts.current_user %}
+	{% if medium.likeable %}
+		<a 
+			href="{{ url_for(
+				request.endpoint,
+				medium_id=medium.id,
+				tags=tags_query,
+				like='add',
+				redirect_uri=request.url,
+				**kwargs,
+			) }}" 
+			data-action-like="{{ url_for(
+				'media_api.api_like_medium',
+				medium_id=medium.id,
+			) }}" 
+			{% if medium.current_user_like_count %}
+				class="like_medium_again" 
+				title="Add another like to this medium ({{ 'currently {} likes'.format(
+					medium.current_user_like_count
+				) }} )" 
+				data-current-likes="{{ medium.current_user_like_count }}">
+				Like again
+			{% else %}
+				class="like_medium" 
+				title="Add a like to this medium">
+				Like
+			{% endif %}
+		</a>
+	{% else %}
+		<span 
+			class="like_medium_again cooldown" 
+			title="Wait a bit before adding another like to this medium ({{ 'currently {} likes'.format(
+					medium.current_user_like_count
+				) }} )" 
+			data-current-likes="{{ medium.current_user_like_count }}">
+			Like again
+		</span>
+	{% endif %}
+	{% if medium.current_user_like_count %}
+		<a 
+			class="unlike_medium" 
+			href="{{ url_for(
+				request.endpoint,
+				medium_id=medium.id,
+				tags=tags_query,
+				like='remove',
+				redirect_uri=request.url,
+				**kwargs,
+			) }}" 
+			data-action-unlike="{{ url_for(
+				'media_api.api_unlike_medium',
+				medium_id=medium.id,
+			) }}" 
+			{% if 1 == medium.current_user_like_count %}
+				title="Unlike this medium">
+			{% else %}
+				title="Remove your most recent like on this medium">
+			{% endif %}
+			Unlike
+		</a>
+	{% endif %}
+{% endif %}

@@ -625,6 +625,10 @@ class MediaFrontend(Media):
 				filter['liked_by_user'] = tag[9:]
 				if 'self' == filter['liked_by_user'] and self.accounts.current_user:
 					filter['liked_by_user'] = self.accounts.current_user.id_bytes
+			elif '-liked by:' == tag[:10] and management_mode:
+				filter['not_liked_by_user'] = tag[10:]
+				if 'self' == filter['not_liked_by_user'] and self.accounts.current_user:
+					filter['not_liked_by_user'] = self.accounts.current_user.id_bytes
 			elif '-~' == tag[:2] and 2 < len(tag):
 				if 'without_tags_like' not in filter:
 					filter['without_tags_like'] = []

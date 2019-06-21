@@ -623,6 +623,8 @@ class MediaFrontend(Media):
 				filter['without_statuses'].append(tag[8:].upper())
 			elif 'liked by:' == tag[:9] and management_mode:
 				filter['liked_by_user'] = tag[9:]
+				if 'self' == filter['liked_by_user'] and self.accounts.current_user:
+					filter['liked_by_user'] = self.accounts.current_user.id_bytes
 			elif '-~' == tag[:2] and 2 < len(tag):
 				if 'without_tags_like' not in filter:
 					filter['without_tags_like'] = []

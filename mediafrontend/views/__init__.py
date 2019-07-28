@@ -502,7 +502,7 @@ def upload_media(view_endpoint, api_request=False):
 	upload_opts = {}
 	if 'file_uri' in request.form and request.form['file_uri']:
 		upload_opts['file_uri'] = request.form['file_uri']
-	elif 'file_upload' in request.files:
+	elif 'file_upload' in request.files and '' != request.files['file_upload'].filename:
 		upload_opts['file_upload'] = request.files['file_upload']
 	errors, filename, medium = g.media.upload(
 		request.remote_addr,
@@ -590,7 +590,7 @@ def process_edit_medium(medium, ignore_replacement=True):
 		replacement_opts = {}
 		if 'file_uri' in request.form and request.form['file_uri']:
 			replacement_opts['file_uri'] = request.form['file_uri']
-		elif 'file_upload' in request.files:
+		elif 'file_upload' in request.files and '' != request.files['file_upload'].filename:
 			replacement_opts['file_upload'] = request.files['file_upload']
 		if replacement_opts:
 			errors, filename, replacement_medium = g.media.upload(

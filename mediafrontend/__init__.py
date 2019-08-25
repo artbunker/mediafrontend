@@ -1037,16 +1037,25 @@ class MediaFrontend(Media):
 		if 'sets' in medium.semantic_tags:
 			for set in medium.semantic_tags['sets']:
 				filter = default_filter.copy()
-				filter['with_tags_like'] = escape('set:' + set) + '%'
-				# get all media in set
+				filter['with_tags_like'] = escape('set:' + set)
+				# get all media in plain set
 				medium.sets[set] = self.search_media(
 					filter=filter,
 					sort='creation_time',
 					order='asc',
 				)
+				filter['with_tags_like'] = escape('set:' + set + ':') + '%'
+				# get all media in ordered set
+				ordered_set = self.search_media(
+					filter=filter,
+					sort='creation_time',
+					order='asc',
+				)
+				for set_medium in ordered_set:
+					medium.sets[set].add(set_medium)
+				# add to collected set media
 				for set_medium in medium.sets[set].values():
 					if set_medium not in set_media:
-						# add to all collected set media
 						set_media.append(set_medium)
 		self.populate_media_covers(set_media)
 		set_medium_ids_to_media = {}

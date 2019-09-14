@@ -646,6 +646,26 @@ def process_edit_medium(medium, ignore_replacement=True):
 	if 'creation_date' in request.form:
 		if not request.form['creation_date']:
 			creation_time = int(time.time())
+		elif request.form['creation_date'][0] in ['+', '-']:
+			seconds = 0;
+			num_string = ''
+			for char in request.form['creation_date'][1:]:
+				if 's' == char:
+					seconds += int(num_string)
+				elif 'm' == char:
+					seconds += int(num_string) * 60
+				elif 'h' == char:
+					seconds += int(num_string) * 60 * 60
+				elif 'd' == char:
+					seconds += int(num_string) * 60 * 60 * 24
+				elif 'w' == char:
+					seconds += int(num_string) * 60 * 60 * 24 * 7
+				elif 'y' == char:
+					seconds += int(num_string) * 60 * 60 * 24 * 365
+				else:
+					num_string += char
+			seconds = int(request.form['creation_date'][0] + str(seconds))
+			updates['creation_time'] = medium.creation_time + seconds
 		else:
 			try:
 				parsed = creation_time = dateutil.parser.parse(

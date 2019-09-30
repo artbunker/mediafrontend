@@ -410,7 +410,7 @@ def api_remove_medium():
 @require_sign_in
 def api_like_medium(medium_id):
 	medium = require_medium(medium_id)
-	response = api_access_not_allowed(medium, owner_or_manager_only=True)
+	response = api_access_not_allowed(medium, owner_or_manager_only=False)
 	if response:
 		return response
 	g.media.populate_medium_like_data(medium)
@@ -433,7 +433,7 @@ def api_like_medium(medium_id):
 @require_sign_in
 def api_unlike_medium(medium_id):
 	medium = require_medium(medium_id)
-	response = api_access_not_allowed(medium, owner_or_manager_only=True)
+	response = api_access_not_allowed(medium, owner_or_manager_only=False)
 	if response:
 		return response
 	g.media.populate_medium_like_data(medium)

@@ -222,7 +222,7 @@ def api_fetch_medium(medium_filename):
 	medium = require_medium(medium_id)
 	response = api_access_not_allowed(medium)
 	if response:
-		return '', response
+		return response
 	return send_from_directory(
 		protected_media_path,
 		medium_filename,
@@ -244,7 +244,7 @@ def api_fetch_summary(summary_filename):
 	medium = require_medium(medium_id)
 	response = api_access_not_allowed(medium)
 	if response:
-		return '', response
+		return response
 	return send_from_directory(
 		protected_summaries_path,
 		summary_filename,
@@ -278,7 +278,7 @@ def api_tags(mode):
 	response = api_access_not_allowed(medium, owner_or_manager_only=True)
 	tags = g.media.tag_string_to_list(request.form['tags'])
 	if response:
-		return '', response
+		return response
 	if 'set' == mode:
 		g.media.set_tags(medium.id, tags)
 	elif 'add' == mode:
@@ -312,7 +312,7 @@ def api_edit_medium():
 	medium = require_medium(request.form['medium_ids'].split(',')[0])
 	response = api_access_not_allowed(medium, owner_or_manager_only=True)
 	if response:
-		return '', response
+		return response
 	errors, medium = process_edit_medium(medium)
 	if errors:
 		# no need to return robust errors since only thumbnail class changes
@@ -333,7 +333,7 @@ def api_generate_medium_summaries():
 	medium = require_medium(request.form['medium_ids'].split(',')[0])
 	response = api_access_not_allowed(medium, owner_or_manager_only=True)
 	if response:
-		return '', response
+		return response
 	# catch everything here and return generic error if something goes wrong
 	try:
 		g.media.generate_medium_summaries(medium)
@@ -358,7 +358,7 @@ def api_generate_media_set():
 	for medium in media.values():
 		response = api_access_not_allowed(medium, owner_or_manager_only=True)
 		if response:
-			return '', response
+			return response
 	set_tags = []
 	if 'sync' not in request.form:
 		new_set_tag, new_set_tag_bytes = generate_or_parse_id(None)
@@ -390,7 +390,7 @@ def api_remove_medium():
 	medium = require_medium(request.form['medium_ids'].split(',')[0])
 	response = api_access_not_allowed(medium, owner_or_manager_only=True)
 	if response:
-		return '', response
+		return response
 	g.media.remove_medium(medium)
 	r = make_response(
 		json.dumps(
@@ -412,7 +412,7 @@ def api_like_medium(medium_id):
 	medium = require_medium(medium_id)
 	response = api_access_not_allowed(medium, owner_or_manager_only=True)
 	if response:
-		return '', response
+		return response
 	g.media.populate_medium_like_data(medium)
 	if (not g.media.add_like(
 		medium.id_bytes,
@@ -435,7 +435,7 @@ def api_unlike_medium(medium_id):
 	medium = require_medium(medium_id)
 	response = api_access_not_allowed(medium, owner_or_manager_only=True)
 	if response:
-		return '', response
+		return response
 	g.media.populate_medium_like_data(medium)
 	if (not g.media.remove_most_recent_like(
 		medium.id_bytes,

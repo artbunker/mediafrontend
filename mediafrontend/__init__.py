@@ -1051,7 +1051,7 @@ class MediaFrontend(Media):
 					sort='creation_time',
 					order='asc',
 				)
-				for set_medium in ordered_set:
+				for set_medium in ordered_set.values():
 					medium.sets[set].add(set_medium)
 				# add to collected set media
 				for set_medium in medium.sets[set].values():

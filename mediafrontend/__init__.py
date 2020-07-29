@@ -450,7 +450,7 @@ class MediaFrontend(Media):
 			if tag in self.config['canonical_search_tags']:
 				tags.append(self.config['canonical_search_tags'][tag])
 				tags.remove(tag)
-				
+
 		escape = lambda value: (
 			value
 				.replace('\\', '\\\\')
@@ -688,6 +688,10 @@ class MediaFrontend(Media):
 			protection_path = 'nonprotected'
 			media_uri = self.config['medium_file_uri']
 			summaries_uri = self.config['summary_file_uri']
+
+		# serve files over same protocol as pages
+		media_uri = media_uri.replace('https:', '').replace('http:', '')
+		summaries_uri = summaries_uri.replace('https:', '').replace('http:', '')
 
 		medium.uris = {
 			'original': '',
@@ -1248,6 +1252,11 @@ class MediaFrontend(Media):
 						tag_files.append('clutter')
 		tags_file_uri = self.config['tags_file_uri']
 		protected_tags_file_uri = self.config['protected_tags_file_uri']
+
+		# serve files over same protocol as pages
+		tags_file_uri = tags_file_uri.replace('https:', '').replace('http:', '')
+		protected_tags_file_uri = protected_tags_file_uri.replace('https:', '').replace('http:', '')
+
 		tag_suggestion_lists = []
 		for tag_file in tag_files:
 			tag_suggestion_lists.append(tags_file_uri.format(tag_file + '.json'))
@@ -1330,7 +1339,7 @@ class MediaFrontend(Media):
 				elif medium.category in ['audio', 'archive']:
 					# static, fallback
 					extensions = ['webp', 'png']
-					
+
 				for extension in extensions:
 					summary_file =  summary_file_template + extension
 					if os.path.exists(os.path.join(summary_path, summary_file)):

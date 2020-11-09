@@ -1,6 +1,10 @@
 <nav class="media_navigation" data-preferences="Preferences">
 	{% if results.values() %}
 		<span id="total_media">{{ total_results }} media</span>
+		{% if 'display_total_storage' in g.media.config and g.media.config['display_total_storage'] %}
+			{% from 'media.jinja' import filesize %}
+			<span id="storage">{{ filesize(total_storage) }}</span>
+		{% endif %}
 		<a href="{{ url_for('media_supplemental.help') }}">Help</a>
 		<a 
 			href="{{ url_for(

@@ -1188,6 +1188,8 @@ def search_media(
 		else:
 			rss_url = url_for(rss_endpoint, **kwargs)
 
+	total_storage = g.media.media_size(filter=filter)
+
 	return render_template(
 		'search_media.html',
 		results=results,
@@ -1195,6 +1197,7 @@ def search_media(
 		total_results=total_results,
 		total_pages=math.ceil(total_results / pagination['perpage']),
 		tags_query=tags_query,
+		total_storage=total_storage,
 		header=header,
 		search_field=search_field,
 		tag_suggestion_lists=tag_suggestion_lists,

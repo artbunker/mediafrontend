@@ -77,6 +77,7 @@
 	},
 
 	"automatic_tag_suggestions_generation": false,
+	"display_total_storage": true,
 
 	"suggest_clutter_tags": false,
 	"clutter_tag_prefixes": [

@@ -8,6 +8,7 @@ import math
 import urllib
 import json
 import subprocess
+import shutil
 
 from flask import url_for, escape, Markup
 from ipaddress import ip_address
@@ -292,6 +293,13 @@ def is_websafe_video(mime):
 		):
 		return True
 	return False
+
+def move(source, dest): 
+	try:
+		os.rename(source, dest)
+	except OSError:
+		shutil.copyfile(source, dest)
+		os.remove(source)
 
 class MediaFrontend(Media):
 	def __init__(
@@ -1295,10 +1303,7 @@ class MediaFrontend(Media):
 			source = os.path.join(source_path, medium_file)
 
 		if os.path.exists(source):
-			os.rename(
-				source,
-				os.path.join(destination_path, medium_file)
-			)
+			move(source, os.path.join(destination_path, medium_file))
 
 	def delete_medium_file(self, medium):
 		medium_file = medium.id + '.' + mime_to_extension(medium.mime)
@@ -1376,7 +1381,7 @@ class MediaFrontend(Media):
 		self.iterate_medium_summaries(
 			medium,
 			lambda summary_path, summary_file: (
-				os.rename(
+				move(
 					os.path.join(summary_path, summary_file),
 					os.path.join(destination_path, summary_file)
 				)

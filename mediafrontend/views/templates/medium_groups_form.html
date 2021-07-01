@@ -5,7 +5,7 @@
 		{% for group in g.media.config['requirable_groups'] %}
 			{% if group in g.media.accounts.available_groups %}
 				{% set checked = '' %}
-				{% if group in fields['groups'] %}
+				{% if ('groups' in fields) and (group in fields['groups']) %}
 					{% set checked = ' checked' %}
 				{% endif %}
 				<input id="group_{{ group }}" name="group_{{ group }}" type="checkbox"{{ checked }}>

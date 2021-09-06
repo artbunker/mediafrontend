@@ -551,7 +551,7 @@ def upload_media(view_endpoint, api_request=False):
 			and medium.owner
 			and medium.owner.display
 		):
-		tags.append('author:' + medium.owner.display)
+		tags.append('creator:' + medium.owner.display)
 
 	if 'filename_tag' in request.form and filename:
 		tags.append('filename:' + filename)

@@ -8,7 +8,7 @@ import math
 import re
 import json
 
-from flask import Blueprint, render_template, abort, request, redirect
+from flask import Blueprint, render_template, abort, request, redirect, jsonify
 from flask import url_for, g, send_from_directory, make_response
 import dateutil.parser
 
@@ -991,6 +991,40 @@ def search_results_rss(results, media_endpoint='', tags_query='', **kwargs):
 	r.headers['Content-type'] = 'text/xml; charset=utf-8'
 	return r
 
+def search_results_json(
+	results,
+	pagination,
+	total_results=0,
+	media_endpoint='', 
+	tags_query='', 
+	**kwargs
+	):
+	posts = [];
+	for result in results.values():
+		if 200 != result.current_user_response_code:
+			continue
+		link = url_for(
+			media_endpoint,
+			medium_id=result.id,
+			_external=True,
+			**kwargs
+		)
+		posts.append({
+			"id": result.id,
+			"tags": result.tags,
+			"url": link,
+			"creation_time": result.creation_time,
+			"mime": result.mime,
+			"size": result.size,
+			"md5": result.id_bytes.hex()
+		})
+	return jsonify(
+			results=posts,
+			pagination=pagination,
+			total_results=total_results,
+			total_pages=math.ceil(total_results / pagination['perpage'])
+		)
+
 def search_media(
 		header=None,
 		search_field=True,
@@ -1001,6 +1035,7 @@ def search_media(
 		override_tags={},
 		override_filters={},
 		rss=False,
+		json=False,
 		rss_endpoint='',
 		rss_media_endpoint='',
 		**kwargs
@@ -1139,7 +1174,7 @@ def search_media(
 		)
 
 	# use external uris for rss readers
-	if rss:
+	if rss or json:
 		g.media.external_uris = True
 
 	results = g.media.search_media(filter=filter, **pagination)
@@ -1151,6 +1186,15 @@ def search_media(
 			media_endpoint=rss_media_endpoint,
 			tags_query=tags_query,
 			**kwargs
+		)
+
+	if json:
+		return search_results_json(
+			results=results,
+			pagination=pagination,
+			total_results=total_results,
+			media_endpoint=rss_media_endpoint,
+			tags_query=tags_query,
 		)
 
 	g.media.populate_media_covers(results)

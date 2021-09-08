@@ -918,6 +918,76 @@ def view_medium(
 		kwargs=kwargs,
 	)
 
+def medium_to_dict(medium, media_endpoint = '', **kwargs):
+	link = url_for(
+		media_endpoint,
+		medium_id=medium.id,
+		#_external=True,
+		**kwargs
+	)
+	return {
+		"id": medium.id,
+		"tags": medium.tags,
+		"link": link,
+		"creation_time": medium.creation_time,
+		"mime": medium.mime,
+		"size": medium.size,
+		"md5": medium.id_bytes.hex(),
+		"uris": medium.uris
+	}
+
+def view_medium_json(
+		medium,
+		media_endpoint='',
+		tags_query='',
+		management_mode=False,
+		**kwargs
+	):
+	if (
+			not management_mode
+			and g.media.accounts.current_user
+			and g.media.accounts.current_user.id == medium.owner_id
+		):
+		management_mode = True
+	if not management_mode and 200 != medium.current_user_response_code:
+		if 402 == medium.current_user_response_code:
+			return render_template(
+				'view_premium_medium.html',
+				medium=medium,
+				kwargs=kwargs,
+			), 402
+		elif 403 == medium.current_user_response_code:
+			return render_template(
+				'view_protected_medium.html',
+				medium=medium,
+				kwargs=kwargs,
+			), 403
+		elif 404 == medium.current_user_response_code:
+			abort(404, 'Medium not found')
+		else:
+			abort(medium.current_user_response_code)
+	medium_dict = medium_to_dict(
+		medium, 
+		media_endpoint=media_endpoint, 
+		**kwargs
+	)
+	g.media.populate_medium_sets(medium)
+	medium_dict["sets"] = dict(map(lambda set: (set, 
+		list(map(lambda nmedium: {
+			"id": nmedium.id,
+			"link": url_for(
+				media_endpoint,
+				medium_id=nmedium.id,
+				#_external=True,
+				**kwargs
+			),
+			"md5": nmedium.id_bytes.hex(),
+			"creation_time": nmedium.creation_time
+		}, medium.sets[set]))
+	), medium.sets))
+	return jsonify(medium_dict)
+
+
 def search_results_rss(results, media_endpoint='', tags_query='', **kwargs):
 	if tags_query:
 		page_uri = url_for(
@@ -1003,21 +1073,11 @@ def search_results_json(
 	for result in results.values():
 		if 200 != result.current_user_response_code:
 			continue
-		link = url_for(
-			media_endpoint,
-			medium_id=result.id,
-			_external=True,
+		posts.append(medium_to_dict(
+			medium=result,
+			media_endpoint=media_endpoint,
 			**kwargs
-		)
-		posts.append({
-			"id": result.id,
-			"tags": result.tags,
-			"url": link,
-			"creation_time": result.creation_time,
-			"mime": result.mime,
-			"size": result.size,
-			"md5": result.id_bytes.hex()
-		})
+		))
 	return jsonify(
 			results=posts,
 			pagination=pagination,
@@ -1120,6 +1180,13 @@ def search_media(
 					and medium.owner_id_bytes not in override_owner_ids
 				):
 				abort(404, 'Medium not found')
+		if json:
+			return view_medium_json(
+				medium,
+				tags_query=tags_query,
+				media_endpoint=rss_media_endpoint,
+				management_mode=management_mode,
+			)
 		# get adjacent media ids
 		prev_medium_id = ''
 		next_medium_id = ''

@@ -698,8 +698,8 @@ class MediaFrontend(Media):
 			summaries_uri = self.config['summary_file_uri']
 
 		# serve files over same protocol as pages
-		media_uri = media_uri.replace('https:', '').replace('http:', '')
-		summaries_uri = summaries_uri.replace('https:', '').replace('http:', '')
+		#media_uri = media_uri.replace('https:', '').replace('http:', '')
+		#summaries_uri = summaries_uri.replace('https:', '').replace('http:', '')
 
 		medium.uris = {
 			'original': '',

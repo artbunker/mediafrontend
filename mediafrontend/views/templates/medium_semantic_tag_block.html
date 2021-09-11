@@ -22,7 +22,25 @@
 					</tr>
 				{% endif %}
 			{% endfor %}
-			{% if 'mirror' in medium.semantic_tags %}
+			{% for tag, display in {
+				'mirror': 'Mirror',
+				'url': 'URL',
+				'source url': 'Source',
+				'creator url': 'Creator',
+				'character url': 'Character',
+			}.items() %}
+				{% if tag in medium.semantic_tags %}
+					<tr>
+						<td>{{ display }}</td>
+						<td>
+							<a href="{{ medium.semantic_tags[tag]	}}" >
+								{{ medium.semantic_tags[tag] }}
+							</a>
+						</td>
+					</tr>
+				{% endif %}
+			{% endfor %}
+			{# {% if 'mirror' in medium.semantic_tags %}
 				<tr>
 					<td>Mirror</td>
 					<td>
@@ -31,7 +49,7 @@
 						</a>
 					</td>
 				</tr>
-			{% endif %}
+			{% endif %} #}
 		</tbody>
 	</table>
 {% endif %}

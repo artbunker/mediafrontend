@@ -825,6 +825,14 @@ class MediaFrontend(Media):
 				medium.semantic_tags['superior of'] = tag[12:]
 			elif 'mirror:' == tag[:7]:
 				medium.semantic_tags['mirror'] = tag[7:]
+			elif 'url:' == tag[:4]:
+				medium.semantic_tags['url'] = tag[4:]
+			elif 'source url:' == tag[:11]:
+				medium.semantic_tags['source url'] = tag[11:]
+			elif 'creator url:' == tag[:12]:
+				medium.semantic_tags['creator url'] = tag[12:]
+			elif 'character url:' == tag[:14]:
+				medium.semantic_tags['character url'] = tag[14:]
 			elif 'title:' == tag[:6]:
 				medium.semantic_tags['title'] = tag[6:]
 			elif 'author:' == tag[:7]:

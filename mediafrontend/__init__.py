@@ -1430,7 +1430,7 @@ class MediaFrontend(Media):
 
 			# static
 			thumbnail_path = summary_path.format(str(edge) + '.webp')
-			thumbnail.save(thumbnail_path, 'WebP', lossless=True)
+			thumbnail.save(thumbnail_path, 'WebP', quality=90)
 
 			# fallback
 			thumbnail_path = summary_path.format(str(edge) + '.png')

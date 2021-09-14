@@ -1,5 +1,8 @@
 {% set original_medium = medium %}
 {% set tiles = False %}
+{% if g.persephone_config['default_blacklisted_tags'] %}
+	<meta name="default_blacklisted_tags" content="{{ g.persephone_config['default_blacklisted_tags'] }}">
+{% endif %}
 {% for set in original_medium.sets %}
 	<div class="medium_set" data-title="{{ set }}">
 		{% for medium in original_medium.sets[set] %}

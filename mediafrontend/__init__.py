@@ -824,15 +824,25 @@ class MediaFrontend(Media):
 			elif 'superior of:' == tag[:12]:
 				medium.semantic_tags['superior of'] = tag[12:]
 			elif 'mirror:' == tag[:7]:
-				medium.semantic_tags['mirror'] = tag[7:]
+				if 'mirror' not in medium.semantic_tags:
+					medium.semantic_tags['mirror'] = []
+				medium.semantic_tags['mirror'].append(tag[7:])
 			elif 'url:' == tag[:4]:
-				medium.semantic_tags['url'] = tag[4:]
+				if 'url' not in medium.semantic_tags:
+					medium.semantic_tags['url'] = []
+				medium.semantic_tags['url'].append(tag[4:])
 			elif 'source url:' == tag[:11]:
-				medium.semantic_tags['source url'] = tag[11:]
+				if 'source url' not in medium.semantic_tags:
+					medium.semantic_tags['source url'] = []
+				medium.semantic_tags['source url'].append(tag[11:])
 			elif 'creator url:' == tag[:12]:
-				medium.semantic_tags['creator url'] = tag[12:]
+				if 'creator url' not in medium.semantic_tags:
+					medium.semantic_tags['creator url'] = []
+				medium.semantic_tags['creator url'].append(tag[12:])
 			elif 'character url:' == tag[:14]:
-				medium.semantic_tags['character url'] = tag[14:]
+				if 'character url' not in medium.semantic_tags:
+					medium.semantic_tags['character url'] = []
+				medium.semantic_tags['character url'].append(tag[14:])
 			elif 'title:' == tag[:6]:
 				medium.semantic_tags['title'] = tag[6:]
 			elif 'author:' == tag[:7]:

@@ -22,22 +22,24 @@
 					</tr>
 				{% endif %}
 			{% endfor %}
-			{% for tag, display in {
+			{% for namespace, display in {
 				'mirror': 'Mirror',
 				'url': 'URL',
 				'source url': 'Source',
 				'creator url': 'Creator',
 				'character url': 'Character',
 			}.items() %}
-				{% if tag in medium.semantic_tags %}
-					<tr>
-						<td>{{ display }}</td>
-						<td>
-							<a href="{{ medium.semantic_tags[tag]	}}" >
-								{{ medium.semantic_tags[tag] }}
-							</a>
-						</td>
-					</tr>
+				{% if namespace in medium.semantic_tags %}
+					{% for tag in medium.semantic_tags[namespace] %}
+						<tr>
+							<td>{{ display }}</td>
+							<td>
+								<a href="{{ tag	}}" >
+									{{ tag }}
+								</a>
+							</td>
+						</tr>
+					{% endfor %}
 				{% endif %}
 			{% endfor %}
 			{# {% if 'mirror' in medium.semantic_tags %}

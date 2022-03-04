@@ -862,7 +862,7 @@ class MediaFrontend(Media):
 			elif 'blurb:' == tag[:6]:
 				if 'raw:' == tag[6:10]:
 					medium.semantic_tags['blurb'] = (
-						Markup('<p>') + tag[10:] + Markup('</p>')
+						Markup('<p>'+ tag[10:].replace('\\n', '<br>') + '</p>')
 					)
 				else:
 					medium.semantic_tags['blurb medium'] = tag[6:]

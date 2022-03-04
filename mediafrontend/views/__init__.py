@@ -933,6 +933,8 @@ def medium_to_dict(medium, media_endpoint = '', **kwargs):
 		"mime": medium.mime,
 		"size": medium.size,
 		"md5": medium.id_bytes.hex(),
+		"width": medium.data1,
+		"height": medium.data2,
 		"uris": medium.uris
 	}
 
